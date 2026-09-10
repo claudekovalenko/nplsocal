@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --color-ink-50: #f5f7fb;
+  --color-ink-100: #e9edf5;
+  --color-ink-200: #cdd5e4;
+  --color-ink-300: #a3b0c9;
+  --color-ink-400: #6f809f;
+  --color-ink-500: #4b5b7a;
+  --color-ink-600: #364660;
+  --color-ink-700: #263650;
+  --color-ink-800: #16243d;
+  --color-ink-900: #0f1a2e;
+  --color-ink-950: #0b1220;
+
+  --color-sun-50: #fff8eb;
+  --color-sun-100: #ffedc7;
+  --color-sun-200: #ffd88a;
+  --color-sun-300: #fdbd4a;
+  --color-sun-400: #f9a21e;
+  --color-sun-500: #f97316;
+  --color-sun-600: #de5a0b;
+  --color-sun-700: #b6420e;
+  --color-sun-800: #913413;
+  --color-sun-900: #772c13;
+
+  --color-sand-50: #fbf9f4;
+  --color-sand-100: #f4efe3;
+  --color-sand-200: #e8dfcb;
+
+  --shadow-soft: 0 1px 2px rgb(11 18 32 / 0.04), 0 8px 24px -12px rgb(11 18 32 / 0.18);
+  --radius-2xl: 1.25rem;
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-sand-50 text-ink-900 antialiased;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.dark body {
+  @apply bg-ink-950 text-ink-100;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-sun-400) 45%, transparent);
+}
+
+/* Reusable primitives (declared as utilities so they can be used with @apply and variants) */
+@utility container-x {
+  @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+}
+
+@utility card {
+  @apply rounded-2xl border border-ink-100 bg-white shadow-soft dark:border-ink-800 dark:bg-ink-900;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-400 focus-visible:ring-offset-2
+    dark:focus-visible:ring-offset-ink-950 disabled:opacity-50 disabled:pointer-events-none;
+}
+@utility btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-400 focus-visible:ring-offset-2
+    dark:focus-visible:ring-offset-ink-950 disabled:opacity-50 disabled:pointer-events-none
+    bg-sun-500 text-white hover:bg-sun-600 active:bg-sun-700;
+}
+@utility btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-400 focus-visible:ring-offset-2
+    dark:focus-visible:ring-offset-ink-950 disabled:opacity-50 disabled:pointer-events-none
+    bg-ink-900 text-white hover:bg-ink-800 dark:bg-white dark:text-ink-950 dark:hover:bg-ink-100;
+}
+@utility btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-400 focus-visible:ring-offset-2
+    dark:focus-visible:ring-offset-ink-950 disabled:opacity-50 disabled:pointer-events-none
+    border border-ink-200 bg-transparent text-ink-800 hover:bg-ink-50 dark:border-ink-700 dark:text-ink-100 dark:hover:bg-ink-800;
+}
+
+@utility eyebrow {
+  @apply text-xs font-semibold uppercase tracking-[0.18em] text-sun-600 dark:text-sun-400;
+}
+
+.prose-tight p + p {
+  margin-top: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation: none !important; transition: none !important; }
+}

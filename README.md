@@ -1,0 +1,104 @@
+# No Place Left SoCal
+
+A progressive web app for the **#NoPlaceLeft** network across **Los Angeles** and **Orange County** — one shared home for vision, tools, training, events, and connection, replacing the separate hub sites.
+
+- Installable on iOS / Android / desktop (Add to Home Screen)
+- Works offline once visited (toolbox, Four Fields, hubs, and the personal 100 List)
+- Mobile-first with a bottom tab bar; full desktop layout; light and dark themes
+- All content lives in plain TypeScript files under `src/content/` — no CMS required to get started
+
+## Stack
+
+| Layer | Choice |
+| --- | --- |
+| Build | Vite 6 + React 18 + TypeScript |
+| Styling | Tailwind CSS v4 (design tokens in `src/index.css`) |
+| Routing | React Router 6 (SPA with fallback for deep links) |
+| PWA | `vite-plugin-pwa` (Workbox) — precaches the app shell, prompts on update |
+| Icons | `lucide-react` |
+
+## Getting started
+
+```bash
+npm install
+npm run dev        # http://localhost:5173
+npm run build      # typecheck + production build to dist/
+npm run preview    # serve the production build (service worker active)
+npm run icons      # regenerate PNG icons from public/icons/icon.svg
+```
+
+## Where to edit content
+
+Everything visible on the site comes from `src/content/`:
+
+| File | What it controls |
+| --- | --- |
+| `site.ts` | Name, tagline, headline, description, contact email, social links, nav order |
+| `hubs.ts` | The LA and OC hubs: description, regions, rhythms, contact email, previous site URL |
+| `fourFields.ts` | The five fields: question, description, scripture, which tools belong to each |
+| `tools.ts` | Every tool in the toolbox: summary, description, steps, scripture, optional links |
+| `trainings.ts` | The training pathway (411 → 4 Fields → Iron on Iron → Coaching) |
+| `events.ts` | Upcoming events. **The current entries are samples** — replace with real dates |
+| `faq.ts` | Questions on the Vision page |
+
+Adding a tool is one new object in `tools.ts` plus its slug in the right field's `toolSlugs` list. It gets a card, a detail page, search, and offline caching automatically.
+
+## Routes
+
+| Path | Page |
+| --- | --- |
+| `/` | Home — hero, hub cards, Four Fields overview, starter tools, next events |
+| `/vision` | What #NoPlaceLeft is (and isn't), convictions, FAQ |
+| `/four-fields` | Interactive Four Fields diagram and each field with its tools |
+| `/tools`, `/tools/:slug` | Searchable, filterable toolbox and tool detail pages |
+| `/training` | The training pathway and upcoming trainings |
+| `/events` | Calendar with hub and type filters |
+| `/hubs`, `/hubs/:id` | Hub overview and detail pages (`la`, `oc`) |
+| `/connect` | Contact form (opens the user's mail client by default) |
+| `/my-100` | Personal, on-device 100 List with stages, backup, and restore |
+
+## Things to wire up next
+
+These are deliberately left as simple defaults so the network can pick the services it wants:
+
+1. **Contact form backend** — `src/pages/Connect.tsx` currently builds a `mailto:` link. Swap `submit()` for Netlify Forms, Formspree, Supabase, or Airtable.
+2. **Events feed** — `src/content/events.ts` is static. Point it at a shared calendar, Airtable base, or Google Sheet so hub leaders can add events without a deploy.
+3. **Real hub content** — the LA and OC descriptions, regions, contact emails, and rhythms in `hubs.ts` are placeholders based on the network's general shape. Replace them with the hubs' actual copy from the previous sites.
+4. **Registration links** — event `registerUrl` values are `#` placeholders.
+5. **Stories / blog** — not yet included; a `stories.ts` + `/stories` route would follow the same pattern as tools.
+6. **Analytics** — none installed. Add a privacy-friendly option (e.g. Plausible) in `index.html` if wanted.
+
+## Deploying
+
+The build output is a static `dist/` folder. Any static host works; a SPA rewrite is required so deep links load.
+
+- **Netlify** — `netlify.toml` and `public/_redirects` are included. Connect the repo and deploy.
+- **Vercel** — `vercel.json` handles the rewrite.
+- **Cloudflare Pages / GitHub Pages / S3** — serve `dist/` and route unknown paths to `index.html`.
+
+Serve over HTTPS (required for service workers and install prompts). The service worker file `sw.js` should be served with `Cache-Control: no-cache` so updates are picked up promptly (Netlify config already does this).
+
+## PWA notes
+
+- The manifest is generated from `vite.config.ts`. Change the app name, colors, or shortcuts there.
+- Icons are rendered from `public/icons/icon.svg` by `npm run icons`.
+- Updates: when a new version is deployed, users see an "Update" banner on their next visit; the app also checks hourly while open.
+- Offline: the whole app shell and content is precached at install. Images fetched at runtime are cached on first view.
+- The 100 List is stored in `localStorage` on the device only. Users can back up and restore it as JSON.
+
+## Project layout
+
+```
+src/
+  content/       # all site copy and data
+  components/    # layout, nav, cards, PWA banners, diagram
+  pages/         # one file per route
+  hooks/         # theme, online status, install prompt, localStorage
+  lib/           # date formatting
+  index.css      # Tailwind + design tokens + utilities
+public/
+  icons/         # SVG source + generated PNGs
+  _redirects     # Netlify SPA fallback
+scripts/
+  generate-icons.mjs
+```
