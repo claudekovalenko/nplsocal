@@ -1,8 +1,9 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ExternalLink, Mail } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { hubById, upcomingEvents } from '@/content';
 import EventCard from '@/components/EventCard';
 import Section from '@/components/Section';
+import NetworkMap from '@/components/NetworkMap';
 
 export default function HubDetail() {
   const { id = '' } = useParams();
@@ -12,53 +13,56 @@ export default function HubDetail() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-ink-950 text-white">
-        <div className={`absolute inset-0 bg-gradient-to-br ${hub.accent} opacity-30`} />
-        <div className="container-x relative py-16 md:py-20">
-          <Link to="/hubs" className="inline-flex items-center gap-1 text-sm text-ink-200 hover:text-white">
-            <ArrowLeft className="h-4 w-4" /> All hubs
-          </Link>
-          <div className="eyebrow mt-6 !text-sun-300">#NoPlaceLeft</div>
-          <h1 className="mt-2 font-display text-4xl font-bold tracking-tight md:text-5xl">{hub.name}</h1>
-          <p className="mt-3 text-lg text-ink-200">{hub.tagline}</p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <Link to="/connect" className="btn-primary">
-              Connect with {hub.shortName} <ArrowRight className="h-4 w-4" />
+      <section className="relative overflow-hidden border-b border-line">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_80%_50%,var(--glow),transparent_70%)] opacity-30" />
+        <div className="container-x relative grid items-center gap-10 py-16 md:grid-cols-[1.2fr_1fr] md:py-24">
+          <div>
+            <Link to="/hubs" className="inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-fg">
+              <ArrowLeft className="h-4 w-4" /> All hubs
             </Link>
-            {hub.contactEmail && (
-              <a href={`mailto:${hub.contactEmail}`} className="btn bg-white/10 text-white ring-1 ring-white/25 hover:bg-white/15">
-                <Mail className="h-4 w-4" /> {hub.contactEmail}
-              </a>
-            )}
+            <div className="eyebrow mt-8">#NoPlaceLeft · {hub.shortName}</div>
+            <h1 className="mt-4 text-4xl md:text-6xl">{hub.name}</h1>
+            <p className="mt-4 text-lg text-muted">{hub.tagline}</p>
+            <div className="mt-8 flex flex-wrap gap-2">
+              <Link to="/connect" className="btn-primary">
+                Connect with {hub.shortName}
+              </Link>
+              {hub.contactEmail && (
+                <a href={`mailto:${hub.contactEmail}`} className="btn-secondary">
+                  {hub.contactEmail}
+                </a>
+              )}
+            </div>
           </div>
+          <NetworkMap variant="hero" className="h-auto w-full" />
         </div>
       </section>
 
       <Section>
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr]">
+        <div className="grid gap-14 md:grid-cols-[1.5fr_1fr]">
           <div>
-            <h2 className="font-display text-2xl font-bold">About the hub</h2>
-            <p className="mt-3 text-ink-700 dark:text-ink-200">{hub.description}</p>
-            <h3 className="mt-8 text-sm font-semibold uppercase tracking-widest text-ink-400">Where we're working</h3>
-            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+            <div className="eyebrow">About the hub</div>
+            <p className="mt-4 text-[17px] leading-relaxed text-muted">{hub.description}</p>
+            <div className="eyebrow mt-12">Where we're working</div>
+            <ul className="mt-3 divide-y divide-line border-y border-line">
               {hub.regions.map((r) => (
-                <li key={r} className="rounded-xl bg-white px-3 py-2 text-sm ring-1 ring-ink-100 dark:bg-ink-900 dark:ring-ink-800">
+                <li key={r} className="py-3 text-sm">
                   {r}
                 </li>
               ))}
             </ul>
           </div>
-          <aside className="space-y-4">
-            <div className="card p-5">
+          <aside className="space-y-10">
+            <div>
               <div className="eyebrow">Rhythms</div>
-              <ul className="mt-3 space-y-3">
+              <ul className="mt-3 divide-y divide-line border-y border-line">
                 {hub.gatherings.map((g) => (
-                  <li key={g.name}>
+                  <li key={g.name} className="py-3.5">
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="font-semibold">{g.name}</span>
-                      <span className="text-xs text-ink-400">{g.cadence}</span>
+                      <span className="text-sm">{g.name}</span>
+                      <span className="text-xs text-faint">{g.cadence}</span>
                     </div>
-                    {g.note && <p className="text-xs text-ink-500 dark:text-ink-300">{g.note}</p>}
+                    {g.note && <p className="mt-0.5 text-xs text-muted">{g.note}</p>}
                   </li>
                 ))}
               </ul>
@@ -68,17 +72,17 @@ export default function HubDetail() {
                 href={hub.legacyUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="card flex items-center justify-between p-4 text-sm font-semibold hover:shadow-lg"
+                className="flex items-center justify-between text-sm text-muted transition hover:text-fg"
               >
-                Previous {hub.shortName} site <ExternalLink className="h-4 w-4 text-ink-400" />
+                Previous {hub.shortName} site <ArrowUpRight className="h-4 w-4" />
               </a>
             )}
           </aside>
         </div>
       </Section>
 
-      <section className="bg-white dark:bg-ink-900">
-        <Section eyebrow="Calendar" title={`Coming up in ${hub.shortName}`}>
+      <section className="border-t border-line bg-elev">
+        <Section eyebrow="Calendar" title={`Coming up in ${hub.shortName}.`}>
           {events.length ? (
             <div className="grid gap-4 md:grid-cols-2">
               {events.map((e) => (
@@ -86,7 +90,7 @@ export default function HubDetail() {
               ))}
             </div>
           ) : (
-            <p className="text-ink-500">Nothing posted yet.</p>
+            <p className="text-muted">Nothing posted yet.</p>
           )}
         </Section>
       </section>

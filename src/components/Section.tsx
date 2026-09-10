@@ -6,20 +6,23 @@ export default function Section({
   lead,
   children,
   className = '',
+  align = 'left',
 }: {
   eyebrow?: string;
   title?: string;
   lead?: string;
   children: ReactNode;
   className?: string;
+  align?: 'left' | 'center';
 }) {
+  const c = align === 'center' ? 'mx-auto text-center' : '';
   return (
-    <section className={`container-x py-12 md:py-16 ${className}`}>
+    <section className={`container-x py-16 md:py-24 ${className}`}>
       {(eyebrow || title) && (
-        <div className="mb-8 max-w-2xl">
+        <div className={`mb-10 max-w-2xl ${c}`}>
           {eyebrow && <div className="eyebrow">{eyebrow}</div>}
-          {title && <h2 className="mt-2 font-display text-2xl font-bold tracking-tight md:text-3xl">{title}</h2>}
-          {lead && <p className="mt-3 text-ink-500 dark:text-ink-300">{lead}</p>}
+          {title && <h2 className="mt-3 text-3xl md:text-4xl">{title}</h2>}
+          {lead && <p className="mt-4 leading-relaxed text-muted">{lead}</p>}
         </div>
       )}
       {children}

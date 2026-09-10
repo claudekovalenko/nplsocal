@@ -8,7 +8,7 @@ function read(): Theme {
     const v = localStorage.getItem(KEY);
     if (v === 'light' || v === 'dark' || v === 'system') return v;
   } catch {}
-  return 'system';
+  return 'dark';
 }
 
 function apply(theme: Theme) {
@@ -16,7 +16,7 @@ function apply(theme: Theme) {
   const dark = theme === 'dark' || (theme === 'system' && prefersDark);
   document.documentElement.classList.toggle('dark', dark);
   const meta = document.querySelector('meta[name="theme-color"]');
-  meta?.setAttribute('content', dark ? '#0b1220' : '#fbf9f4');
+  meta?.setAttribute('content', dark ? '#000000' : '#ffffff');
 }
 
 export function useTheme() {

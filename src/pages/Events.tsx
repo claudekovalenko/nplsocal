@@ -23,32 +23,23 @@ export default function Events() {
     [hub, type],
   );
 
-  const pill = (active: boolean) =>
-    `rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-      active ? 'bg-ink-900 text-white dark:bg-white dark:text-ink-950' : 'bg-ink-50 text-ink-600 hover:bg-ink-100 dark:bg-ink-800 dark:text-ink-200'
-    }`;
-
   return (
     <>
-      <PageHeader
-        eyebrow="Calendar"
-        title="Trainings, prayer, and gatherings."
-        lead="Everything happening across both hubs. Times are Pacific."
-      >
-        <div className="mt-6 space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-xs font-semibold uppercase tracking-widest text-ink-400">Hub</span>
-            <button className={pill(hub === 'all')} onClick={() => setHub('all')}>All SoCal</button>
+      <PageHeader eyebrow="Calendar" title="Trainings, prayer, gatherings." lead="Everything happening across both hubs. Times are Pacific.">
+        <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center gap-3">
+          <div className="flex flex-wrap justify-center gap-2">
+            <button className={hub === 'all' ? 'pill-active' : 'pill'} onClick={() => setHub('all')}>
+              All SoCal
+            </button>
             {hubs.map((h) => (
-              <button key={h.id} className={pill(hub === h.id)} onClick={() => setHub(h.id)}>
+              <button key={h.id} className={hub === h.id ? 'pill-active' : 'pill'} onClick={() => setHub(h.id)}>
                 {h.shortName}
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-xs font-semibold uppercase tracking-widest text-ink-400">Type</span>
+          <div className="flex flex-wrap justify-center gap-2">
             {types.map((t) => (
-              <button key={t.id} className={pill(type === t.id)} onClick={() => setType(t.id)}>
+              <button key={t.id} className={type === t.id ? 'pill-active' : 'pill'} onClick={() => setType(t.id)}>
                 {t.label}
               </button>
             ))}
@@ -56,7 +47,7 @@ export default function Events() {
         </div>
       </PageHeader>
 
-      <section className="container-x py-10">
+      <section className="container-x py-12 md:py-16">
         {list.length ? (
           <div className="grid gap-4 md:grid-cols-2">
             {list.map((e) => (
@@ -64,11 +55,9 @@ export default function Events() {
             ))}
           </div>
         ) : (
-          <p className="py-10 text-center text-ink-500">Nothing scheduled for that filter yet.</p>
+          <p className="py-16 text-center text-muted">Nothing scheduled for that filter yet.</p>
         )}
-        <p className="mt-10 text-center text-xs text-ink-400">
-          Hosting something? Send it to us on the Connect page and we'll add it here.
-        </p>
+        <p className="mt-12 text-center text-xs text-faint">Hosting something? Send it through the Connect page and we'll add it here.</p>
       </section>
     </>
   );

@@ -1,18 +1,18 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Wrench, CalendarDays, Users, ListChecks } from 'lucide-react';
+import { Home, Wrench, CalendarDays, Map, ListChecks } from 'lucide-react';
 
 const items = [
   { to: '/', label: 'Home', icon: Home, end: true },
   { to: '/tools', label: 'Toolbox', icon: Wrench },
   { to: '/events', label: 'Events', icon: CalendarDays },
-  { to: '/hubs', label: 'Hubs', icon: Users },
+  { to: '/hubs', label: 'Map', icon: Map },
   { to: '/my-100', label: 'My 100', icon: ListChecks },
 ];
 
 export default function BottomNav() {
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-ink-100 bg-sand-50/95 backdrop-blur-md md:hidden dark:border-ink-800 dark:bg-ink-950/95"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg/85 backdrop-blur-xl md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       aria-label="Quick"
     >
@@ -23,12 +23,12 @@ export default function BottomNav() {
             to={to}
             end={end}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${
-                isActive ? 'text-sun-600 dark:text-sun-400' : 'text-ink-500 dark:text-ink-400'
+              `flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium tracking-wide transition ${
+                isActive ? 'text-fg' : 'text-faint'
               }`
             }
           >
-            <Icon className="h-5 w-5" />
+            <Icon className="h-5 w-5" strokeWidth={1.75} />
             {label}
           </NavLink>
         ))}

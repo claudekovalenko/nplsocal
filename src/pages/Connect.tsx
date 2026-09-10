@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Mail, Send, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { site, hubs } from '@/content';
 import PageHeader from '@/components/PageHeader';
 
@@ -8,7 +8,7 @@ type Interest = 'training' | 'coach' | 'practitioner' | 'host' | 'other';
 const interests: { id: Interest; label: string }[] = [
   { id: 'training', label: 'I want to get trained' },
   { id: 'coach', label: 'I want a coach' },
-  { id: 'practitioner', label: "I'm a practitioner — connect me to a hub" },
+  { id: 'practitioner', label: "I'm a practitioner — connect me" },
   { id: 'host', label: 'I want to host a training or event' },
   { id: 'other', label: 'Something else' },
 ];
@@ -22,58 +22,52 @@ export default function Connect() {
 
   /**
    * Framework default: opens the user's mail client with a pre-filled message.
-   * Swap this for a form backend (Netlify Forms, Formspree, Supabase, Airtable)
-   * when the network picks one — see README.
+   * Swap for a form backend (Netlify Forms, Formspree, Supabase, Airtable) — see README.
    */
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const hub = hubs.find((h) => h.id === form.hub);
     const to = hub?.contactEmail ?? site.contact.email;
     const subject = encodeURIComponent(`[NPL SoCal] ${interests.find((i) => i.id === form.interest)?.label ?? 'Contact'}`);
-    const body = encodeURIComponent(
-      `Name: ${form.name}\nEmail: ${form.email}\nHub: ${hub?.shortName ?? 'Not sure'}\n\n${form.message}`,
-    );
+    const body = encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\nHub: ${hub?.shortName ?? 'Not sure'}\n\n${form.message}`);
     window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
     setSent(true);
   };
-
-  const input =
-    'w-full rounded-xl border border-ink-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-sun-400 focus:ring-2 focus:ring-sun-200 dark:border-ink-700 dark:bg-ink-950 dark:focus:ring-sun-900';
 
   return (
     <>
       <PageHeader
         eyebrow="Connect"
-        title="Tell us where you are. We'll find you a coach."
-        lead="Whether you're brand new or already working the fields, the next step is a real person in your area. Fill this out and someone from your hub will reach out."
+        title="Tell us where you are."
+        lead="Whether you're brand new or already working the fields, the next step is a real person in your area. Someone from your hub will reach out."
       />
-      <section className="container-x grid gap-10 py-12 md:grid-cols-[1.3fr_1fr]">
+      <section className="container-x grid gap-14 py-14 md:grid-cols-[1.4fr_1fr] md:py-20">
         {sent ? (
-          <div className="card flex flex-col items-center p-10 text-center">
-            <CheckCircle2 className="h-10 w-10 text-emerald-500" />
-            <h2 className="mt-4 font-display text-2xl font-bold">Your email client should have opened.</h2>
-            <p className="mt-2 max-w-md text-sm text-ink-500 dark:text-ink-300">
-              If it didn't, just write to {site.contact.email} with your name, city, and what you're looking for.
+          <div className="card flex flex-col items-center p-12 text-center">
+            <CheckCircle2 className="h-8 w-8 text-accent" strokeWidth={1.5} />
+            <h2 className="mt-5 text-2xl">Your email client should have opened.</h2>
+            <p className="mt-3 max-w-md text-sm text-muted">
+              If it didn't, write to {site.contact.email} with your name, city, and what you're looking for.
             </p>
-            <button className="btn-ghost mt-6" onClick={() => setSent(false)}>
+            <button className="btn-secondary mt-8" onClick={() => setSent(false)}>
               Send another
             </button>
           </div>
         ) : (
-          <form onSubmit={submit} className="card space-y-5 p-6 md:p-8">
-            <div className="grid gap-5 sm:grid-cols-2">
-              <label className="block text-sm font-medium">
-                Name
-                <input required className={`${input} mt-1.5`} value={form.name} onChange={update('name')} autoComplete="name" />
+          <form onSubmit={submit} className="space-y-6">
+            <div className="grid gap-6 sm:grid-cols-2">
+              <label className="block">
+                <span className="eyebrow">Name</span>
+                <input required className="field mt-2" value={form.name} onChange={update('name')} autoComplete="name" />
               </label>
-              <label className="block text-sm font-medium">
-                Email
-                <input required type="email" className={`${input} mt-1.5`} value={form.email} onChange={update('email')} autoComplete="email" />
+              <label className="block">
+                <span className="eyebrow">Email</span>
+                <input required type="email" className="field mt-2" value={form.email} onChange={update('email')} autoComplete="email" />
               </label>
             </div>
-            <label className="block text-sm font-medium">
-              Closest hub
-              <select className={`${input} mt-1.5`} value={form.hub} onChange={update('hub')}>
+            <label className="block">
+              <span className="eyebrow">Closest hub</span>
+              <select className="field mt-2" value={form.hub} onChange={update('hub')}>
                 <option value="">Not sure / somewhere else</option>
                 {hubs.map((h) => (
                   <option key={h.id} value={h.id}>
@@ -83,52 +77,46 @@ export default function Connect() {
               </select>
             </label>
             <fieldset>
-              <legend className="text-sm font-medium">What are you looking for?</legend>
+              <legend className="eyebrow">What are you looking for?</legend>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
                 {interests.map((i) => (
                   <label
                     key={i.id}
-                    className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm ${
-                      form.interest === i.id
-                        ? 'border-sun-400 bg-sun-50 dark:bg-sun-900/20'
-                        : 'border-ink-200 dark:border-ink-700'
+                    className={`flex cursor-pointer items-center gap-3 rounded-md border px-3.5 py-3 text-sm transition ${
+                      form.interest === i.id ? 'border-fg' : 'border-line hover:border-line-strong'
                     }`}
                   >
-                    <input
-                      type="radio"
-                      name="interest"
-                      value={i.id}
-                      checked={form.interest === i.id}
-                      onChange={update('interest')}
-                      className="accent-sun-500"
-                    />
+                    <input type="radio" name="interest" value={i.id} checked={form.interest === i.id} onChange={update('interest')} className="accent-current" />
                     {i.label}
                   </label>
                 ))}
               </div>
             </fieldset>
-            <label className="block text-sm font-medium">
-              Anything else?
-              <textarea rows={4} className={`${input} mt-1.5`} value={form.message} onChange={update('message')} placeholder="Your city, your church, how you heard about NPL…" />
+            <label className="block">
+              <span className="eyebrow">Anything else?</span>
+              <textarea rows={4} className="field mt-2" value={form.message} onChange={update('message')} placeholder="Your city, your church, how you heard about NPL" />
             </label>
-            <button type="submit" className="btn-primary w-full sm:w-auto">
-              <Send className="h-4 w-4" /> Send
+            <button type="submit" className="btn-primary w-full sm:w-auto sm:min-w-40">
+              Send
             </button>
           </form>
         )}
 
-        <aside className="space-y-4">
-          <div className="card p-5">
+        <aside className="space-y-10 text-sm">
+          <div>
             <div className="eyebrow">Direct</div>
-            <a href={`mailto:${site.contact.email}`} className="mt-3 flex items-center gap-2 text-sm font-semibold hover:text-sun-600 dark:hover:text-sun-400">
-              <Mail className="h-4 w-4" /> {site.contact.email}
-            </a>
-            <ul className="mt-4 space-y-2 text-sm">
+            <ul className="mt-3 divide-y divide-line border-y border-line">
+              <li className="flex items-center justify-between py-3">
+                <span className="text-muted">SoCal</span>
+                <a href={`mailto:${site.contact.email}`} className="transition hover:text-accent">
+                  {site.contact.email}
+                </a>
+              </li>
               {hubs.map((h) =>
                 h.contactEmail ? (
-                  <li key={h.id} className="flex items-center justify-between">
-                    <span className="text-ink-500 dark:text-ink-300">{h.shortName}</span>
-                    <a href={`mailto:${h.contactEmail}`} className="font-medium hover:text-sun-600 dark:hover:text-sun-400">
+                  <li key={h.id} className="flex items-center justify-between py-3">
+                    <span className="text-muted">{h.shortName}</span>
+                    <a href={`mailto:${h.contactEmail}`} className="transition hover:text-accent">
                       {h.contactEmail}
                     </a>
                   </li>
@@ -136,12 +124,12 @@ export default function Connect() {
               )}
             </ul>
           </div>
-          <div className="card p-5 text-sm text-ink-600 dark:text-ink-200">
+          <div>
             <div className="eyebrow">What happens next</div>
-            <ol className="mt-3 list-decimal space-y-1.5 pl-4">
-              <li>A practitioner from your hub replies, usually within a few days.</li>
-              <li>You'll be invited to the next 411 Training or Iron on Iron.</li>
-              <li>You start your 100 List and begin praying and sharing.</li>
+            <ol className="mt-3 space-y-2 text-muted">
+              <li>01 · A practitioner from your hub replies, usually within a few days.</li>
+              <li>02 · You're invited to the next 411 Training or Iron on Iron.</li>
+              <li>03 · You start your 100 List and begin praying and sharing.</li>
             </ol>
           </div>
         </aside>

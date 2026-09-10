@@ -4,66 +4,66 @@ import Logo from './Logo';
 
 export default function Footer() {
   return (
-    <footer className="mt-20 border-t border-ink-100 bg-white dark:border-ink-800 dark:bg-ink-900">
-      <div className="container-x grid gap-10 py-12 md:grid-cols-4">
-        <div className="md:col-span-2">
+    <footer className="mt-24 border-t border-line">
+      <div className="container-x grid gap-12 py-14 md:grid-cols-[1.5fr_1fr_1fr]">
+        <div>
           <div className="flex items-center gap-2.5">
-            <Logo className="h-9 w-9" />
-            <div>
-              <div className="font-bold">{site.name}</div>
-              <div className="text-xs text-ink-400">{site.tagline}</div>
-            </div>
+            <Logo className="h-6 w-6" />
+            <span className="text-sm font-semibold uppercase tracking-[0.12em]">{site.shortName}</span>
           </div>
-          <p className="mt-4 max-w-md text-sm text-ink-500 dark:text-ink-300">{site.description}</p>
-          <p className="mt-4 text-xs text-ink-400">
-            Part of the wider{' '}
-            <a href={site.urls.international} target="_blank" rel="noreferrer" className="underline decoration-sun-400 underline-offset-2">
+          <p className="mt-5 max-w-sm text-sm leading-relaxed text-muted">{site.description}</p>
+          <p className="mt-5 text-xs text-faint">
+            Part of the{' '}
+            <a href={site.urls.international} target="_blank" rel="noreferrer" className="text-muted underline-offset-4 hover:underline">
               #NoPlaceLeft
             </a>{' '}
-            movement. All tools are freely given — use, adapt, and pass them on.
+            movement. All tools are freely given.
           </p>
         </div>
-
         <div>
           <div className="eyebrow">Explore</div>
-          <ul className="mt-3 space-y-2 text-sm">
+          <ul className="mt-4 space-y-2.5 text-sm">
             {navigation
               .filter((n) => n.to !== '/')
               .map((n) => (
                 <li key={n.to}>
-                  <Link to={n.to} className="text-ink-600 hover:text-ink-900 dark:text-ink-300 dark:hover:text-white">
+                  <Link to={n.to} className="text-muted transition hover:text-fg">
                     {n.label}
                   </Link>
                 </li>
               ))}
             <li>
-              <Link to="/my-100" className="text-ink-600 hover:text-ink-900 dark:text-ink-300 dark:hover:text-white">
+              <Link to="/my-100" className="text-muted transition hover:text-fg">
                 My 100 List
               </Link>
             </li>
           </ul>
         </div>
-
         <div>
-          <div className="eyebrow">Hubs</div>
-          <ul className="mt-3 space-y-2 text-sm">
+          <div className="eyebrow">Network</div>
+          <ul className="mt-4 space-y-2.5 text-sm">
             {hubs.map((h) => (
               <li key={h.id}>
-                <Link to={`/hubs/${h.id}`} className="text-ink-600 hover:text-ink-900 dark:text-ink-300 dark:hover:text-white">
+                <Link to={`/hubs/${h.id}`} className="text-muted transition hover:text-fg">
                   {h.shortName}
                 </Link>
               </li>
             ))}
             <li>
-              <a href={`mailto:${site.contact.email}`} className="text-ink-600 hover:text-ink-900 dark:text-ink-300 dark:hover:text-white">
+              <a href={`mailto:${site.contact.email}`} className="text-muted transition hover:text-fg">
                 {site.contact.email}
               </a>
             </li>
           </ul>
         </div>
       </div>
-      <div className="border-t border-ink-100 py-4 text-center text-xs text-ink-400 dark:border-ink-800">
-        {site.scripture.ref} · "{site.scripture.text}"
+      <div className="border-t border-line">
+        <div className="container-x flex flex-col gap-2 py-5 text-xs text-faint sm:flex-row sm:items-center sm:justify-between">
+          <span>{site.name}</span>
+          <span>
+            {site.scripture.ref} · "{site.scripture.text}"
+          </span>
+        </div>
       </div>
     </footer>
   );

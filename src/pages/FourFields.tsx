@@ -9,52 +9,44 @@ export default function FourFields() {
     <>
       <PageHeader
         eyebrow="Mark 4:26–29"
-        title="Four Fields of Kingdom Growth"
+        title="Four Fields of Kingdom Growth."
         lead="A farmer goes to an empty field, sows seed, tends what grows, and gathers a harvest that seeds the next field. Jesus used that picture for the kingdom — and it gives us a whole-process map for making disciples that multiply."
       />
 
-      <section className="container-x grid items-start gap-10 py-12 md:grid-cols-[1fr_1.2fr] md:py-16">
+      <section className="container-x grid items-start gap-12 py-16 md:grid-cols-[1fr_1.2fr] md:py-24">
         <div className="md:sticky md:top-24">
           <FourFieldsDiagram />
-          <p className="mt-4 text-center text-xs text-ink-400">Tap a field to jump to it.</p>
+          <p className="mt-4 text-center text-xs text-faint">Select a field to jump to it.</p>
         </div>
-        <div className="space-y-4">
+        <ol className="divide-y divide-line border-y border-line">
           {fields.map((f) => (
-            <a
-              key={f.id}
-              href={`#${f.id}`}
-              className="card flex items-start gap-4 p-4 transition hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink-900 font-bold text-white dark:bg-white dark:text-ink-950">
-                {f.number}
-              </span>
-              <span>
-                <span className="block font-bold">{f.name}</span>
-                <span className="block text-sm text-ink-500 dark:text-ink-300">{f.question}</span>
-              </span>
-            </a>
+            <li key={f.id}>
+              <a href={`#${f.id}`} className="group flex items-baseline gap-6 py-5 transition hover:bg-fg/5 md:px-3">
+                <span className="w-6 text-xs text-faint">0{f.number}</span>
+                <span>
+                  <span className="block text-xl">{f.name}</span>
+                  <span className="block text-sm text-muted">{f.question}</span>
+                </span>
+              </a>
+            </li>
           ))}
-        </div>
+        </ol>
       </section>
 
       {fields.map((f, i) => (
-        <section
-          key={f.id}
-          id={f.id}
-          className={`scroll-mt-20 ${i % 2 === 0 ? 'bg-white dark:bg-ink-900' : ''}`}
-        >
-          <div className="container-x py-14">
-            <div className="eyebrow">Field {f.number}</div>
-            <h2 className="mt-2 font-display text-3xl font-bold tracking-tight">{f.name}</h2>
-            <p className="mt-1 text-lg font-medium text-ink-500 dark:text-ink-300">{f.question}</p>
-            <div className="mt-6 grid gap-8 md:grid-cols-[1.4fr_1fr]">
-              <p className="text-ink-700 dark:text-ink-200">{f.description}</p>
-              <blockquote className="rounded-2xl border-l-4 border-sun-500 bg-sun-50 p-5 text-sm text-ink-700 dark:bg-ink-800 dark:text-ink-200">
+        <section key={f.id} id={f.id} className={`scroll-mt-16 border-t border-line ${i % 2 === 0 ? 'bg-elev' : ''}`}>
+          <div className="container-x py-16 md:py-24">
+            <div className="eyebrow">Field 0{f.number}</div>
+            <h2 className="mt-3 text-3xl md:text-5xl">{f.name}</h2>
+            <p className="mt-2 text-lg text-muted">{f.question}</p>
+            <div className="mt-8 grid gap-10 md:grid-cols-[1.4fr_1fr]">
+              <p className="text-[17px] leading-relaxed text-muted">{f.description}</p>
+              <blockquote className="border-l border-line-strong pl-5 text-sm leading-relaxed text-muted">
                 "{f.scripture.text}"
-                <footer className="mt-2 text-xs font-semibold text-sun-700 dark:text-sun-300">{f.scripture.ref}</footer>
+                <footer className="mt-2 text-xs uppercase tracking-[0.18em] text-faint">{f.scripture.ref}</footer>
               </blockquote>
             </div>
-            <h3 className="mt-10 text-sm font-semibold uppercase tracking-widest text-ink-400">Tools for this field</h3>
+            <div className="eyebrow mt-12">Tools for this field</div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {f.toolSlugs.map((s) => {
                 const t = toolBySlug(s);
@@ -65,9 +57,9 @@ export default function FourFields() {
         </section>
       ))}
 
-      <section className="container-x py-16 text-center">
-        <p className="text-ink-500 dark:text-ink-300">Want to learn the whole framework hands-on?</p>
-        <Link to="/training" className="btn-primary mt-4">
+      <section className="container-x border-t border-line py-20 text-center">
+        <p className="text-muted">Want to learn the whole framework hands-on?</p>
+        <Link to="/training" className="btn-primary mt-6">
           Come to a 4 Fields Training
         </Link>
       </section>

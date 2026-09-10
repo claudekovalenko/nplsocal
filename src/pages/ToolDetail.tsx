@@ -1,5 +1,5 @@
 import { Link, useParams, Navigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, BookOpen, Share2 } from 'lucide-react';
+import { ArrowLeft, Share2 } from 'lucide-react';
 import { toolBySlug, fieldById, toolsByField } from '@/content';
 import FieldBadge from '@/components/FieldBadge';
 
@@ -20,43 +20,41 @@ export default function ToolDetail() {
 
   return (
     <>
-      <section className="border-b border-ink-100 bg-white dark:border-ink-800 dark:bg-ink-900">
-        <div className="container-x py-10 md:py-14">
-          <Link to="/tools" className="inline-flex items-center gap-1 text-sm text-ink-500 hover:text-ink-900 dark:hover:text-white">
+      <section className="border-b border-line">
+        <div className="container-x py-14 md:py-20">
+          <Link to="/tools" className="inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-fg">
             <ArrowLeft className="h-4 w-4" /> Toolbox
           </Link>
-          <div className="mt-4">
+          <div className="mt-8">
             <FieldBadge field={tool.field} />
           </div>
-          <h1 className="mt-3 font-display text-3xl font-bold tracking-tight md:text-5xl">{tool.name}</h1>
-          <p className="mt-2 text-lg font-medium text-sun-600 dark:text-sun-400">{tool.tagline}</p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <button type="button" onClick={share} className="btn-ghost">
+          <h1 className="mt-4 text-4xl md:text-6xl">{tool.name}</h1>
+          <p className="mt-3 text-lg text-muted">{tool.tagline}</p>
+          <div className="mt-8 flex flex-wrap gap-2">
+            <button type="button" onClick={share} className="btn-secondary">
               <Share2 className="h-4 w-4" /> Share
             </button>
             <Link to={`/four-fields#${field.id}`} className="btn-ghost">
-              <BookOpen className="h-4 w-4" /> Field {field.number}: {field.name}
+              Field 0{field.number} · {field.name}
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="container-x grid gap-10 py-12 md:grid-cols-[1.4fr_1fr]">
+      <section className="container-x grid gap-14 py-14 md:grid-cols-[1.5fr_1fr] md:py-20">
         <div>
-          <p className="text-lg text-ink-700 dark:text-ink-200">{tool.description}</p>
+          <p className="text-[17px] leading-relaxed text-muted">{tool.description}</p>
 
           {tool.steps && (
             <>
-              <h2 className="mt-10 font-display text-2xl font-bold">How it works</h2>
-              <ol className="mt-4 space-y-3">
+              <div className="eyebrow mt-14">How it works</div>
+              <ol className="mt-4 divide-y divide-line border-y border-line">
                 {tool.steps.map((s, i) => (
-                  <li key={s.title} className="card flex gap-4 p-4">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sun-500 text-sm font-bold text-white">
-                      {i + 1}
-                    </span>
+                  <li key={s.title} className="flex gap-6 py-5">
+                    <span className="w-6 shrink-0 text-xs text-faint">0{i + 1}</span>
                     <div>
-                      <div className="font-semibold">{s.title}</div>
-                      <div className="mt-0.5 text-sm text-ink-600 dark:text-ink-200">{s.detail}</div>
+                      <div className="text-base">{s.title}</div>
+                      <div className="mt-1 text-sm leading-relaxed text-muted">{s.detail}</div>
                     </div>
                   </li>
                 ))}
@@ -66,11 +64,11 @@ export default function ToolDetail() {
 
           {tool.links?.length ? (
             <>
-              <h2 className="mt-10 font-display text-xl font-bold">Resources</h2>
-              <ul className="mt-3 space-y-2">
+              <div className="eyebrow mt-14">Resources</div>
+              <ul className="mt-3 space-y-2 text-sm">
                 {tool.links.map((l) => (
                   <li key={l.url}>
-                    <a href={l.url} target="_blank" rel="noreferrer" className="text-sun-600 underline-offset-2 hover:underline dark:text-sun-400">
+                    <a href={l.url} target="_blank" rel="noreferrer" className="underline-offset-4 hover:underline">
                       {l.label}
                     </a>
                   </li>
@@ -80,11 +78,11 @@ export default function ToolDetail() {
           ) : null}
         </div>
 
-        <aside className="space-y-6">
+        <aside className="space-y-10 text-sm">
           {tool.scripture?.length ? (
-            <div className="card p-5">
+            <div>
               <div className="eyebrow">Scripture</div>
-              <ul className="mt-3 space-y-1 text-sm font-medium">
+              <ul className="mt-3 space-y-1.5 text-muted">
                 {tool.scripture.map((s) => (
                   <li key={s}>{s}</li>
                 ))}
@@ -93,36 +91,32 @@ export default function ToolDetail() {
           ) : null}
 
           {tool.slug === '100-list' && (
-            <div className="card border-sun-200 bg-sun-50 p-5 dark:border-sun-900 dark:bg-sun-900/20">
+            <div className="card p-6">
               <div className="eyebrow">Try it now</div>
-              <p className="mt-2 text-sm text-ink-700 dark:text-ink-200">
-                Keep your own list right here in the app. It's private to your device and works offline.
-              </p>
-              <Link to="/my-100" className="btn-primary mt-4 w-full">
-                Open My 100 List <ArrowRight className="h-4 w-4" />
+              <p className="mt-2 leading-relaxed text-muted">Keep your own list in the app. Private to your device, works offline.</p>
+              <Link to="/my-100" className="btn-primary mt-5 w-full">
+                Open My 100 List
               </Link>
             </div>
           )}
 
           {siblings.length > 0 && (
-            <div className="card p-5">
-              <div className="eyebrow">More in Field {field.number}</div>
-              <ul className="mt-3 space-y-2">
+            <div>
+              <div className="eyebrow">More in Field 0{field.number}</div>
+              <ul className="mt-3 divide-y divide-line border-y border-line">
                 {siblings.map((t) => (
                   <li key={t.slug}>
-                    <Link to={`/tools/${t.slug}`} className="text-sm font-semibold hover:text-sun-600 dark:hover:text-sun-400">
-                      {t.name}
+                    <Link to={`/tools/${t.slug}`} className="block py-3 transition hover:text-fg">
+                      <span className="block">{t.name}</span>
+                      <span className="block text-xs text-muted">{t.tagline}</span>
                     </Link>
-                    <p className="text-xs text-ink-500 dark:text-ink-300">{t.tagline}</p>
                   </li>
                 ))}
               </ul>
             </div>
           )}
 
-          <div className="rounded-2xl border border-dashed border-ink-200 p-5 text-sm text-ink-500 dark:border-ink-700 dark:text-ink-300">
-            Learned it? The next step is to teach it. Who will you train this week?
-          </div>
+          <p className="text-muted">Learned it? The next step is to teach it. Who will you train this week?</p>
         </aside>
       </section>
     </>

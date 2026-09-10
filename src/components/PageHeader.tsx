@@ -5,18 +5,23 @@ export default function PageHeader({
   title,
   lead,
   children,
+  align = 'center',
 }: {
   eyebrow?: string;
   title: string;
   lead?: string;
   children?: ReactNode;
+  align?: 'center' | 'left';
 }) {
+  const c = align === 'center' ? 'mx-auto text-center' : '';
   return (
-    <section className="border-b border-ink-100 bg-white dark:border-ink-800 dark:bg-ink-900">
-      <div className="container-x py-12 md:py-16">
-        {eyebrow && <div className="eyebrow">{eyebrow}</div>}
-        <h1 className="mt-2 font-display text-3xl font-bold tracking-tight md:text-5xl">{title}</h1>
-        {lead && <p className="mt-4 max-w-2xl text-base text-ink-500 md:text-lg dark:text-ink-300">{lead}</p>}
+    <section className="border-b border-line">
+      <div className="container-x py-16 md:py-24">
+        <div className={`max-w-3xl ${c}`}>
+          {eyebrow && <div className="eyebrow fade-up">{eyebrow}</div>}
+          <h1 className="fade-up fade-up-2 mt-4 text-4xl leading-[1.05] md:text-6xl">{title}</h1>
+          {lead && <p className="fade-up fade-up-3 mt-6 text-base leading-relaxed text-muted md:text-lg">{lead}</p>}
+        </div>
         {children}
       </div>
     </section>

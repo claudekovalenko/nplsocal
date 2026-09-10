@@ -19,7 +19,7 @@ for (const [name, size, pad] of jobs) {
   const inner = size - pad * 2;
   const art = await sharp(svg).resize(inner, inner).png().toBuffer();
   await sharp({
-    create: { width: size, height: size, channels: 4, background: '#0b1220' },
+    create: { width: size, height: size, channels: 4, background: '#000000' },
   })
     .composite([{ input: art, left: pad, top: pad }])
     .png()

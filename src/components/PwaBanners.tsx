@@ -4,6 +4,12 @@ import { Download, RefreshCw, WifiOff, X, Share } from 'lucide-react';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { useOnline } from '@/hooks/useOnline';
 
+const Toast = ({ children }: { children: React.ReactNode }) => (
+  <div className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-3 rounded-lg border border-line bg-bg/90 px-4 py-3 text-sm shadow-2xl backdrop-blur-xl">
+    {children}
+  </div>
+);
+
 export default function PwaBanners() {
   const online = useOnline();
   const { canInstall, install, dismissed, dismiss, isIOS, installed } = useInstallPrompt();
@@ -14,13 +20,11 @@ export default function PwaBanners() {
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(_url, reg) {
-      // Check for updates periodically while the app is open.
       if (reg) setInterval(() => reg.update(), 60 * 60 * 1000);
     },
   });
 
   useEffect(() => {
-    // Show a gentle iOS hint after a few visits.
     if (!isIOS || installed || dismissed) return;
     try {
       const visits = Number(localStorage.getItem('npl:visits') ?? '0') + 1;
@@ -30,52 +34,49 @@ export default function PwaBanners() {
   }, [isIOS, installed, dismissed]);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-16 z-50 flex flex-col items-center gap-2 px-4 md:bottom-4">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[4.5rem] z-50 flex flex-col items-center gap-2 px-4 md:bottom-5">
       {!online && (
-        <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-ink-900 px-4 py-2 text-sm text-white shadow-lg dark:bg-white dark:text-ink-950">
-          <WifiOff className="h-4 w-4" /> You're offline — saved pages and your 100 List still work.
+        <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-line bg-bg/90 px-4 py-2 text-xs text-muted backdrop-blur-xl">
+          <WifiOff className="h-3.5 w-3.5" /> Offline — saved pages and your 100 List still work.
         </div>
       )}
-
       {needRefresh && (
-        <div className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-3 rounded-2xl bg-ink-900 px-4 py-3 text-sm text-white shadow-lg dark:bg-white dark:text-ink-950">
-          <span className="flex items-center gap-2">
+        <Toast>
+          <span className="flex items-center gap-2 text-muted">
             <RefreshCw className="h-4 w-4" /> A new version is ready.
           </span>
-          <div className="flex gap-2">
-            <button className="btn-primary !py-1.5 !px-3" onClick={() => updateServiceWorker(true)}>
+          <div className="flex items-center gap-1">
+            <button className="btn-primary !h-8 !px-4 !text-xs" onClick={() => updateServiceWorker(true)}>
               Update
             </button>
-            <button className="p-1.5" aria-label="Dismiss" onClick={() => setNeedRefresh(false)}>
+            <button className="p-1.5 text-muted" aria-label="Dismiss" onClick={() => setNeedRefresh(false)}>
               <X className="h-4 w-4" />
             </button>
           </div>
-        </div>
+        </Toast>
       )}
-
       {canInstall && !dismissed && (
-        <div className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 text-sm shadow-lg ring-1 ring-ink-100 dark:bg-ink-900 dark:ring-ink-700">
-          <span className="flex items-center gap-2">
-            <Download className="h-4 w-4 text-sun-500" /> Install NPL SoCal for offline access.
+        <Toast>
+          <span className="flex items-center gap-2 text-muted">
+            <Download className="h-4 w-4" /> Install for offline access.
           </span>
-          <div className="flex gap-2">
-            <button className="btn-primary !py-1.5 !px-3" onClick={install}>
+          <div className="flex items-center gap-1">
+            <button className="btn-primary !h-8 !px-4 !text-xs" onClick={install}>
               Install
             </button>
-            <button className="p-1.5" aria-label="Dismiss" onClick={dismiss}>
+            <button className="p-1.5 text-muted" aria-label="Dismiss" onClick={dismiss}>
               <X className="h-4 w-4" />
             </button>
           </div>
-        </div>
+        </Toast>
       )}
-
       {showIosHint && !dismissed && (
-        <div className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 text-sm shadow-lg ring-1 ring-ink-100 dark:bg-ink-900 dark:ring-ink-700">
-          <span className="flex items-center gap-2">
-            <Share className="h-4 w-4 text-sun-500" /> Tap Share, then "Add to Home Screen" to install.
+        <Toast>
+          <span className="flex items-center gap-2 text-muted">
+            <Share className="h-4 w-4" /> Tap Share, then "Add to Home Screen".
           </span>
           <button
-            className="p-1.5"
+            className="p-1.5 text-muted"
             aria-label="Dismiss"
             onClick={() => {
               setShowIosHint(false);
@@ -84,7 +85,7 @@ export default function PwaBanners() {
           >
             <X className="h-4 w-4" />
           </button>
-        </div>
+        </Toast>
       )}
     </div>
   );

@@ -23,39 +23,30 @@ export default function Tools() {
       <PageHeader
         eyebrow="Toolbox"
         title="Simple tools that reproduce."
-        lead="Everything here is freely given and works offline once you've opened it. Learn a tool, use it this week, then teach it to someone else."
+        lead="Everything here is freely given and works offline once opened. Learn a tool, use it this week, then teach it to someone else."
       >
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <label className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+        <div className="mx-auto mt-10 max-w-2xl">
+          <label className="relative block">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-faint" />
             <input
               type="search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search tools…"
-              className="w-full rounded-full border border-ink-200 bg-white py-2.5 pl-9 pr-4 text-sm outline-none focus:border-sun-400 focus:ring-2 focus:ring-sun-200 dark:border-ink-700 dark:bg-ink-950 dark:focus:ring-sun-900"
+              placeholder="Search tools"
+              className="field !pl-10"
             />
           </label>
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {[{ id: 'all', name: 'All' }, ...fields].map((f) => (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => setField(f.id)}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                field === f.id
-                  ? 'bg-ink-900 text-white dark:bg-white dark:text-ink-950'
-                  : 'bg-ink-50 text-ink-600 hover:bg-ink-100 dark:bg-ink-800 dark:text-ink-200'
-              }`}
-            >
-              {f.name}
-            </button>
-          ))}
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {[{ id: 'all', name: 'All' }, ...fields].map((f) => (
+              <button key={f.id} type="button" onClick={() => setField(f.id)} className={field === f.id ? 'pill-active' : 'pill'}>
+                {f.name}
+              </button>
+            ))}
+          </div>
         </div>
       </PageHeader>
 
-      <section className="container-x py-10">
+      <section className="container-x py-12 md:py-16">
         {filtered.length ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((t) => (
@@ -63,7 +54,7 @@ export default function Tools() {
             ))}
           </div>
         ) : (
-          <p className="py-10 text-center text-ink-500">No tools match "{q}".</p>
+          <p className="py-16 text-center text-muted">No tools match "{q}".</p>
         )}
       </section>
     </>
