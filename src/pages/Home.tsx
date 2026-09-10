@@ -1,22 +1,15 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronDown } from 'lucide-react';
-import { site, hubs, tools, upcomingEvents } from '@/content';
+import { site, hubs, tools, featuredEvents } from '@/content';
 import NetworkMap from '@/components/NetworkMap';
-import FourFieldsDiagram from '@/components/FourFieldsDiagram';
 import ToolCard from '@/components/ToolCard';
-import EventCard from '@/components/EventCard';
+import { FeaturedEvent } from '@/components/EventCard';
 
-const starterSlugs = ['411', '3-circles', '3-thirds'];
-const stats = [
-  { n: '2', label: 'Counties' },
-  { n: '122', label: 'Cities' },
-  { n: '13M+', label: 'People' },
-  { n: '200+', label: 'Languages' },
-];
+const starterSlugs = ['411', '3-circles', '100-list'];
 
 export default function Home() {
   const starters = starterSlugs.map((s) => tools.find((t) => t.slug === s)!);
-  const events = upcomingEvents().slice(0, 3);
+  const featured = featuredEvents().slice(0, 3);
 
   return (
     <>
@@ -26,39 +19,90 @@ export default function Home() {
         <div className="container-x relative z-10 flex flex-col items-center pt-24 text-center md:pt-32">
           <div className="eyebrow fade-up">{site.hashtag} · Los Angeles · Orange County</div>
           <h1 className="fade-up fade-up-2 mt-5 text-5xl leading-[0.95] sm:text-6xl md:text-7xl lg:text-8xl">No Place Left.</h1>
-          <p className="fade-up fade-up-3 mt-5 text-muted md:text-lg">Disciples, churches, and leaders — multiplying until every neighborhood is reached.</p>
+          <p className="fade-up fade-up-3 mt-5 text-muted md:text-lg">Tools, regions, and what's next — for everyone in the network.</p>
           <div className="fade-up fade-up-3 mt-8 flex flex-wrap justify-center gap-3">
-            <Link to="/training" className="btn-primary min-w-40">
-              Get trained
+            <Link to="/three-thirds" className="btn-primary min-w-40">
+              Run a 3/3rds
             </Link>
             <Link to="/tools" className="btn-secondary min-w-40">
-              Toolbox
+              Tools
             </Link>
           </div>
         </div>
         <div className="relative z-0 mx-auto mt-4 w-full max-w-3xl flex-1 px-2 md:mt-6">
           <NetworkMap variant="hero" className="h-auto w-full" />
         </div>
-        <a href="#network" className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 text-faint transition hover:text-fg md:block" aria-label="Scroll">
+        <a href="#next" className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 text-faint transition hover:text-fg md:block" aria-label="Scroll">
           <ChevronDown className="h-5 w-5 animate-bounce" />
         </a>
       </section>
 
-      {/* Network */}
-      <section id="network" className="border-t border-line">
+      {/* Next up: network-wide */}
+      <section id="next" className="border-t border-line">
         <div className="container-x py-20 md:py-28">
-          <h2 className="text-center text-3xl md:text-5xl">Two counties. One network.</h2>
-          <dl className="mx-auto mt-12 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-4">
-            {stats.map((s) => (
-              <div key={s.label} className="bg-bg px-6 py-7 text-center">
-                <dd className="text-3xl font-light tracking-tight md:text-4xl">{s.n}</dd>
-                <dt className="eyebrow mt-1">{s.label}</dt>
-              </div>
+          <div className="flex items-end justify-between gap-6">
+            <div>
+              <div className="eyebrow">For everyone</div>
+              <h2 className="mt-3 text-3xl md:text-5xl">Next up.</h2>
+            </div>
+            <Link to="/events" className="btn-ghost">
+              All events <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {featured.map((e) => (
+              <FeaturedEvent key={e.id} event={e} />
             ))}
-          </dl>
-          <div className="mt-6 grid gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-2">
+          </div>
+        </div>
+      </section>
+
+      {/* The format */}
+      <section className="border-t border-line bg-elev">
+        <div className="container-x grid items-center gap-12 py-20 md:grid-cols-2 md:py-28">
+          <div>
+            <div className="eyebrow">The format</div>
+            <h2 className="mt-3 text-3xl md:text-5xl">Everything runs on 3/3rds.</h2>
+            <p className="mt-4 text-muted">Look back. Look up. Look forward. One pattern for every group, so anyone can lead.</p>
+            <div className="mt-8 flex gap-3">
+              <Link to="/three-thirds" className="btn-primary">
+                Run a meeting
+              </Link>
+              <Link to="/tools/3-thirds" className="btn-secondary">
+                Learn it
+              </Link>
+            </div>
+          </div>
+          <ol className="grid gap-px overflow-hidden rounded-xl border border-line bg-line">
+            {[
+              ['Look back', 'Care · Worship · Accountability · Vision'],
+              ['Look up', 'Read · Retell · Discuss · Obey'],
+              ['Look forward', 'Practice · Goals · Pray'],
+            ].map(([t, d], i) => (
+              <li key={t} className="flex items-baseline gap-5 bg-bg p-6">
+                <span className="w-6 text-xs text-faint">0{i + 1}</span>
+                <span>
+                  <span className="block text-lg">{t}</span>
+                  <span className="block text-sm text-muted">{d}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Regions */}
+      <section className="border-t border-line">
+        <div className="container-x py-20 md:py-28">
+          <div className="flex items-end justify-between gap-6">
+            <h2 className="text-3xl md:text-5xl">Your region.</h2>
+            <Link to="/regions" className="btn-ghost">
+              Map <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="mt-10 grid gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-2">
             {hubs.map((h) => (
-              <Link key={h.id} to={`/hubs/${h.id}`} className="group flex items-end justify-between gap-6 bg-bg p-8 transition hover:bg-surface md:p-10">
+              <Link key={h.id} to={`/regions/${h.id}`} className="group flex items-end justify-between gap-6 bg-bg p-8 transition hover:bg-surface md:p-10">
                 <div>
                   <div className="eyebrow">{h.shortName}</div>
                   <h3 className="mt-3 text-2xl md:text-3xl">{h.tagline}</h3>
@@ -70,23 +114,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Four Fields */}
-      <section className="border-t border-line bg-elev">
-        <div className="container-x grid items-center gap-12 py-20 md:grid-cols-2 md:py-28">
-          <div>
-            <div className="eyebrow">The framework</div>
-            <h2 className="mt-3 text-3xl md:text-5xl">Four Fields.</h2>
-            <p className="mt-4 text-muted">One picture of the whole process, from empty field to reproducing church.</p>
-            <Link to="/four-fields" className="btn-secondary mt-8">
-              Learn it
-            </Link>
-          </div>
-          <FourFieldsDiagram compact />
-        </div>
-      </section>
-
       {/* Tools */}
-      <section className="border-t border-line">
+      <section className="border-t border-line bg-elev">
         <div className="container-x py-20 md:py-28">
           <div className="flex items-end justify-between gap-6">
             <h2 className="text-3xl md:text-5xl">Start here.</h2>
@@ -99,27 +128,6 @@ export default function Home() {
               <ToolCard key={t.slug} tool={t} />
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Events */}
-      <section className="border-t border-line bg-elev">
-        <div className="container-x py-20 md:py-28">
-          <div className="flex items-end justify-between gap-6">
-            <h2 className="text-3xl md:text-5xl">Coming up.</h2>
-            <Link to="/events" className="btn-ghost">
-              Calendar <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-          {events.length ? (
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
-              {events.map((e) => (
-                <EventCard key={e.id} event={e} />
-              ))}
-            </div>
-          ) : (
-            <p className="mt-10 text-muted">Nothing posted yet.</p>
-          )}
         </div>
       </section>
 

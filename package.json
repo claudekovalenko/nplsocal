@@ -2,7 +2,7 @@
   "name": "nplsocal",
   "private": true,
   "version": "0.1.0",
-  "description": "No Place Left SoCal \u2014 a progressive web app for the #NoPlaceLeft network across Los Angeles and Orange County.",
+  "description": "No Place Left SoCal — a progressive web app for the #NoPlaceLeft network across Los Angeles and Orange County.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
     "map": "node scripts/build-map.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

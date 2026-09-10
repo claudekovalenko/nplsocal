@@ -9,7 +9,6 @@ export interface Hub {
   tagline: string;
   description: string;
   regions: string[];
-  /** Placeholder until the real hub sites are merged in. */
   legacyUrl?: string;
   contactEmail?: string;
   gatherings: { name: string; cadence: string; note?: string }[];
@@ -37,7 +36,6 @@ export interface Tool {
   steps?: { title: string; detail: string }[];
   scripture?: string[];
   tags?: string[];
-  /** Optional external reference (video, PDF). Kept optional so the app works offline. */
   links?: { label: string; url: string }[];
 }
 
@@ -50,16 +48,29 @@ export interface Training {
   outcomes: string[];
 }
 
+/**
+ * Event tiers keep the calendar readable:
+ *  - network: for everyone across SoCal — shown big on Home and the top of Events
+ *  - hub:     open to everyone in one hub — the normal calendar
+ *  - group:   contained to a specific group or location — hidden unless asked for
+ */
+export type EventTier = 'network' | 'hub' | 'group';
+
 export interface Event {
   id: string;
   title: string;
-  type: 'training' | 'gathering' | 'prayer' | 'outreach' | 'online';
+  type: 'training' | 'gathering' | 'prayer' | 'outreach' | 'online' | 'push';
+  tier: EventTier;
   hub: HubId;
-  /** ISO date, local to America/Los_Angeles */
+  /** ISO date, Pacific time. For network events with unsettled dates, keep a best guess here and set dateLabel. */
   start: string;
   end?: string;
+  /** Human date when exact dates are not set yet, e.g. "Early 2027". */
+  dateLabel?: string;
   location: string;
   city?: string;
+  /** Who this is for, e.g. "Practitioners", "Santa Ana leaders". Shown on group-tier events. */
+  audience?: string;
   description: string;
   registerUrl?: string;
   online?: boolean;

@@ -8,7 +8,7 @@ import NetworkMap from '@/components/NetworkMap';
 export default function HubDetail() {
   const { id = '' } = useParams();
   const hub = hubById(id);
-  if (!hub) return <Navigate to="/hubs" replace />;
+  if (!hub) return <Navigate to="/regions" replace />;
   const events = upcomingEvents().filter((e) => e.hub === hub.id || e.hub === 'socal');
 
   return (
@@ -17,8 +17,8 @@ export default function HubDetail() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_80%_50%,var(--glow),transparent_70%)] opacity-30" />
         <div className="container-x relative grid items-center gap-10 py-16 md:grid-cols-[1.2fr_1fr] md:py-24">
           <div>
-            <Link to="/hubs" className="inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-fg">
-              <ArrowLeft className="h-4 w-4" /> All hubs
+            <Link to="/regions" className="inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-fg">
+              <ArrowLeft className="h-4 w-4" /> All regions
             </Link>
             <div className="eyebrow mt-8">#NoPlaceLeft · {hub.shortName}</div>
             <h1 className="mt-4 text-4xl md:text-6xl">{hub.name}</h1>

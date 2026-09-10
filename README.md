@@ -58,6 +58,39 @@ Everything visible on the site comes from `src/content/`:
 
 Adding a tool is one new object in `tools.ts` plus its slug in the right field's `toolSlugs` list. It gets a card, a detail page, search, and offline caching automatically.
 
+## How the site is organized
+
+Five doors in the navigation, and everything else lives inside one of them:
+
+| Door | What's inside |
+| --- | --- |
+| Vision | What #NoPlaceLeft is and isn't, convictions, FAQ |
+| Tools | The 3/3rds runner, the Four Fields, the training pathway, every tool, My 100 List |
+| Regions | The LA/OC map and each region's page |
+| Events | Network-wide events up top, then a compact calendar |
+| Track | The live generational map of groups and churches |
+
+### Events have three tiers
+
+Set `tier` on each event in `src/content/events.ts`:
+
+- `network` — for everyone. Big cards on Home and at the top of Events (LA Push, OC Mid-Level, SoCal Prayer Night). Use `dateLabel` like "Early 2027" until dates are fixed.
+- `hub` — open to a whole region. The normal calendar, grouped by month.
+- `group` — contained to a specific group or location. Hidden until someone ticks "Include group gatherings". Set `audience` to say who it's for.
+
+### The tracker
+
+`/track` is a simple generational map: one row per group or church with region, leader, parent group, status (dotted group or solid church), attendance, believers, baptized, and the Acts 2 elements present. Generation is computed from the parent chain; the dashboard rolls up totals per region.
+
+It stores data on the device by default. To make it **shared and live** across the network:
+
+1. Create a Supabase project and run `supabase/schema.sql` in its SQL editor.
+2. Turn on Email auth (magic link) under Authentication → Providers.
+3. In the GitHub repo, add two Actions **Variables**: `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (Project Settings → API).
+4. Push. The next deploy switches the tracker to the shared store: anyone can view, signed-in practitioners can edit, and changes appear live on every open screen.
+
+For local development put the same two values in a `.env.local` file (see `.env.example`).
+
 ## Routes
 
 | Path | Page |
@@ -68,7 +101,9 @@ Adding a tool is one new object in `tools.ts` plus its slug in the right field's
 | `/tools`, `/tools/:slug` | Searchable, filterable toolbox and tool detail pages |
 | `/training` | The training pathway and upcoming trainings |
 | `/events` | Calendar with hub and type filters |
-| `/hubs`, `/hubs/:id` | Hub overview and detail pages (`la`, `oc`) |
+| `/regions`, `/regions/:id` | Map and region pages (`la`, `oc`) |
+| `/three-thirds` | Live 3/3rds meeting runner with timers and weekly goals |
+| `/track`, `/track/new`, `/track/:id` | Generational tracker |
 | `/connect` | Contact form (opens the user's mail client by default) |
 | `/my-100` | Personal, on-device 100 List with stages, backup, and restore |
 

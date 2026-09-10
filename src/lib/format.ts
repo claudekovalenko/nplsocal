@@ -30,3 +30,7 @@ export function monthDay(iso: string) {
     day: new Intl.DateTimeFormat('en-US', { timeZone: TZ, day: 'numeric' }).format(d),
   };
 }
+
+export function monthKey(iso: string) {
+  return new Intl.DateTimeFormat('en-US', { timeZone: TZ, month: 'long', year: 'numeric' }).format(new Date(iso));
+}

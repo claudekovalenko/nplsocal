@@ -73,7 +73,7 @@ export default function NetworkMap({ variant = 'full', className = '' }: { varia
 
       {/* Counties */}
       {hubs.map((h) => (
-        <Link key={h} to={`/hubs/${h}`} aria-label={h === 'la' ? 'Los Angeles hub' : 'Orange County hub'}>
+        <Link key={h} to={`/regions/${h}`} aria-label={h === 'la' ? 'Los Angeles hub' : 'Orange County hub'}>
           <path
             d={counties[h].path}
             fill="url(#land)"

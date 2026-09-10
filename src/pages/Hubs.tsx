@@ -19,7 +19,7 @@ export default function Hubs() {
       <section className="container-x py-16 md:py-24">
         <div className="grid gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-2">
           {hubs.map((h) => (
-            <Link key={h.id} to={`/hubs/${h.id}`} className="group flex items-end justify-between gap-6 bg-bg p-8 transition hover:bg-surface md:p-10">
+            <Link key={h.id} to={`/regions/${h.id}`} className="group flex items-end justify-between gap-6 bg-bg p-8 transition hover:bg-surface md:p-10">
               <div>
                 <div className="eyebrow">{h.shortName}</div>
                 <h2 className="mt-3 text-2xl md:text-3xl">{h.tagline}</h2>

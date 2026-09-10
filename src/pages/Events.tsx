@@ -1,36 +1,48 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { upcomingEvents, hubs } from '@/content';
-import PageHeader from '@/components/PageHeader';
-import EventCard from '@/components/EventCard';
-
-const types = [
-  { id: 'all', label: 'All' },
-  { id: 'training', label: 'Trainings' },
-  { id: 'gathering', label: 'Iron on Iron' },
-  { id: 'prayer', label: 'Prayer' },
-  { id: 'outreach', label: 'Outreach' },
-];
+import { upcomingEvents, hubs, type Event } from '@/content';
+import { FeaturedEvent, EventRow } from '@/components/EventCard';
+import { monthKey } from '@/lib/format';
 
 export default function Events() {
-  const [hub, setHub] = useState('all');
-  const [type, setType] = useState('all');
+  const [hub, setHub] = useState<string>('all');
+  const [showGroups, setShowGroups] = useState(false);
 
-  const list = useMemo(
-    () =>
-      upcomingEvents().filter(
-        (e) => (hub === 'all' || e.hub === hub || e.hub === 'socal') && (type === 'all' || e.type === type),
-      ),
-    [hub, type],
+  const all = useMemo(() => upcomingEvents(), []);
+  const featured = all.filter((e) => e.tier === 'network');
+  const calendar = all.filter(
+    (e) =>
+      e.tier !== 'network' &&
+      (hub === 'all' || e.hub === hub || e.hub === 'socal') &&
+      (showGroups || e.tier !== 'group'),
   );
+  const byMonth = calendar.reduce<Record<string, Event[]>>((acc, e) => {
+    (acc[monthKey(e.start)] ??= []).push(e);
+    return acc;
+  }, {});
+  const groupCount = all.filter((e) => e.tier === 'group' && (hub === 'all' || e.hub === hub)).length;
 
   return (
     <>
-      <PageHeader eyebrow="Calendar" title="Trainings, prayer, gatherings." lead="Both hubs. Pacific time.">
-        <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center gap-3">
-          <div className="flex flex-wrap justify-center gap-2">
+      {/* For everyone */}
+      <section className="border-b border-line">
+        <div className="container-x py-16 md:py-24">
+          <div className="eyebrow">For everyone</div>
+          <h1 className="mt-4 text-4xl md:text-6xl">What's next.</h1>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {featured.map((e) => (
+              <FeaturedEvent key={e.id} event={e} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Calendar */}
+      <section className="container-x py-12 md:py-16">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap gap-2">
             <button className={hub === 'all' ? 'pill-active' : 'pill'} onClick={() => setHub('all')}>
-              All SoCal
+              All
             </button>
             {hubs.map((h) => (
               <button key={h.id} className={hub === h.id ? 'pill-active' : 'pill'} onClick={() => setHub(h.id)}>
@@ -38,28 +50,39 @@ export default function Events() {
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap justify-center gap-2">
-            {types.map((t) => (
-              <button key={t.id} className={type === t.id ? 'pill-active' : 'pill'} onClick={() => setType(t.id)}>
-                {t.label}
-              </button>
-            ))}
-          </div>
+          {groupCount > 0 && (
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
+              <input type="checkbox" checked={showGroups} onChange={(e) => setShowGroups(e.target.checked)} className="accent-current" />
+              Include group gatherings ({groupCount})
+            </label>
+          )}
         </div>
-      </PageHeader>
 
-      <section className="container-x py-12 md:py-16">
-        {list.length ? (
-          <div className="grid gap-4 md:grid-cols-2">
-            {list.map((e) => (
-              <EventCard key={e.id} event={e} detailed />
-            ))}
-          </div>
+        {Object.keys(byMonth).length === 0 ? (
+          <p className="py-16 text-center text-muted">Nothing scheduled.</p>
         ) : (
-          <p className="py-16 text-center text-muted">Nothing scheduled for that filter yet.</p>
+          Object.entries(byMonth).map(([month, list]) => (
+            <div key={month} className="mt-10">
+              <div className="eyebrow">{month}</div>
+              <ul className="mt-2 divide-y divide-line border-y border-line">
+                {list.map((e) => (
+                  <EventRow key={e.id} event={e} showHub={hub === 'all'} />
+                ))}
+              </ul>
+            </div>
+          ))
         )}
+
         <p className="mt-12 text-center text-xs text-faint">
-          Hosting something? <Link to="/connect" className="text-muted underline-offset-4 hover:underline">Tell us</Link>.
+          Trainings on the pathway are on the{' '}
+          <Link to="/training" className="text-muted underline-offset-4 hover:underline">
+            Training
+          </Link>{' '}
+          page. Hosting something?{' '}
+          <Link to="/connect" className="text-muted underline-offset-4 hover:underline">
+            Tell us
+          </Link>
+          .
         </p>
       </section>
     </>

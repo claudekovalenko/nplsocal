@@ -38,7 +38,6 @@ export default function Header() {
             <NavLink
               key={n.to}
               to={n.to}
-              end={'end' in n && n.end}
               className={({ isActive }) =>
                 `rounded-md px-3 py-1.5 text-[13px] font-medium transition ${
                   isActive ? 'bg-fg/8 text-fg' : 'text-muted hover:bg-fg/5 hover:text-fg'
@@ -51,6 +50,9 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
+          <NavLink to="/connect" className={({ isActive }) => `hidden rounded-md px-3 py-1.5 text-[13px] font-medium transition md:block ${isActive ? 'bg-fg/8 text-fg' : 'text-muted hover:bg-fg/5 hover:text-fg'}`}>
+            Connect
+          </NavLink>
           <button
             type="button"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -75,11 +77,10 @@ export default function Header() {
       {open && (
         <nav id="mobile-nav" className="border-t border-line bg-bg md:hidden" aria-label="Mobile">
           <div className="container-x grid py-2">
-            {[...navigation, { to: '/my-100', label: 'My 100 List' }].map((n) => (
+            {[...navigation, { to: '/connect', label: 'Connect' }, { to: '/my-100', label: 'My 100 List' }].map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}
-                end={'end' in n && (n as { end?: boolean }).end}
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   `border-b border-line py-3.5 text-base font-medium last:border-0 ${isActive ? 'text-fg' : 'text-muted'}`

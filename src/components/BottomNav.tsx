@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Wrench, CalendarDays, Map, ListChecks } from 'lucide-react';
+import { Home, Wrench, CalendarDays, Map, Activity } from 'lucide-react';
 
 const items = [
   { to: '/', label: 'Home', icon: Home, end: true },
-  { to: '/tools', label: 'Toolbox', icon: Wrench },
+  { to: '/tools', label: 'Tools', icon: Wrench },
   { to: '/events', label: 'Events', icon: CalendarDays },
-  { to: '/hubs', label: 'Map', icon: Map },
-  { to: '/my-100', label: 'My 100', icon: ListChecks },
+  { to: '/regions', label: 'Regions', icon: Map },
+  { to: '/track', label: 'Track', icon: Activity },
 ];
 
 export default function BottomNav() {
@@ -23,9 +23,7 @@ export default function BottomNav() {
             to={to}
             end={end}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium tracking-wide transition ${
-                isActive ? 'text-fg' : 'text-faint'
-              }`
+              `flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium tracking-wide transition ${isActive ? 'text-fg' : 'text-faint'}`
             }
           >
             <Icon className="h-5 w-5" strokeWidth={1.75} />

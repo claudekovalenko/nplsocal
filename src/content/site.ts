@@ -7,7 +7,6 @@ export const site = {
   description: 'Ordinary disciples across Los Angeles and Orange County, laboring together until there is no place left.',
   vision:
     'Reproducing disciples, churches, and leaders among the lost across every community of Los Angeles and Orange County, and from here to the ends of the earth.',
-  // Replace with the network's real contact points.
   contact: {
     email: 'hello@nplsocal.net',
     whatsapp: '',
@@ -27,13 +26,11 @@ export const site = {
   },
 } as const;
 
+/** Five doors. Everything else is reachable from inside one of them. */
 export const navigation = [
-  { to: '/', label: 'Home', end: true },
   { to: '/vision', label: 'Vision' },
-  { to: '/four-fields', label: 'Four Fields' },
-  { to: '/tools', label: 'Toolbox' },
-  { to: '/training', label: 'Training' },
+  { to: '/tools', label: 'Tools' },
+  { to: '/regions', label: 'Regions' },
   { to: '/events', label: 'Events' },
-  { to: '/hubs', label: 'Hubs' },
-  { to: '/connect', label: 'Connect' },
+  { to: '/track', label: 'Track' },
 ] as const;
