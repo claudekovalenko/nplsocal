@@ -4,7 +4,12 @@ import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'node:url';
 
+// Base path: "/" for a custom domain or root host, "/<repo>/" for GitHub project pages.
+// The deploy workflow sets BASE_PATH; local dev and other hosts default to "/".
+const base = process.env.BASE_PATH ?? '/';
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     tailwindcss(),
@@ -16,9 +21,9 @@ export default defineConfig({
         short_name: 'NPL SoCal',
         description:
           'Tools, training, and connection for disciple-makers across Los Angeles and Orange County — until there is no place left.',
-        id: '/',
-        start_url: '/',
-        scope: '/',
+        id: base,
+        start_url: base,
+        scope: base,
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#000000',
@@ -31,14 +36,14 @@ export default defineConfig({
           { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
         shortcuts: [
-          { name: 'Toolbox', url: '/tools', description: 'Open the NPL toolbox' },
-          { name: 'Events', url: '/events', description: 'Upcoming trainings and gatherings' },
-          { name: 'My 100 List', url: '/my-100', description: 'Your personal oikos list' },
+          { name: 'Toolbox', url: `${base}tools`, description: 'Open the NPL toolbox' },
+          { name: 'Events', url: `${base}events`, description: 'Upcoming trainings and gatherings' },
+          { name: 'My 100 List', url: `${base}my-100`, description: 'Your personal oikos list' },
         ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
-        navigateFallback: '/index.html',
+        navigateFallback: `${base}index.html`,
         cleanupOutdatedCaches: true,
         runtimeCaching: [
           {

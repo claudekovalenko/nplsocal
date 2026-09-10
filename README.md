@@ -85,13 +85,20 @@ These are deliberately left as simple defaults so the network can pick the servi
 
 ## Deploying
 
-The build output is a static `dist/` folder. Any static host works; a SPA rewrite is required so deep links load.
+### GitHub Pages (set up)
 
-- **Netlify** — `netlify.toml` and `public/_redirects` are included. Connect the repo and deploy.
-- **Vercel** — `vercel.json` handles the rewrite.
-- **Cloudflare Pages / GitHub Pages / S3** — serve `dist/` and route unknown paths to `index.html`.
+`.github/workflows/deploy.yml` builds and publishes the site on every push to the default branch. Nothing to configure: the workflow enables Pages on first run.
 
-Serve over HTTPS (required for service workers and install prompts). The service worker file `sw.js` should be served with `Cache-Control: no-cache` so updates are picked up promptly (Netlify config already does this).
+- Without a custom domain the site lives at `https://<owner>.github.io/<repo>/` and the build uses that subpath as its base.
+- To serve from **nplsocal.net** instead, add a `public/CNAME` file containing `nplsocal.net`, point the domain's DNS at GitHub Pages (`A` records to GitHub's Pages IPs, or a `CNAME` from `www` to `<owner>.github.io`), and push. The workflow detects the file and builds with `/` as the base. Then enable "Enforce HTTPS" under Settings → Pages.
+
+The base path is read from `BASE_PATH` at build time, so the same code deploys anywhere.
+
+### Other hosts
+
+The build output is a static `dist/` folder. A SPA rewrite is needed so deep links load; `dist/404.html` covers GitHub Pages, and `netlify.toml`, `public/_redirects`, and `vercel.json` cover Netlify and Vercel.
+
+Serve over HTTPS (required for service workers and install prompts).
 
 ## PWA notes
 
