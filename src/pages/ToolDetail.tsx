@@ -29,7 +29,6 @@ export default function ToolDetail() {
             <FieldBadge field={tool.field} />
           </div>
           <h1 className="mt-4 text-4xl md:text-6xl">{tool.name}</h1>
-          <p className="mt-3 text-lg text-muted">{tool.tagline}</p>
           <div className="mt-8 flex flex-wrap gap-2">
             <button type="button" onClick={share} className="btn-secondary">
               <Share2 className="h-4 w-4" /> Share
@@ -43,11 +42,11 @@ export default function ToolDetail() {
 
       <section className="container-x grid gap-14 py-14 md:grid-cols-[1.5fr_1fr] md:py-20">
         <div>
-          <p className="text-[17px] leading-relaxed text-muted">{tool.description}</p>
+          <p className="text-lg text-muted">{tool.description}</p>
 
           {tool.steps && (
             <>
-              <div className="eyebrow mt-14">How it works</div>
+              <div className="eyebrow mt-12">Steps</div>
               <ol className="mt-4 divide-y divide-line border-y border-line">
                 {tool.steps.map((s, i) => (
                   <li key={s.title} className="flex gap-6 py-5">
@@ -115,7 +114,7 @@ export default function ToolDetail() {
             </div>
           )}
 
-          <p className="text-muted">Learned it? Teach it.</p>
+          <p className="text-muted">Now teach it.</p>
         </aside>
       </section>
     </>
