@@ -41,9 +41,8 @@ export default function HubDetail() {
       <Section>
         <div className="grid gap-14 md:grid-cols-[1.5fr_1fr]">
           <div>
-            <div className="eyebrow">About the hub</div>
-            <p className="mt-4 text-[17px] leading-relaxed text-muted">{hub.description}</p>
-            <div className="eyebrow mt-12">Where we're working</div>
+            <p className="text-[17px] leading-relaxed text-muted">{hub.description}</p>
+            <div className="eyebrow mt-12">Areas</div>
             <ul className="mt-3 divide-y divide-line border-y border-line">
               {hub.regions.map((r) => (
                 <li key={r} className="py-3 text-sm">
@@ -74,7 +73,7 @@ export default function HubDetail() {
                 rel="noreferrer"
                 className="flex items-center justify-between text-sm text-muted transition hover:text-fg"
               >
-                Previous {hub.shortName} site <ArrowUpRight className="h-4 w-4" />
+                Previous site <ArrowUpRight className="h-4 w-4" />
               </a>
             )}
           </aside>
@@ -86,7 +85,7 @@ export default function HubDetail() {
           {events.length ? (
             <div className="grid gap-4 md:grid-cols-2">
               {events.map((e) => (
-                <EventCard key={e.id} event={e} />
+                <EventCard key={e.id} event={e} detailed />
               ))}
             </div>
           ) : (

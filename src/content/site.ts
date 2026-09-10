@@ -4,8 +4,7 @@ export const site = {
   hashtag: '#NoPlaceLeft',
   tagline: 'Until there is no place left.',
   headline: 'Multiplying disciples, churches, and leaders across Southern California.',
-  description:
-    'A network of ordinary disciples across Los Angeles and Orange County, laboring together so that every neighborhood, language, and people has a reproducing church — until there is no place left.',
+  description: 'Ordinary disciples across Los Angeles and Orange County, laboring together until there is no place left.',
   vision:
     'Reproducing disciples, churches, and leaders among the lost across every community of Los Angeles and Orange County, and from here to the ends of the earth.',
   // Replace with the network's real contact points.

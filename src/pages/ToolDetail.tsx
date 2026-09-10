@@ -93,7 +93,6 @@ export default function ToolDetail() {
           {tool.slug === '100-list' && (
             <div className="card p-6">
               <div className="eyebrow">Try it now</div>
-              <p className="mt-2 leading-relaxed text-muted">Keep your own list in the app. Private to your device, works offline.</p>
               <Link to="/my-100" className="btn-primary mt-5 w-full">
                 Open My 100 List
               </Link>
@@ -116,7 +115,7 @@ export default function ToolDetail() {
             </div>
           )}
 
-          <p className="text-muted">Learned it? The next step is to teach it. Who will you train this week?</p>
+          <p className="text-muted">Learned it? Teach it.</p>
         </aside>
       </section>
     </>

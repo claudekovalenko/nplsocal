@@ -10,13 +10,13 @@ export default function FourFields() {
       <PageHeader
         eyebrow="Mark 4:26–29"
         title="Four Fields of Kingdom Growth."
-        lead="A farmer goes to an empty field, sows seed, tends what grows, and gathers a harvest that seeds the next field. Jesus used that picture for the kingdom — and it gives us a whole-process map for making disciples that multiply."
+        lead="A farmer, a field, a harvest. One map for the whole process."
       />
 
       <section className="container-x grid items-start gap-12 py-16 md:grid-cols-[1fr_1.2fr] md:py-24">
         <div className="md:sticky md:top-24">
           <FourFieldsDiagram />
-          <p className="mt-4 text-center text-xs text-faint">Select a field to jump to it.</p>
+          <p className="mt-4 text-center text-xs text-faint">Select a field.</p>
         </div>
         <ol className="divide-y divide-line border-y border-line">
           {fields.map((f) => (
@@ -58,9 +58,8 @@ export default function FourFields() {
       ))}
 
       <section className="container-x border-t border-line py-20 text-center">
-        <p className="text-muted">Want to learn the whole framework hands-on?</p>
-        <Link to="/training" className="btn-primary mt-6">
-          Come to a 4 Fields Training
+        <Link to="/training" className="btn-primary">
+          4 Fields Training
         </Link>
       </section>
     </>

@@ -12,7 +12,7 @@ export default function Training() {
       <PageHeader
         eyebrow="Training"
         title="From first step to multiplying leader."
-        lead="Every training is hands-on, free, and taught by practitioners doing the work in LA and OC right now. Start with the 411, go deeper with 4 Fields, and stay sharp with Iron on Iron."
+        lead="Hands-on, free, taught by practitioners."
       />
 
       <Section>
@@ -25,7 +25,6 @@ export default function Training() {
               </div>
               <h2 className="mt-4 text-2xl md:text-3xl">{t.name}</h2>
               <p className="mt-1 text-sm text-muted">{t.audience}</p>
-              <p className="mt-5 leading-relaxed text-muted">{t.summary}</p>
               <ul className="mt-6 space-y-2 border-t border-line pt-5 text-sm">
                 {t.outcomes.map((o) => (
                   <li key={o} className="flex gap-3">
@@ -48,7 +47,7 @@ export default function Training() {
               ))}
             </div>
           ) : (
-            <p className="text-muted">No trainings scheduled yet — reach out and we'll get one on the calendar near you.</p>
+            <p className="text-muted">Nothing scheduled yet.</p>
           )}
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/connect" className="btn-primary">

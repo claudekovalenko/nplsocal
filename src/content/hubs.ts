@@ -6,8 +6,7 @@ export const hubs: Hub[] = [
     name: 'No Place Left Los Angeles',
     shortName: 'Los Angeles',
     tagline: 'Every neighborhood. Every language. Every people.',
-    description:
-      'LA County is home to more than ten million people from every nation on earth. NPL LA is a family of disciple-makers working across the city and its suburbs — from the Westside to the San Gabriel Valley, South LA to the Valley — praying, sharing, and training toward reproducing churches in every community.',
+    description: 'Ten million people from every nation on earth. Disciple-makers from the Westside to the San Gabriel Valley, South LA to the Valley.',
     regions: [
       'Central & Downtown LA',
       'Westside & South Bay',
@@ -31,8 +30,7 @@ export const hubs: Hub[] = [
     name: 'No Place Left Orange County',
     shortName: 'Orange County',
     tagline: 'From the coast to the canyons.',
-    description:
-      'Orange County is 34 cities and over three million people — many of whom have never had a real gospel conversation. NPL OC connects disciple-makers across North, Central, and South County to pray, go, and multiply simple, reproducing churches.',
+    description: 'Thirty-four cities, three million people. Disciple-makers across North, Central, and South County.',
     regions: [
       'North County (Fullerton, Anaheim, Brea)',
       'Central County (Santa Ana, Orange, Garden Grove)',

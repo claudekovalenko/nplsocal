@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { upcomingEvents, hubs } from '@/content';
 import PageHeader from '@/components/PageHeader';
 import EventCard from '@/components/EventCard';
@@ -25,7 +26,7 @@ export default function Events() {
 
   return (
     <>
-      <PageHeader eyebrow="Calendar" title="Trainings, prayer, gatherings." lead="Everything happening across both hubs. Times are Pacific.">
+      <PageHeader eyebrow="Calendar" title="Trainings, prayer, gatherings." lead="Both hubs. Pacific time.">
         <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center gap-3">
           <div className="flex flex-wrap justify-center gap-2">
             <button className={hub === 'all' ? 'pill-active' : 'pill'} onClick={() => setHub('all')}>
@@ -51,13 +52,15 @@ export default function Events() {
         {list.length ? (
           <div className="grid gap-4 md:grid-cols-2">
             {list.map((e) => (
-              <EventCard key={e.id} event={e} />
+              <EventCard key={e.id} event={e} detailed />
             ))}
           </div>
         ) : (
           <p className="py-16 text-center text-muted">Nothing scheduled for that filter yet.</p>
         )}
-        <p className="mt-12 text-center text-xs text-faint">Hosting something? Send it through the Connect page and we'll add it here.</p>
+        <p className="mt-12 text-center text-xs text-faint">
+          Hosting something? <Link to="/connect" className="text-muted underline-offset-4 hover:underline">Tell us</Link>.
+        </p>
       </section>
     </>
   );

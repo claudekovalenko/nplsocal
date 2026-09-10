@@ -11,7 +11,7 @@ const typeLabel: Record<Event['type'], string> = {
   online: 'Online',
 };
 
-export default function EventCard({ event }: { event: Event }) {
+export default function EventCard({ event, detailed = false }: { event: Event; detailed?: boolean }) {
   const { month, day } = monthDay(event.start);
   const hub = hubById(event.hub);
   return (
@@ -28,12 +28,11 @@ export default function EventCard({ event }: { event: Event }) {
         <p className="mt-1 text-sm text-muted">{formatRange(event.start, event.end)}</p>
         <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
           {event.online ? <Video className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
-          {event.location}
-          {event.city ? ` · ${event.city}` : ''}
+          {event.city ?? event.location}
         </p>
-        <p className="mt-3 text-sm leading-relaxed text-muted/80">{event.description}</p>
+        {detailed && <p className="mt-3 text-sm leading-relaxed text-muted/80">{event.description}</p>}
         {event.registerUrl && (
-          <a href={event.registerUrl} className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-fg underline-offset-4 hover:underline">
+          <a href={event.registerUrl} className="mt-4 inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline">
             Register <ArrowUpRight className="h-3.5 w-3.5" />
           </a>
         )}

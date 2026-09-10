@@ -64,7 +64,7 @@ export default function My100() {
 
   return (
     <>
-      <PageHeader eyebrow="Personal tool" title="My 100 List." lead="The people God has already put in your life. Add names, pray through them, and move each one forward a step at a time.">
+      <PageHeader eyebrow="Personal tool" title="My 100 List." lead="The people God has already put in your life.">
         <p className="mx-auto mt-6 flex w-fit items-center gap-1.5 text-xs text-faint">
           <Lock className="h-3 w-3" /> Stored only on this device. Nothing is sent anywhere.
         </p>
@@ -103,7 +103,7 @@ export default function My100() {
         <ul className="mt-8 divide-y divide-line border-y border-line">
           {visible.length === 0 && (
             <li className="py-12 text-center text-sm text-muted">
-              {people.length === 0 ? 'Start with family, then friends, coworkers, neighbors, and the people you see every week.' : 'No one in this stage yet.'}
+              {people.length === 0 ? 'Family, friends, coworkers, neighbors.' : 'No one in this stage yet.'}
             </li>
           )}
           {visible.map((p) => (

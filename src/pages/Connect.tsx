@@ -39,7 +39,7 @@ export default function Connect() {
       <PageHeader
         eyebrow="Connect"
         title="Tell us where you are."
-        lead="Whether you're brand new or already working the fields, the next step is a real person in your area. Someone from your hub will reach out."
+        lead="Someone from your hub will reach out."
       />
       <section className="container-x grid gap-14 py-14 md:grid-cols-[1.4fr_1fr] md:py-20">
         {sent ? (
@@ -123,14 +123,6 @@ export default function Connect() {
                 ) : null,
               )}
             </ul>
-          </div>
-          <div>
-            <div className="eyebrow">What happens next</div>
-            <ol className="mt-3 space-y-2 text-muted">
-              <li>01 · A practitioner from your hub replies, usually within a few days.</li>
-              <li>02 · You're invited to the next 411 Training or Iron on Iron.</li>
-              <li>03 · You start your 100 List and begin praying and sharing.</li>
-            </ol>
           </div>
         </aside>
       </section>

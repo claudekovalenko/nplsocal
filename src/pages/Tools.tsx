@@ -23,7 +23,7 @@ export default function Tools() {
       <PageHeader
         eyebrow="Toolbox"
         title="Simple tools that reproduce."
-        lead="Everything here is freely given and works offline once opened. Learn a tool, use it this week, then teach it to someone else."
+        lead="Learn it. Use it this week. Teach it."
       >
         <div className="mx-auto mt-10 max-w-2xl">
           <label className="relative block">
