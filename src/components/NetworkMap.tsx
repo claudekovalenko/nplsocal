@@ -28,12 +28,12 @@ export default function NetworkMap({ variant = 'full', className = '' }: { varia
   const labelFor = (p: Place) => (variant === 'full' ? p.label : p.size >= 2 ? p.label : '');
 
   // Hero: crop to the LA basin + OC and fade the cut edges so it reads as an object, not a cut-off map.
-  const viewBox = variant === 'hero' ? '120 240 880 720' : `0 0 ${MAP_W} ${MAP_H}`;
+  const viewBox = variant === 'hero' ? '120 250 880 690' : `0 0 ${MAP_W} ${MAP_H}`;
   const style =
     variant === 'hero'
       ? {
-          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 18%, black 92%, transparent 100%)',
-          maskImage: 'linear-gradient(to bottom, transparent 0%, black 18%, black 92%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 16%, black 90%, transparent 100%)',
+          maskImage: 'linear-gradient(to bottom, transparent 0%, black 16%, black 90%, transparent 100%)',
         }
       : undefined;
   const laCaption = variant === 'hero' ? [560, 300] : [counties.la.centroid[0] - 40, counties.la.centroid[1] - 210];

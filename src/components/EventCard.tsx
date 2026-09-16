@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { MapPin, Video, ArrowUpRight } from 'lucide-react';
 import type { Event } from '@/content';
 import { hubById } from '@/content';
@@ -13,6 +14,23 @@ export const typeLabel: Record<Event['type'], string> = {
 };
 
 const hubName = (e: Event) => hubById(e.hub)?.shortName ?? 'All SoCal';
+const isReal = (url?: string) => !!url && /^https?:\/\//.test(url);
+
+/** Real sign-up link opens in a new tab; otherwise go to Connect with the event pre-filled. */
+export function RegisterLink({ event, className }: { event: Event; className: string }) {
+  if (isReal(event.registerUrl)) {
+    return (
+      <a href={event.registerUrl} target="_blank" rel="noreferrer" className={className}>
+        Register <ArrowUpRight className="h-4 w-4" />
+      </a>
+    );
+  }
+  return (
+    <Link to={`/connect?event=${event.id}`} className={className}>
+      Register <ArrowUpRight className="h-4 w-4" />
+    </Link>
+  );
+}
 
 /** Big card for network-tier events: the ones everyone should know about. */
 export function FeaturedEvent({ event }: { event: Event }) {
@@ -37,11 +55,7 @@ export function FeaturedEvent({ event }: { event: Event }) {
             <div className="text-sm text-muted">{formatRange(event.start, event.end).split(' · ')[1] ?? ''}</div>
           )}
         </div>
-        {event.registerUrl && (
-          <a href={event.registerUrl} className="btn-primary">
-            Register <ArrowUpRight className="h-4 w-4" />
-          </a>
-        )}
+        <RegisterLink event={event} className="btn-primary" />
       </div>
     </article>
   );
@@ -73,11 +87,7 @@ export function EventRow({ event, showHub = true }: { event: Event; showHub?: bo
           </span>
         </div>
       </div>
-      {event.registerUrl && (
-        <a href={event.registerUrl} className="hidden text-sm font-medium underline-offset-4 hover:underline sm:inline-flex sm:items-center sm:gap-1">
-          Register <ArrowUpRight className="h-3.5 w-3.5" />
-        </a>
-      )}
+      <RegisterLink event={event} className="hidden text-sm font-medium underline-offset-4 hover:underline sm:inline-flex sm:items-center sm:gap-1" />
     </li>
   );
 }
@@ -102,11 +112,7 @@ export default function EventCard({ event, detailed = false }: { event: Event; d
           {event.city ?? event.location}
         </p>
         {detailed && <p className="mt-3 text-sm leading-relaxed text-muted/80">{event.description}</p>}
-        {event.registerUrl && (
-          <a href={event.registerUrl} className="mt-4 inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline">
-            Register <ArrowUpRight className="h-3.5 w-3.5" />
-          </a>
-        )}
+        <RegisterLink event={event} className="mt-4 inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline" />
       </div>
     </article>
   );

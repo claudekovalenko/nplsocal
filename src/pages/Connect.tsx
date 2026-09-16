@@ -1,11 +1,14 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
-import { site, hubs } from '@/content';
+import { site, hubs, events } from '@/content';
+import { formatRange } from '@/lib/format';
 import PageHeader from '@/components/PageHeader';
 
-type Interest = 'training' | 'coach' | 'practitioner' | 'host' | 'other';
+type Interest = 'event' | 'training' | 'coach' | 'practitioner' | 'host' | 'other';
 
 const interests: { id: Interest; label: string }[] = [
+  { id: 'event', label: 'Register for an event' },
   { id: 'training', label: 'I want to get trained' },
   { id: 'coach', label: 'I want a coach' },
   { id: 'practitioner', label: "I'm a practitioner — connect me" },
@@ -15,7 +18,19 @@ const interests: { id: Interest; label: string }[] = [
 
 export default function Connect() {
   const [sent, setSent] = useState(false);
+  const [params] = useSearchParams();
+  const event = events.find((e) => e.id === params.get('event'));
   const [form, setForm] = useState({ name: '', email: '', hub: '', interest: 'training' as Interest, message: '' });
+
+  useEffect(() => {
+    if (!event) return;
+    setForm((f) => ({
+      ...f,
+      interest: 'event',
+      hub: event.hub === 'socal' ? f.hub : event.hub,
+      message: `I'd like to register for ${event.title} (${event.dateLabel ?? formatRange(event.start, event.end)}).`,
+    }));
+  }, [event]);
 
   const update = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -28,7 +43,9 @@ export default function Connect() {
     e.preventDefault();
     const hub = hubs.find((h) => h.id === form.hub);
     const to = hub?.contactEmail ?? site.contact.email;
-    const subject = encodeURIComponent(`[NPL SoCal] ${interests.find((i) => i.id === form.interest)?.label ?? 'Contact'}`);
+    const subject = encodeURIComponent(
+      `[NPL SoCal] ${form.interest === 'event' && event ? `Register: ${event.title}` : (interests.find((i) => i.id === form.interest)?.label ?? 'Contact')}`,
+    );
     const body = encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\nHub: ${hub?.shortName ?? 'Not sure'}\n\n${form.message}`);
     window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
     setSent(true);
@@ -37,9 +54,9 @@ export default function Connect() {
   return (
     <>
       <PageHeader
-        eyebrow="Connect"
-        title="Tell us where you are."
-        lead="Someone from your hub will reach out."
+        eyebrow={event ? 'Register' : 'Connect'}
+        title={event ? event.title : 'Tell us where you are.'}
+        lead={event ? 'Send your name and email and we will confirm your spot.' : 'Someone from your hub will reach out.'}
       />
       <section className="container-x grid gap-14 py-14 md:grid-cols-[1.4fr_1fr] md:py-20">
         {sent ? (

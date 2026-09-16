@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronDown } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { site, hubs, tools, featuredEvents } from '@/content';
 import NetworkMap from '@/components/NetworkMap';
 import ToolCard from '@/components/ToolCard';
@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="relative flex min-h-[100svh] flex-col overflow-hidden">
+      <section className="relative flex flex-col overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_100%,var(--glow),transparent_70%)] opacity-40" />
         <div className="container-x relative z-10 flex flex-col items-center pt-24 text-center md:pt-32">
           <div className="eyebrow fade-up">{site.hashtag} · Los Angeles · Orange County</div>
@@ -29,12 +29,9 @@ export default function Home() {
             </Link>
           </div>
         </div>
-        <div className="relative z-0 mx-auto mt-4 w-full max-w-3xl flex-1 px-2 md:mt-6">
+        <div className="relative z-0 mx-auto -mb-6 mt-2 w-full max-w-3xl px-2 md:mt-4">
           <NetworkMap variant="hero" className="h-auto w-full" />
         </div>
-        <a href="#next" className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 text-faint transition hover:text-fg md:block" aria-label="Scroll">
-          <ChevronDown className="h-5 w-5 animate-bounce" />
-        </a>
       </section>
 
       {/* Next up: network-wide */}
