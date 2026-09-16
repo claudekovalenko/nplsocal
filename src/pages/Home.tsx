@@ -9,7 +9,7 @@ const starterSlugs = ['411', '3-circles', '100-list'];
 
 export default function Home() {
   const starters = starterSlugs.map((s) => tools.find((t) => t.slug === s)!);
-  const featured = featuredEvents().slice(0, 3);
+  const featured = featuredEvents().slice(0, 4);
 
   return (
     <>
@@ -49,7 +49,7 @@ export default function Home() {
               All events <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-4 md:grid-cols-2">
             {featured.map((e) => (
               <FeaturedEvent key={e.id} event={e} />
             ))}

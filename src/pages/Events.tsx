@@ -29,7 +29,7 @@ export default function Events() {
         <div className="container-x py-16 md:py-24">
           <div className="eyebrow">For everyone</div>
           <h1 className="mt-4 text-4xl md:text-6xl">What's next.</h1>
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-4 md:grid-cols-2">
             {featured.map((e) => (
               <FeaturedEvent key={e.id} event={e} />
             ))}
