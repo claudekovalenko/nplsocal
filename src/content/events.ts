@@ -44,11 +44,13 @@ export const events: Event[] = [
     description: 'A full day on starting and carrying gospel conversations. Open to the whole network.',
     registerUrl: '#',
   },
+
+  // ── Hub: open to a hub ─────────────────────────────────────────
   {
     id: 'socal-prayer-oct',
     title: 'SoCal Prayer Night',
     type: 'prayer',
-    tier: 'network',
+    tier: 'hub',
     hub: 'socal',
     start: '2026-10-14T20:00:00-07:00',
     end: '2026-10-14T21:00:00-07:00',
@@ -57,8 +59,6 @@ export const events: Event[] = [
     online: true,
     registerUrl: '#',
   },
-
-  // ── Hub: open to a hub ─────────────────────────────────────────
   {
     id: 'oc-411-oct',
     title: '411 Training',
