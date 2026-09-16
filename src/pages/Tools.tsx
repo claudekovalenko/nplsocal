@@ -25,29 +25,23 @@ export default function Tools() {
           <div className="eyebrow">Tools</div>
           <h1 className="mt-4 text-4xl md:text-6xl">Simple. Reproducible. Yours.</h1>
 
-          {/* The format + the map + the pathway: three doors */}
-          <div className="mt-12 grid gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-3">
-            <Link to="/three-thirds" className="group bg-bg p-7 transition hover:bg-surface">
-              <div className="eyebrow">The format</div>
-              <div className="mt-3 flex items-center gap-2 text-2xl">
-                Run a 3/3rds <Play className="h-4 w-4 text-faint transition group-hover:text-fg" />
-              </div>
-              <p className="mt-1 text-sm text-muted">Live meeting guide with timers.</p>
-            </Link>
-            <Link to="/four-fields" className="group bg-bg p-7 transition hover:bg-surface">
-              <div className="eyebrow">The framework</div>
-              <div className="mt-3 flex items-center gap-2 text-2xl">
-                Four Fields <ArrowRight className="h-4 w-4 text-faint transition group-hover:text-fg" />
-              </div>
-              <p className="mt-1 text-sm text-muted">The whole process on one drawing.</p>
-            </Link>
-            <Link to="/training" className="group bg-bg p-7 transition hover:bg-surface">
-              <div className="eyebrow">The pathway</div>
-              <div className="mt-3 flex items-center gap-2 text-2xl">
-                Training <ArrowRight className="h-4 w-4 text-faint transition group-hover:text-fg" />
-              </div>
-              <p className="mt-1 text-sm text-muted">411 → 4 Fields → Iron on Iron.</p>
-            </Link>
+          {/* Practitioner tools */}
+          <div className="mt-12 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-5">
+            {[
+              { to: '/three-thirds', eyebrow: 'House church', title: 'Run a 3/3rds', text: 'Live meeting guide with timers.', icon: Play },
+              { to: '/track', eyebrow: 'Live map', title: 'Tracker', text: 'Groups, churches, generations.', icon: ArrowRight },
+              { to: '/my-100', eyebrow: 'Personal', title: 'My 100 List', text: 'The people in your life.', icon: ArrowRight },
+              { to: '/four-fields', eyebrow: 'Framework', title: 'Four Fields', text: 'The whole process, one drawing.', icon: ArrowRight },
+              { to: '/training', eyebrow: 'Pathway', title: 'Training', text: '411 → 4 Fields → Iron on Iron.', icon: ArrowRight },
+            ].map(({ to, eyebrow, title, text, icon: Icon }) => (
+              <Link key={to} to={to} className="group bg-bg p-6 transition hover:bg-surface">
+                <div className="eyebrow">{eyebrow}</div>
+                <div className="mt-3 flex items-center gap-2 text-xl">
+                  {title} <Icon className="h-4 w-4 text-faint transition group-hover:text-fg" />
+                </div>
+                <p className="mt-1 text-sm text-muted">{text}</p>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -75,11 +69,6 @@ export default function Tools() {
         ) : (
           <p className="py-16 text-center text-muted">No tools match "{q}".</p>
         )}
-        <div className="mt-10 text-center">
-          <Link to="/my-100" className="text-sm text-muted underline-offset-4 hover:underline">
-            My 100 List
-          </Link>
-        </div>
       </section>
     </>
   );

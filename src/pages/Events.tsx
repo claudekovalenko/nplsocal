@@ -74,11 +74,7 @@ export default function Events() {
         )}
 
         <p className="mt-12 text-center text-xs text-faint">
-          Trainings on the pathway are on the{' '}
-          <Link to="/training" className="text-muted underline-offset-4 hover:underline">
-            Training
-          </Link>{' '}
-          page. Hosting something?{' '}
+          Hosting something?{' '}
           <Link to="/connect" className="text-muted underline-offset-4 hover:underline">
             Tell us
           </Link>

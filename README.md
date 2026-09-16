@@ -60,15 +60,15 @@ Adding a tool is one new object in `tools.ts` plus its slug in the right field's
 
 ## How the site is organized
 
-Five doors in the navigation, and everything else lives inside one of them:
+Two doors and an About menu:
 
 | Door | What's inside |
 | --- | --- |
-| Vision | What #NoPlaceLeft is and isn't, convictions, FAQ |
-| Tools | The 3/3rds runner, the Four Fields, the training pathway, every tool, My 100 List |
-| Regions | The LA/OC map and each region's page |
-| Events | Network-wide events up top, then a compact calendar |
-| Track | The live generational map of groups and churches |
+| Gatherings | Network-wide events up top, then a compact calendar |
+| Tools | Run a 3/3rds, the Tracker, My 100 List, Four Fields, Training, and every tool |
+| About ▾ | About (vision, convictions, FAQ), Regions (the LA/OC map), Connect |
+
+The home page is the map, the network-wide gatherings, and nothing else.
 
 ### Events have three tiers
 
@@ -96,11 +96,11 @@ For local development put the same two values in a `.env.local` file (see `.env.
 | Path | Page |
 | --- | --- |
 | `/` | Home — hero, hub cards, Four Fields overview, starter tools, next events |
-| `/vision` | What #NoPlaceLeft is (and isn't), convictions, FAQ |
+| `/about` | What #NoPlaceLeft is (and isn't), convictions, FAQ |
 | `/four-fields` | Interactive Four Fields diagram and each field with its tools |
 | `/tools`, `/tools/:slug` | Searchable, filterable toolbox and tool detail pages |
 | `/training` | The training pathway and upcoming trainings |
-| `/events` | Calendar with hub and type filters |
+| `/gatherings` | Network-wide events, then a month-grouped calendar |
 | `/regions`, `/regions/:id` | Map and region pages (`la`, `oc`) |
 | `/three-thirds` | Live 3/3rds meeting runner with timers and weekly goals |
 | `/track`, `/track/new`, `/track/:id` | Generational tracker |

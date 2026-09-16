@@ -15,7 +15,7 @@ const values = [
 export default function Vision() {
   return (
     <>
-      <PageHeader eyebrow="Romans 15:23" title="A vision, not an organization." lead="Reproducing disciples, churches, and leaders until there is no place left where Christ is not known." />
+      <PageHeader eyebrow="About · Romans 15:23" title="A vision, not an organization." lead="Reproducing disciples, churches, and leaders until there is no place left where Christ is not known." />
 
       <Section>
         <div className="grid gap-12 md:grid-cols-2">

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { site, navigation, hubs } from '@/content';
+import { site, navigation, aboutMenu } from '@/content';
 import Logo from './Logo';
 
 export default function Footer() {
@@ -11,19 +11,11 @@ export default function Footer() {
           <span className="text-sm font-semibold uppercase tracking-[0.12em]">{site.shortName}</span>
         </Link>
         <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm" aria-label="Footer">
-          {navigation.map((n) => (
+          {[...navigation, ...aboutMenu, { to: '/track', label: 'Tracker' }].map((n) => (
             <Link key={n.to} to={n.to} className="text-muted transition hover:text-fg">
               {n.label}
             </Link>
           ))}
-          {hubs.map((h) => (
-            <Link key={h.id} to={`/regions/${h.id}`} className="text-muted transition hover:text-fg">
-              {h.shortName}
-            </Link>
-          ))}
-          <Link to="/connect" className="text-muted transition hover:text-fg">
-            Connect
-          </Link>
         </nav>
       </div>
       <div className="border-t border-line">

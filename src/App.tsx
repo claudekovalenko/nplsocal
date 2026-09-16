@@ -24,13 +24,15 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="vision" element={<Vision />} />
+          <Route path="about" element={<Vision />} />
+          <Route path="vision" element={<Navigate to="/about" replace />} />
           <Route path="four-fields" element={<FourFields />} />
           <Route path="tools" element={<Tools />} />
           <Route path="tools/:slug" element={<ToolDetail />} />
           <Route path="three-thirds" element={<ThreeThirds />} />
           <Route path="training" element={<Training />} />
-          <Route path="events" element={<Events />} />
+          <Route path="gatherings" element={<Events />} />
+          <Route path="events" element={<Navigate to="/gatherings" replace />} />
           <Route path="regions" element={<Hubs />} />
           <Route path="regions/:id" element={<HubDetail />} />
           <Route path="hubs" element={<Navigate to="/regions" replace />} />

@@ -26,11 +26,14 @@ export const site = {
   },
 } as const;
 
-/** Five doors. Everything else is reachable from inside one of them. */
+/** Two doors, plus an About menu. Everything else lives inside one of them. */
 export const navigation = [
-  { to: '/vision', label: 'Vision' },
+  { to: '/gatherings', label: 'Gatherings' },
   { to: '/tools', label: 'Tools' },
+] as const;
+
+export const aboutMenu = [
+  { to: '/about', label: 'About' },
   { to: '/regions', label: 'Regions' },
-  { to: '/events', label: 'Events' },
-  { to: '/track', label: 'Track' },
+  { to: '/connect', label: 'Connect' },
 ] as const;
