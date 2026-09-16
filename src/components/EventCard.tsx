@@ -1,7 +1,7 @@
 import { MapPin, Video, ArrowUpRight } from 'lucide-react';
 import type { Event } from '@/content';
 import { hubById } from '@/content';
-import { formatRange, monthDay, formatDate } from '@/lib/format';
+import { formatRange, monthDay, formatDate, sameDay } from '@/lib/format';
 
 export const typeLabel: Record<Event['type'], string> = {
   training: 'Training',
@@ -13,7 +13,6 @@ export const typeLabel: Record<Event['type'], string> = {
 };
 
 const hubName = (e: Event) => hubById(e.hub)?.shortName ?? 'All SoCal';
-const sameDay = (a: string, b: string) => new Date(a).toDateString() === new Date(b).toDateString();
 
 /** Big card for network-tier events: the ones everyone should know about. */
 export function FeaturedEvent({ event }: { event: Event }) {

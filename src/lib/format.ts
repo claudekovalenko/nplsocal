@@ -14,12 +14,15 @@ export function formatTime(iso: string) {
   return new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' }).format(new Date(iso));
 }
 
+/** Same calendar day in Pacific time (not the viewer's or server's zone). */
+export function sameDay(a: string, b: string) {
+  const f = new Intl.DateTimeFormat('en-US', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+  return f.format(new Date(a)) === f.format(new Date(b));
+}
+
 export function formatRange(start: string, end?: string) {
-  const s = new Date(start);
   if (!end) return `${formatDate(start)} · ${formatTime(start)}`;
-  const e = new Date(end);
-  const sameDay = s.toDateString() === e.toDateString();
-  if (sameDay) return `${formatDate(start)} · ${formatTime(start)}–${formatTime(end)}`;
+  if (sameDay(start, end)) return `${formatDate(start)} · ${formatTime(start)}–${formatTime(end)}`;
   return `${formatDate(start)} – ${formatDate(end)}`;
 }
 
