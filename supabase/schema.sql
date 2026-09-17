@@ -43,3 +43,45 @@ create policy "write signed in" on public.groups for all
 
 -- Live updates in the app
 alter publication supabase_realtime add table public.groups;
+
+-- ── Event registrations ────────────────────────────────────────────
+-- Contact details are private: anyone may sign up, only signed-in
+-- organizers can read, change or delete the roster.
+
+create table if not exists public.registrations (
+  id         text primary key,
+  event_id   text not null,
+  name       text not null,
+  email      text not null default '',
+  phone      text not null default '',
+  party      integer not null default 1 check (party between 1 and 500),
+  city       text not null default '',
+  church     text not null default '',
+  network    text not null default '',
+  notes      text not null default '',
+  created_at timestamptz not null default now()
+);
+
+create index if not exists registrations_event_idx on public.registrations (event_id, created_at desc);
+
+alter table public.registrations enable row level security;
+
+-- Public sign-up: insert only, no reading back.
+drop policy if exists "anyone can register" on public.registrations;
+create policy "anyone can register" on public.registrations
+  for insert to anon, authenticated with check (true);
+
+-- Organizers see and manage the roster.
+drop policy if exists "organizers read" on public.registrations;
+create policy "organizers read" on public.registrations
+  for select to authenticated using (true);
+
+drop policy if exists "organizers write" on public.registrations;
+create policy "organizers write" on public.registrations
+  for update to authenticated using (true) with check (true);
+
+drop policy if exists "organizers delete" on public.registrations;
+create policy "organizers delete" on public.registrations
+  for delete to authenticated using (true);
+
+alter publication supabase_realtime add table public.registrations;

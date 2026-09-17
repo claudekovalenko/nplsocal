@@ -78,6 +78,14 @@ Set `tier` on each event in `src/content/events.ts`:
 - `hub` — open to a whole region. The normal calendar, grouped by month.
 - `group` — contained to a specific group or location. Hidden until someone ticks "Include group gatherings". Set `audience` to say who it's for.
 
+### Event registration
+
+Every event's Register button opens an in-app form at `/register/<event id>` asking for name, email, phone, party size, city, church and network. Organizers see the roster at `/roster` (all events) and `/roster/<event id>`, with totals, breakdowns by church, city and network, search, CSV export, and CSV import for people who signed up somewhere else. The importer matches common column headers, so an export from another form usually drops straight in.
+
+An event with a real `registerUrl` (starting with `http`) keeps using that link instead and opens it in a new tab.
+
+Contact details are private by design: the database policy lets anyone insert a sign-up but only signed-in organizers read the roster. Until the shared database is connected the form also opens the visitor's email app addressed to the organizer, so no sign-up is lost.
+
 ### The tracker
 
 `/track` is a simple generational map: one row per group or church with region, leader, parent group, status (dotted group or solid church), attendance, believers, baptized, and the Acts 2 elements present. Generation is computed from the parent chain; the dashboard rolls up totals per region.
@@ -104,6 +112,8 @@ For local development put the same two values in a `.env.local` file (see `.env.
 | `/regions`, `/regions/:id` | Map and region pages (`la`, `oc`) |
 | `/three-thirds` | Live 3/3rds meeting runner with timers and weekly goals |
 | `/track`, `/track/new`, `/track/:id` | Generational tracker |
+| `/register/:eventId` | Event registration form |
+| `/roster`, `/roster/:eventId` | Registration rosters, export and import |
 | `/connect` | Contact form (opens the user's mail client by default) |
 | `/my-100` | Personal, on-device 100 List with stages, backup, and restore |
 

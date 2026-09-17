@@ -14,6 +14,8 @@ import HubDetail from '@/pages/HubDetail';
 import Connect from '@/pages/Connect';
 import My100 from '@/pages/My100';
 import Track from '@/pages/Track';
+import Register from '@/pages/Register';
+import Roster from '@/pages/Roster';
 import TrackEdit from '@/pages/TrackEdit';
 import NotFound from '@/pages/NotFound';
 
@@ -42,6 +44,9 @@ export default function App() {
           <Route path="track" element={<Track />} />
           <Route path="track/new" element={<TrackEdit />} />
           <Route path="track/:id" element={<TrackEdit />} />
+          <Route path="register/:eventId" element={<Register />} />
+          <Route path="roster" element={<Roster />} />
+          <Route path="roster/:eventId" element={<Roster />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

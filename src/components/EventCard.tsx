@@ -26,7 +26,7 @@ export function RegisterLink({ event, className }: { event: Event; className: st
     );
   }
   return (
-    <Link to={`/connect?event=${event.id}`} className={className}>
+    <Link to={`/register/${event.id}`} className={className}>
       Register <ArrowUpRight className="h-4 w-4" />
     </Link>
   );

@@ -1,0 +1,153 @@
+import { useState, type FormEvent } from 'react';
+import { Link, Navigate, useParams } from 'react-router-dom';
+import { ArrowLeft, CheckCircle2, Lock } from 'lucide-react';
+import { events, site, hubById } from '@/content';
+import { formatRange } from '@/lib/format';
+import { emptyRegistration, uid, type Registration } from '@/lib/registrations';
+import { useRegistrations } from '@/hooks/useRegistrations';
+
+export default function Register() {
+  const { eventId = '' } = useParams();
+  const event = events.find((e) => e.id === eventId);
+  const { store, add } = useRegistrations(eventId);
+  const [form, setForm] = useState<Registration>(() => emptyRegistration(eventId));
+  const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!event) return <Navigate to="/gatherings" replace />;
+
+  const set = <K extends keyof Registration>(k: K, v: Registration[K]) => setForm((f) => ({ ...f, [k]: v }));
+  const text = (k: keyof Registration) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    set(k, e.target.value as never);
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    const reg: Registration = { ...form, id: uid(), eventId, createdAt: new Date().toISOString() };
+    try {
+      await add(reg);
+      // Until a shared database is connected, also send it to the organizer
+      // so a sign-up never sits unseen on someone's phone.
+      if (store.kind === 'local') {
+        const body = [
+          `Event: ${event.title}`,
+          `Name: ${reg.name}`,
+          `Party size: ${reg.party}`,
+          `Email: ${reg.email}`,
+          `Phone: ${reg.phone}`,
+          `City: ${reg.city}`,
+          `Church: ${reg.church}`,
+          `Network: ${reg.network}`,
+          reg.notes ? `Notes: ${reg.notes}` : '',
+        ]
+          .filter(Boolean)
+          .join('\n');
+        window.location.href = `mailto:${site.contact.email}?subject=${encodeURIComponent(
+          `[NPL SoCal] Registration: ${event.title}`,
+        )}&body=${encodeURIComponent(body)}`;
+      }
+      setSent(true);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (sent) {
+    return (
+      <section className="container-x max-w-xl py-20 text-center md:py-28">
+        <CheckCircle2 className="mx-auto h-9 w-9 text-accent" strokeWidth={1.5} />
+        <h1 className="mt-6 text-3xl md:text-4xl">You're registered.</h1>
+        <p className="mt-4 text-muted">
+          {form.name}, we have you down for {event.title}
+          {form.party > 1 ? ` with ${form.party - 1} other${form.party > 2 ? 's' : ''}` : ''}. We'll be in touch at{' '}
+          {form.email}.
+        </p>
+        {store.kind === 'local' && (
+          <p className="mt-4 text-xs text-faint">
+            Your email app should have opened with the details. If it didn't, send them to {site.contact.email}.
+          </p>
+        )}
+        <Link to="/gatherings" className="btn-secondary mt-8">
+          Back to gatherings
+        </Link>
+      </section>
+    );
+  }
+
+  const hub = hubById(event.hub);
+
+  return (
+    <section className="container-x max-w-2xl py-12 md:py-16">
+      <Link to="/gatherings" className="inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-fg">
+        <ArrowLeft className="h-4 w-4" /> Gatherings
+      </Link>
+
+      <div className="eyebrow mt-8">Register · {hub ? hub.shortName : 'All SoCal'}</div>
+      <h1 className="mt-3 text-4xl md:text-5xl">{event.title}</h1>
+      <p className="mt-3 text-muted">
+        {event.dateLabel ?? formatRange(event.start, event.end)} · {event.city ?? event.location}
+      </p>
+
+      <form onSubmit={submit} className="mt-10 space-y-7">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <label className="block sm:col-span-2">
+            <span className="eyebrow">Your name</span>
+            <input required className="field mt-2" value={form.name} onChange={text('name')} autoComplete="name" />
+          </label>
+          <label className="block">
+            <span className="eyebrow">Email</span>
+            <input required type="email" className="field mt-2" value={form.email} onChange={text('email')} autoComplete="email" />
+          </label>
+          <label className="block">
+            <span className="eyebrow">Phone</span>
+            <input required type="tel" className="field mt-2" value={form.phone} onChange={text('phone')} autoComplete="tel" />
+          </label>
+          <label className="block">
+            <span className="eyebrow">How many in your party?</span>
+            <input
+              required
+              type="number"
+              min={1}
+              max={200}
+              className="field mt-2"
+              value={form.party}
+              onChange={(e) => set('party', Math.max(1, Number(e.target.value) || 1))}
+            />
+            <span className="mt-1 block text-xs text-faint">Including you.</span>
+          </label>
+          <label className="block">
+            <span className="eyebrow">City</span>
+            <input required className="field mt-2" value={form.city} onChange={text('city')} placeholder="Santa Ana" />
+          </label>
+          <label className="block">
+            <span className="eyebrow">Church</span>
+            <input required className="field mt-2" value={form.church} onChange={text('church')} />
+          </label>
+          <label className="block">
+            <span className="eyebrow">Network</span>
+            <input className="field mt-2" value={form.network} onChange={text('network')} placeholder="NPL SoCal, or leave blank" />
+          </label>
+          <label className="block sm:col-span-2">
+            <span className="eyebrow">Anything else?</span>
+            <textarea rows={3} className="field mt-2" value={form.notes} onChange={text('notes')} placeholder="Questions, dietary needs, arrival time" />
+          </label>
+        </div>
+
+        {error && <p className="text-sm text-red-400">{error}</p>}
+
+        <div className="flex flex-wrap items-center gap-4">
+          <button type="submit" className="btn-primary min-w-40" disabled={busy}>
+            {busy ? 'Sending…' : 'Register'}
+          </button>
+          <span className="inline-flex items-center gap-1.5 text-xs text-faint">
+            <Lock className="h-3 w-3" /> Only the organizers see your details.
+          </span>
+        </div>
+      </form>
+    </section>
+  );
+}

@@ -11,7 +11,7 @@ export default function Footer() {
           <span className="text-sm font-semibold uppercase tracking-[0.12em]">{site.shortName}</span>
         </Link>
         <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm" aria-label="Footer">
-          {[...navigation, ...aboutMenu, { to: '/track', label: 'Tracker' }].map((n) => (
+          {[...navigation, ...aboutMenu, { to: '/track', label: 'Tracker' }, { to: '/roster', label: 'Rosters' }].map((n) => (
             <Link key={n.to} to={n.to} className="text-muted transition hover:text-fg">
               {n.label}
             </Link>
