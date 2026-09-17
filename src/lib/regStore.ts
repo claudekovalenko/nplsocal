@@ -72,7 +72,6 @@ interface Row {
   party: number;
   city: string;
   church: string;
-  network: string;
   days: string[];
   notes: string;
   created_at: string;
@@ -87,7 +86,6 @@ const toReg = (r: Row): Registration => ({
   party: r.party ?? 1,
   city: r.city ?? '',
   church: r.church ?? '',
-  network: r.network ?? '',
   days: r.days ?? [],
   notes: r.notes ?? '',
   createdAt: r.created_at,
@@ -102,7 +100,6 @@ const toRow = (r: Registration) => ({
   party: r.party,
   city: r.city,
   church: r.church,
-  network: r.network,
   days: r.days,
   notes: r.notes,
 });

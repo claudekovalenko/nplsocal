@@ -43,8 +43,7 @@ export default function Register() {
           `Email: ${reg.email}`,
           `Phone: ${reg.phone}`,
           `City: ${reg.city}`,
-          `Church: ${reg.church}`,
-          `Network: ${reg.network}`,
+          `Church / network: ${reg.church}`,
           reg.days.length ? `Days: ${reg.days.map(dayLabel).join(', ')}` : '',
           reg.notes ? `Notes: ${reg.notes}` : '',
         ]
@@ -129,13 +128,15 @@ export default function Register() {
             <span className="eyebrow">City</span>
             <input required className="field mt-2" value={form.city} onChange={text('city')} placeholder="Santa Ana" />
           </label>
-          <label className="block">
-            <span className="eyebrow">Church</span>
-            <input required className="field mt-2" value={form.church} onChange={text('church')} />
-          </label>
-          <label className="block">
-            <span className="eyebrow">Network</span>
-            <input className="field mt-2" value={form.network} onChange={text('network')} placeholder="NPL SoCal, or leave blank" />
+          <label className="block sm:col-span-2">
+            <span className="eyebrow">Church / Network</span>
+            <input
+              required
+              className="field mt-2"
+              value={form.church}
+              onChange={text('church')}
+              placeholder="Grace Fullerton, NPL SoCal, or both"
+            />
           </label>
           {multiDay && (
             <fieldset className="sm:col-span-2">

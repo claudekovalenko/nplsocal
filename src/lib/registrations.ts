@@ -7,8 +7,8 @@ export interface Registration {
   phone: string;
   party: number;
   city: string;
+  /** Their church, their network, or both — people identify with one or the other. */
   church: string;
-  network: string;
   /** Which days of a multi-day event they plan to attend (YYYY-MM-DD). */
   days: string[];
   notes: string;
@@ -24,7 +24,6 @@ export const emptyRegistration = (eventId: string): Registration => ({
   party: 1,
   city: '',
   church: '',
-  network: '',
   days: [],
   notes: '',
   createdAt: new Date().toISOString(),
@@ -35,7 +34,7 @@ export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().to
 export const totalPeople = (regs: Registration[]) => regs.reduce((n, r) => n + Math.max(1, r.party || 1), 0);
 
 /** Count distinct non-empty values of a field, biggest first. */
-export function countBy(regs: Registration[], key: 'city' | 'church' | 'network') {
+export function countBy(regs: Registration[], key: 'city' | 'church') {
   const map = new Map<string, number>();
   for (const r of regs) {
     const v = (r[key] || '').trim();
@@ -51,8 +50,7 @@ const CSV_COLUMNS: [keyof Registration, string][] = [
   ['email', 'Email'],
   ['phone', 'Phone'],
   ['city', 'City'],
-  ['church', 'Church'],
-  ['network', 'Network'],
+  ['church', 'Church / Network'],
   ['days', 'Days'],
   ['notes', 'Notes'],
   ['createdAt', 'Registered'],
@@ -131,8 +129,11 @@ export function fromCsv(text: string, eventId: string): Registration[] {
     phone: at(row, idx.phone),
     party: Math.max(1, parseInt(at(row, idx.party), 10) || 1),
     city: at(row, idx.city),
-    church: at(row, idx.church),
-    network: at(row, idx.network),
+    church: [at(row, idx.church), at(row, idx.network)]
+      .map((v) => v.trim())
+      .filter(Boolean)
+      .filter((v, i, all) => all.indexOf(v) === i)
+      .join(' / '),
     days: at(row, idx.days).split(/[\s,;]+/).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)),
     notes: at(row, idx.notes),
   }));

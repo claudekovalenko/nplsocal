@@ -58,7 +58,6 @@ create table if not exists public.npl_registrations (
   party      integer not null default 1 check (party between 1 and 500),
   city       text not null default '',
   church     text not null default '',
-  network    text not null default '',
   days       text[] not null default '{}',
   notes      text not null default '',
   created_at timestamptz not null default now()

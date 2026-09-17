@@ -37,7 +37,7 @@ export default function Roster() {
   const filtered = useMemo(() => {
     const n = q.trim().toLowerCase();
     if (!n) return rows;
-    return rows.filter((r) => [r.name, r.email, r.phone, r.city, r.church, r.network].join(' ').toLowerCase().includes(n));
+    return rows.filter((r) => [r.name, r.email, r.phone, r.city, r.church].join(' ').toLowerCase().includes(n));
   }, [rows, q]);
 
   const download = () => {
@@ -135,7 +135,7 @@ export default function Roster() {
             {[
               ['People', totalPeople(rows)],
               ['Sign-ups', rows.length],
-              ['Churches', countBy(rows, 'church').length],
+              ['Church / network', countBy(rows, 'church').length],
               ['Cities', countBy(rows, 'city').length],
             ].map(([label, n]) => (
               <div key={String(label)} className="bg-bg px-5 py-6 text-center">
@@ -160,10 +160,9 @@ export default function Roster() {
             </div>
           )}
 
-          <div className="mt-10 grid gap-8 md:grid-cols-3">
-            <Breakdown title="By church" rows={countBy(rows, 'church')} />
+          <div className="mt-10 grid gap-8 md:grid-cols-2">
+            <Breakdown title="By church / network" rows={countBy(rows, 'church')} />
             <Breakdown title="By city" rows={countBy(rows, 'city')} />
-            <Breakdown title="By network" rows={countBy(rows, 'network')} />
           </div>
 
           <div className="mt-12 flex flex-wrap items-center justify-between gap-3">
@@ -192,10 +191,10 @@ export default function Roster() {
             </p>
           ) : (
             <div className="mt-6 overflow-x-auto">
-              <table className="w-full min-w-[46rem] border-collapse text-sm">
+              <table className="w-full min-w-[42rem] border-collapse text-sm">
                 <thead>
                   <tr className="border-y border-line text-left">
-                    {['Name', 'Party', 'Contact', 'City', 'Church', 'Network', ''].map((h) => (
+                    {['Name', 'Party', 'Contact', 'City', 'Church / Network', ''].map((h) => (
                       <th key={h} className="py-3 pr-4 text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
                         {h}
                       </th>
@@ -225,7 +224,6 @@ export default function Roster() {
                       </td>
                       <td className="py-3 pr-4 text-muted">{r.city}</td>
                       <td className="py-3 pr-4 text-muted">{r.church}</td>
-                      <td className="py-3 pr-4 text-muted">{r.network}</td>
                       <td className="py-3">
                         <button onClick={() => confirm(`Remove ${r.name}?`) && remove(r.id)} className="p-1.5 text-faint transition hover:text-fg" aria-label={`Remove ${r.name}`}>
                           <Trash2 className="h-4 w-4" />
