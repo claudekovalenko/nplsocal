@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Lock } from 'lucide-react';
 import { events, site, hubById } from '@/content';
-import { formatRange } from '@/lib/format';
+import { formatRange, eventDays, dayLabel } from '@/lib/format';
 import { emptyRegistration, uid, type Registration } from '@/lib/registrations';
 import { useRegistrations } from '@/hooks/useRegistrations';
 
@@ -16,6 +16,11 @@ export default function Register() {
   const [error, setError] = useState<string | null>(null);
 
   if (!event) return <Navigate to="/gatherings" replace />;
+
+  const days = eventDays(event.start, event.end);
+  const multiDay = days.length > 1;
+  const toggleDay = (d: string) =>
+    setForm((f) => ({ ...f, days: f.days.includes(d) ? f.days.filter((x) => x !== d) : [...f.days, d].sort() }));
 
   const set = <K extends keyof Registration>(k: K, v: Registration[K]) => setForm((f) => ({ ...f, [k]: v }));
   const text = (k: keyof Registration) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -40,6 +45,7 @@ export default function Register() {
           `City: ${reg.city}`,
           `Church: ${reg.church}`,
           `Network: ${reg.network}`,
+          reg.days.length ? `Days: ${reg.days.map(dayLabel).join(', ')}` : '',
           reg.notes ? `Notes: ${reg.notes}` : '',
         ]
           .filter(Boolean)
@@ -131,6 +137,37 @@ export default function Register() {
             <span className="eyebrow">Network</span>
             <input className="field mt-2" value={form.network} onChange={text('network')} placeholder="NPL SoCal, or leave blank" />
           </label>
+          {multiDay && (
+            <fieldset className="sm:col-span-2">
+              <legend className="eyebrow">Which days can you come?</legend>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {days.map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => toggleDay(d)}
+                    aria-pressed={form.days.includes(d)}
+                    className={form.days.includes(d) ? 'pill-active' : 'pill'}
+                  >
+                    {dayLabel(d)}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, days: f.days.length === days.length ? [] : [...days] }))}
+                  className="pill"
+                >
+                  {form.days.length === days.length ? 'Clear' : 'All days'}
+                </button>
+              </div>
+              <span className="mt-2 block text-xs text-faint">
+                {event.dateLabel
+                  ? 'Dates are still being confirmed — pick what looks likely and we will follow up.'
+                  : 'Pick every day you expect to be there.'}
+              </span>
+            </fieldset>
+          )}
+
           <label className="block sm:col-span-2">
             <span className="eyebrow">Anything else?</span>
             <textarea rows={3} className="field mt-2" value={form.notes} onChange={text('notes')} placeholder="Questions, dietary needs, arrival time" />

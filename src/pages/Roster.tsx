@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Download, Upload, Search, Trash2, Lock, Wifi, HardDrive } from 'lucide-react';
 import { events, hubById } from '@/content';
-import { formatRange, formatDate } from '@/lib/format';
-import { countBy, fromCsv, toCsv, totalPeople } from '@/lib/registrations';
+import { formatRange, formatDate, eventDays, dayLabel } from '@/lib/format';
+import { countBy, fromCsv, peoplePerDay, toCsv, totalPeople } from '@/lib/registrations';
 import { useRegistrations } from '@/hooks/useRegistrations';
 
 function Breakdown({ title, rows }: { title: string; rows: [string, number][] }) {
@@ -30,6 +30,9 @@ export default function Roster() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const event = events.find((e) => e.id === eventId);
+
+  const days = event ? eventDays(event.start, event.end) : [];
+  const perDay = days.length > 1 ? peoplePerDay(rows, days) : [];
 
   const filtered = useMemo(() => {
     const n = q.trim().toLowerCase();
@@ -142,6 +145,21 @@ export default function Roster() {
             ))}
           </dl>
 
+          {perDay.length > 0 && (
+            <div className="mt-10">
+              <div className="eyebrow">People per day</div>
+              <ul className="mt-3 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3 lg:grid-cols-5">
+                {perDay.map(([day, n]) => (
+                  <li key={day} className="bg-bg px-4 py-4 text-center">
+                    <div className="text-2xl font-light tracking-tight">{n}</div>
+                    <div className="mt-0.5 text-xs text-muted">{dayLabel(day)}</div>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-faint">Anyone who did not pick days is counted on every day.</p>
+            </div>
+          )}
+
           <div className="mt-10 grid gap-8 md:grid-cols-3">
             <Breakdown title="By church" rows={countBy(rows, 'church')} />
             <Breakdown title="By city" rows={countBy(rows, 'city')} />
@@ -189,6 +207,9 @@ export default function Roster() {
                     <tr key={r.id} className="border-b border-line align-top">
                       <td className="py-3 pr-4">
                         {r.name}
+                        {r.days.length > 0 && (
+                          <div className="mt-0.5 text-xs text-muted">{r.days.map(dayLabel).join(' · ')}</div>
+                        )}
                         {r.notes && <div className="mt-0.5 text-xs text-faint">{r.notes}</div>}
                       </td>
                       <td className="py-3 pr-4 tabular-nums">{r.party}</td>

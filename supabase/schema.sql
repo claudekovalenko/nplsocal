@@ -58,6 +58,7 @@ create table if not exists public.registrations (
   city       text not null default '',
   church     text not null default '',
   network    text not null default '',
+  days       text[] not null default '{}',
   notes      text not null default '',
   created_at timestamptz not null default now()
 );

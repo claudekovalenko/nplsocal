@@ -82,6 +82,8 @@ Set `tier` on each event in `src/content/events.ts`:
 
 Every event's Register button opens an in-app form at `/register/<event id>` asking for name, email, phone, party size, city, church and network. Organizers see the roster at `/roster` (all events) and `/roster/<event id>`, with totals, breakdowns by church, city and network, search, CSV export, and CSV import for people who signed up somewhere else. The importer matches common column headers, so an export from another form usually drops straight in.
 
+For a multi-day event the form also asks which days they can come, and the roster shows a people-per-day count so you can plan each day. The day list is generated from the event's start and end dates; anyone who skips the question is counted on every day.
+
 An event with a real `registerUrl` (starting with `http`) keeps using that link instead and opens it in a new tab.
 
 Contact details are private by design: the database policy lets anyone insert a sign-up but only signed-in organizers read the roster. Until the shared database is connected the form also opens the visitor's email app addressed to the organizer, so no sign-up is lost.

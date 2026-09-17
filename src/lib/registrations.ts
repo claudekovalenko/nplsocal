@@ -9,6 +9,8 @@ export interface Registration {
   city: string;
   church: string;
   network: string;
+  /** Which days of a multi-day event they plan to attend (YYYY-MM-DD). */
+  days: string[];
   notes: string;
   createdAt: string;
 }
@@ -23,6 +25,7 @@ export const emptyRegistration = (eventId: string): Registration => ({
   city: '',
   church: '',
   network: '',
+  days: [],
   notes: '',
   createdAt: new Date().toISOString(),
 });
@@ -50,12 +53,13 @@ const CSV_COLUMNS: [keyof Registration, string][] = [
   ['city', 'City'],
   ['church', 'Church'],
   ['network', 'Network'],
+  ['days', 'Days'],
   ['notes', 'Notes'],
   ['createdAt', 'Registered'],
 ];
 
 const escape = (v: unknown) => {
-  const s = String(v ?? '');
+  const s = Array.isArray(v) ? v.join(' ') : String(v ?? '');
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 };
 
@@ -116,6 +120,7 @@ export function fromCsv(text: string, eventId: string): Registration[] {
     church: find('church'),
     network: find('network'),
     notes: find('note', 'comment', 'question'),
+    days: find('days', 'which day'),
   };
   const at = (row: string[], i: number) => (i >= 0 ? (row[i] ?? '').trim() : '');
   return rows.slice(1).map((row) => ({
@@ -128,6 +133,17 @@ export function fromCsv(text: string, eventId: string): Registration[] {
     city: at(row, idx.city),
     church: at(row, idx.church),
     network: at(row, idx.network),
+    days: at(row, idx.days).split(/[\s,;]+/).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)),
     notes: at(row, idx.notes),
   }));
+}
+
+/** How many people are coming on each day, for a multi-day event. */
+export function peoplePerDay(regs: Registration[], days: string[]) {
+  return days.map((day) => {
+    const n = regs
+      .filter((r) => r.days.length === 0 || r.days.includes(day))
+      .reduce((sum, r) => sum + Math.max(1, r.party || 1), 0);
+    return [day, n] as [string, number];
+  });
 }
