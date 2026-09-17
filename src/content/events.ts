@@ -7,16 +7,16 @@ import type { Event } from './types';
 export const events: Event[] = [
   // ── Network: for everyone ──────────────────────────────────────
   {
-    id: 'la-push-2027',
-    title: 'Los Angeles Push',
+    id: 'la-metro-gospel-push-2027',
+    title: 'L.A. Metro Gospel Push 2027',
     type: 'push',
     tier: 'network',
     hub: 'la',
-    start: '2027-01-15T09:00:00-08:00',
-    end: '2027-01-24T21:00:00-08:00',
-    dateLabel: 'Early 2027',
-    location: 'Across Los Angeles',
-    description: 'The whole network converges on LA for a season of prayer, sowing, and training.',
+    // Runs over New Year: Dec 30 2026 through Jan 2 2027.
+    start: '2026-12-30T09:00:00-08:00',
+    end: '2027-01-02T21:00:00-08:00',
+    location: 'Across the L.A. metro',
+    description: 'Four days of prayer, gospel conversations, and training across the L.A. metro. Open to the whole network.',
     registerUrl: '#',
   },
   {
