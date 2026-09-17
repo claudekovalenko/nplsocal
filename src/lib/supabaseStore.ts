@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
 import type { Group } from './groups';
 import type { GroupStore } from './store';
 
@@ -53,29 +52,31 @@ const toRow = (g: Group): Omit<Row, 'updated_at'> => ({
   notes: g.notes,
 });
 
-export function createSupabaseStore(url: string, key: string): GroupStore {
-  const sb = createClient(url, key);
+import { supabase } from './supabaseClient';
+
+export function createSupabaseStore(): GroupStore {
+  const sb = supabase();
   const subs = new Set<() => void>();
   const notify = () => subs.forEach((cb) => cb());
 
   sb.channel('groups-live')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'groups' }, notify)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'npl_groups' }, notify)
     .subscribe();
 
   return {
     kind: 'supabase',
     async list() {
-      const { data, error } = await sb.from('groups').select('*').order('started');
+      const { data, error } = await sb.from('npl_groups').select('*').order('started');
       if (error) throw error;
       return (data as Row[]).map(toGroup);
     },
     async upsert(group) {
-      const { error } = await sb.from('groups').upsert(toRow(group));
+      const { error } = await sb.from('npl_groups').upsert(toRow(group));
       if (error) throw error;
       notify();
     },
     async remove(id) {
-      const { error } = await sb.from('groups').delete().eq('id', id);
+      const { error } = await sb.from('npl_groups').delete().eq('id', id);
       if (error) throw error;
       notify();
     },

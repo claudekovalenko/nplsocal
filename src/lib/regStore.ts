@@ -113,28 +113,28 @@ class SharedRegStore implements RegistrationStore {
   constructor() {
     supabase()
       .channel('registrations-live')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'registrations' }, () =>
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'npl_registrations' }, () =>
         this.subs.forEach((cb) => cb()),
       )
       .subscribe();
   }
   async list(eventId?: string) {
-    let q = supabase().from('registrations').select('*').order('created_at', { ascending: false });
+    let q = supabase().from('npl_registrations').select('*').order('created_at', { ascending: false });
     if (eventId) q = q.eq('event_id', eventId);
     const { data, error } = await q;
     if (error) throw error;
     return (data as Row[]).map(toReg);
   }
   async add(reg: Registration) {
-    const { error } = await supabase().from('registrations').insert(toRow(reg));
+    const { error } = await supabase().from('npl_registrations').insert(toRow(reg));
     if (error) throw error;
   }
   async addMany(regs: Registration[]) {
-    const { error } = await supabase().from('registrations').insert(regs.map(toRow));
+    const { error } = await supabase().from('npl_registrations').insert(regs.map(toRow));
     if (error) throw error;
   }
   async remove(id: string) {
-    const { error } = await supabase().from('registrations').delete().eq('id', id);
+    const { error } = await supabase().from('npl_registrations').delete().eq('id', id);
     if (error) throw error;
   }
   subscribe(cb: () => void) {

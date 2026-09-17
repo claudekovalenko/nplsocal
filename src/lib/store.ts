@@ -66,11 +66,10 @@ let instance: GroupStore | null = null;
 
 export async function getStore(): Promise<GroupStore> {
   if (instance) return instance;
-  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-  if (url && key) {
+  const { isShared } = await import('./supabaseClient');
+  if (isShared) {
     const { createSupabaseStore } = await import('./supabaseStore');
-    instance = createSupabaseStore(url, key);
+    instance = createSupabaseStore();
   } else {
     instance = new LocalStore();
   }

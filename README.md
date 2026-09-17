@@ -92,14 +92,22 @@ Contact details are private by design: the database policy lets anyone insert a 
 
 `/track` is a simple generational map: one row per group or church with region, leader, parent group, status (dotted group or solid church), attendance, believers, baptized, and the Acts 2 elements present. Generation is computed from the parent chain; the dashboard rolls up totals per region.
 
-It stores data on the device by default. To make it **shared and live** across the network:
+## The database
 
-1. Create a Supabase project and run `supabase/schema.sql` in its SQL editor.
-2. Turn on Email auth (magic link) under Authentication → Providers.
-3. In the GitHub repo, add two Actions **Variables**: `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (Project Settings → API).
-4. Push. The next deploy switches the tracker to the shared store: anyone can view, signed-in practitioners can edit, and changes appear live on every open screen.
+Both the tracker and event registrations live in Supabase. The connection details are in `.env`, committed on purpose: the publishable key grants only what the row-level security policies allow, so it is safe in a public repo and ships in the browser bundle anyway.
 
-For local development put the same two values in a `.env.local` file (see `.env.example`).
+Tables are prefixed `npl_` because the database is shared with other small apps.
+
+| Table | Who can read | Who can write |
+| --- | --- | --- |
+| `npl_registrations` | Signed-in organizers only | Anyone may submit a sign-up; organizers may edit or delete |
+| `npl_groups` | Signed-in practitioners only | Signed-in practitioners |
+
+Contact details are never readable by the public. A visitor's browser can insert a registration but cannot read a single row back.
+
+`supabase/schema.sql` is the source of truth for this structure. To move to a dedicated project later, run that file there and change the two values in `.env`.
+
+**Still to do in the Supabase dashboard** (it was returning 500 errors when this was set up): confirm Email auth is enabled under Authentication → Providers, and add the deployed site URL to Authentication → URL Configuration so magic-link sign-in redirects back correctly. Public registration works without either; only the organizer sign-in needs them.
 
 ## Routes
 
