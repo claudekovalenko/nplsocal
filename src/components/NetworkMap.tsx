@@ -27,14 +27,26 @@ export default function NetworkMap({ variant = 'full', className = '' }: { varia
 
   const labelFor = (p: Place) => (variant === 'full' ? p.label : p.size >= 2 ? p.label : '');
 
-  // Hero: crop to the LA basin + OC and fade the cut edges so it reads as an object, not a cut-off map.
+  // Hero: crop to the LA basin + OC. The county outlines run past every edge of
+  // that crop, so fade the whole frame outward with an elliptical mask — a
+  // vertical-only fade left hard vertical cuts at the sides.
   const viewBox = variant === 'hero' ? '120 250 880 690' : `0 0 ${MAP_W} ${MAP_H}`;
+  // Two linear fades intersected, rather than one radial: a radial gradient is
+  // still ~80% opaque at the middle of each edge, which left the clipped county
+  // fill showing as a straight line (obvious on a light background). Intersecting
+  // a vertical and a horizontal fade reaches fully transparent on all four sides.
+  // Where mask-composite is unsupported the masks simply add, which is no worse
+  // than no fade at all.
   const style =
     variant === 'hero'
-      ? {
-          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 16%, black 90%, transparent 100%)',
-          maskImage: 'linear-gradient(to bottom, transparent 0%, black 16%, black 90%, transparent 100%)',
-        }
+      ? ({
+          WebkitMaskImage:
+            'linear-gradient(to bottom, transparent 0%, #000 13%, #000 87%, transparent 100%), linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%)',
+          maskImage:
+            'linear-gradient(to bottom, transparent 0%, #000 13%, #000 87%, transparent 100%), linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%)',
+          WebkitMaskComposite: 'source-in',
+          maskComposite: 'intersect',
+        } as const)
       : undefined;
   const laCaption = variant === 'hero' ? [560, 300] : [counties.la.centroid[0] - 40, counties.la.centroid[1] - 210];
 

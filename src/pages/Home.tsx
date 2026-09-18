@@ -10,7 +10,9 @@ export default function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="relative flex flex-col overflow-hidden">
+      {/* No overflow-hidden: it sliced a hard horizontal line across the
+          bottom of the map, where the fade had not finished. */}
+      <section className="relative flex flex-col">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_100%,var(--glow),transparent_70%)] opacity-40" />
         <div className="container-x relative z-10 flex flex-col items-center pt-24 text-center md:pt-32">
           <div className="eyebrow fade-up">{site.hashtag} · Los Angeles · Orange County</div>
@@ -24,13 +26,14 @@ export default function Home() {
             </Link>
           </div>
         </div>
-        <div className="relative z-0 mx-auto -mb-6 mt-2 w-full max-w-3xl px-2 md:mt-4">
+        <div className="relative z-0 mx-auto -mb-12 mt-2 w-full max-w-3xl px-2 md:-mb-20 md:mt-4">
           <NetworkMap variant="hero" className="h-auto w-full" />
         </div>
       </section>
 
-      {/* Next up */}
-      <section id="next" className="border-t border-line">
+      {/* Next up. No top border: the map fades into this section, and a hairline
+          there read as a hard cut across the bottom of the map. */}
+      <section id="next">
         <div className="container-x py-20 md:py-28">
           <div className="flex items-end justify-between gap-6">
             <div>
