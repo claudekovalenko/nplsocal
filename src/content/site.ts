@@ -28,6 +28,7 @@ export const site = {
 
 /** Two doors, plus an About menu. Everything else lives inside one of them. */
 export const navigation = [
+  { to: '/push', label: 'The Push' },
   { to: '/gatherings', label: 'Gatherings' },
   { to: '/tools', label: 'Tools' },
 ] as const;

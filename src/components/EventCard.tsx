@@ -34,6 +34,8 @@ export function RegisterLink({ event, className }: { event: Event; className: st
 
 /** Big card for network-tier events: the ones everyone should know about. */
 export function FeaturedEvent({ event }: { event: Event }) {
+  // The push has a hub of its own; send people there rather than to a bare form.
+  const hub = event.id === 'la-metro-gospel-push-2027' ? '/push' : null;
   return (
     <article className="card group relative flex flex-col justify-between overflow-hidden p-7 transition hover:border-line-strong md:p-9">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_100%_0%,var(--glow),transparent_70%)] opacity-25" />
@@ -55,7 +57,13 @@ export function FeaturedEvent({ event }: { event: Event }) {
             <div className="text-sm text-muted">{formatRange(event.start, event.end).split(' · ')[1] ?? ''}</div>
           )}
         </div>
-        <RegisterLink event={event} className="btn-primary" />
+        {hub ? (
+          <Link to={hub} className="btn-primary">
+            Open the hub <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        ) : (
+          <RegisterLink event={event} className="btn-primary" />
+        )}
       </div>
     </article>
   );

@@ -82,7 +82,41 @@ await page.waitForTimeout(1200);
 const timerAfter = await page.locator('.tabular-nums').first().textContent();
 check('3/3rds timer counts down', timerBefore !== timerAfter, `${timerBefore} to ${timerAfter}`);
 
-// 5. The tracker accepts a group.
+// 5. The push hub carries the whole event.
+await page.goto(BASE + '/push', { waitUntil: 'networkidle' });
+const pushHeading = (await page.textContent('h1')) || '';
+check('push hub loads', /Push/i.test(pushHeading), pushHeading.replace(/\s+/g, ' ').trim());
+
+const dayTabs = await page.locator('#schedule button').count();
+check('schedule offers every day', dayTabs === 4, `${dayTabs} day tabs`);
+const firstDayBlocks = await page.locator('#schedule ol li').count();
+await page.locator('#schedule button').nth(2).click();
+await page.waitForTimeout(300);
+const thirdDayBlocks = await page.locator('#schedule ol li').count();
+check('switching day changes the schedule', firstDayBlocks > 0 && thirdDayBlocks > 0);
+
+// Daily report: with no database configured it queues on the device, which is
+// exactly what a team with no signal would hit.
+await page.locator('#report input[required]').fill('Audit Reporter');
+const counts = page.locator('#report input[type="number"]');
+await counts.nth(0).fill('12');
+await counts.nth(1).fill('5');
+await counts.nth(2).fill('2');
+await page.getByRole('button', { name: /Send report/ }).click();
+await page.waitForTimeout(1200);
+const reportDone = ((await page.textContent('#report')) || '').match(/Report received|Saved on your phone/);
+check('daily report submits', !!reportDone, reportDone?.[0]);
+
+// Stay-connected form.
+await page.locator('#connect input[autocomplete="name"]').fill('Audit Contact');
+await page.locator('#connect input[required]').nth(1).fill('audit@example.com');
+await page.locator('#connect button[type="button"]').first().click();
+await page.getByRole('button', { name: /Keep me posted/ }).click();
+await page.waitForTimeout(1200);
+const interestDone = ((await page.textContent('#connect')) || '').includes("We've got you");
+check('stay-connected form submits', interestDone);
+
+// 6. The tracker accepts a group.
 await page.goto(BASE + '/track/new', { waitUntil: 'networkidle' });
 const trackForm = await page.locator('form input').count();
 check('tracker offers a group form', trackForm > 0, `${trackForm} fields`);

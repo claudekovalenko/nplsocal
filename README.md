@@ -88,6 +88,27 @@ An event with a real `registerUrl` (starting with `http`) keeps using that link 
 
 Contact details are private by design: the database policy lets anyone insert a sign-up but only signed-in organizers read the roster. Until the shared database is connected the form also opens the visitor's email app addressed to the organizer, so no sign-up is lost.
 
+### The Push hub
+
+`/push` is the central page for the L.A. Metro Gospel Push and carries the whole event:
+
+- the schedule, day by day, with a block-by-block breakdown
+- a link to the Signal group chat
+- registration
+- a two-minute end-of-day report from each team
+- a stay-connected form for anyone not ready to register
+
+Edit `src/content/push.ts` to change any of it. Two things there need your input:
+
+| Field | What to do |
+| --- | --- |
+| `signalUrl` | Paste the Signal group invite link. The button is disabled and labelled "link coming" until you do. |
+| `schedule` | The blocks are a **draft**. Replace them with the real plan, then delete `draft: true` from a day and the page stops labelling it as draft. |
+
+**Daily reports** collect conversations, gospel shared, responded, baptized and groups started, plus a story and a prayer request. They work with no signal: a failed send is queued on the phone and goes out by itself on the next attempt, so a team in a dead zone never loses a report.
+
+The public page shows **totals only**, through a database function that returns sums and nothing else. Names and stories stay organizer-only.
+
 ### The tracker
 
 `/track` is a simple generational map: one row per group or church with region, leader, parent group, status (dotted group or solid church), attendance, believers, baptized, and the Acts 2 elements present. Generation is computed from the parent chain; the dashboard rolls up totals per region.
