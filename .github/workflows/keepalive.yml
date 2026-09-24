@@ -1,0 +1,25 @@
+name: Keep the database awake
+
+# Supabase pauses a free project after roughly seven days of low database
+# activity. If that happened during an event the registration form would simply
+# stop working, so touch the database twice a day.
+#
+# Note: GitHub disables scheduled workflows in a repository with no activity for
+# 60 days, and emails the owner first. If that ever happens, re-enable this
+# workflow from the Actions tab.
+on:
+  schedule:
+    - cron: '17 6,18 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Credentials come from the committed .env: the publishable key grants
+      # only what the row-level security policies allow.
+      - run: npm run keepalive

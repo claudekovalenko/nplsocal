@@ -86,3 +86,27 @@ create policy "organizers delete" on public.npl_registrations
   for delete to authenticated using (true);
 
 alter publication supabase_realtime add table public.npl_registrations;
+
+-- ── Heartbeat ──────────────────────────────────────────────────────
+-- Supabase pauses a free project after ~7 days of low database activity,
+-- which would take the registration form down mid-event. The scheduled
+-- job in .github/workflows/keepalive.yml reads and touches this row twice
+-- a day. One row, no private data.
+
+create table if not exists public.npl_heartbeat (
+  id         smallint primary key default 1 check (id = 1),
+  last_ping  timestamptz not null default now(),
+  note       text not null default 'keeps the free-tier project from pausing'
+);
+
+insert into public.npl_heartbeat (id) values (1) on conflict (id) do nothing;
+
+alter table public.npl_heartbeat enable row level security;
+
+drop policy if exists "npl_heartbeat public read" on public.npl_heartbeat;
+create policy "npl_heartbeat public read" on public.npl_heartbeat
+  for select to anon, authenticated using (true);
+
+drop policy if exists "npl_heartbeat public touch" on public.npl_heartbeat;
+create policy "npl_heartbeat public touch" on public.npl_heartbeat
+  for update to anon, authenticated using (id = 1) with check (id = 1);

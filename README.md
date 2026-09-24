@@ -127,6 +127,29 @@ Contact details are never readable by the public. A visitor's browser can insert
 | `/connect` | Contact form (opens the user's mail client by default) |
 | `/my-100` | Personal, on-device 100 List with stages, backup, and restore |
 
+## Checking the work
+
+Two agents live in `.claude/agents/` and can be asked for by name.
+
+| Agent | What it does |
+| --- | --- |
+| `ui-auditor` | Walks every page in a real browser, clicks the controls, follows the links, runs the critical journeys, and fixes what it finds |
+| `build-auditor` | Typechecks and builds, then attacks the data-handling code with messy real-world input and rewrites what breaks |
+
+Both are backed by commands you can run yourself:
+
+```bash
+npm run audit       # build, serve, crawl every page, drive the critical journeys
+npm run typecheck   # types only
+npm run keepalive   # touch the database so the free project never pauses
+```
+
+`npm run audit` builds **without** database credentials on purpose, so the journey tests submit real forms without writing rows to the live database. It reports broken routes, uncaught errors, failed requests, controls a screen reader cannot name, images without alt text, horizontal overflow at phone width, and any click that blanks the page. It exits non-zero on a problem, and runs on every push through `.github/workflows/ci.yml`.
+
+## Keeping the database awake
+
+A free Supabase project is paused after about seven days of low activity, which would take the registration form down mid-event. `.github/workflows/keepalive.yml` reads and touches a heartbeat row twice a day so that never happens. If GitHub ever disables the schedule for repository inactivity, re-enable it from the Actions tab.
+
 ## Things to wire up next
 
 These are deliberately left as simple defaults so the network can pick the services it wants:

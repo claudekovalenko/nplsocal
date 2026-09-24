@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "icons": "node scripts/generate-icons.mjs",
-    "map": "node scripts/build-map.mjs"
+    "map": "node scripts/build-map.mjs",
+    "audit": "node scripts/audit.mjs",
+    "keepalive": "node scripts/db-keepalive.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
@@ -26,6 +28,7 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "d3-geo": "^3.1.1",
+    "playwright": "^1.63.0",
     "sharp": "^0.33.5",
     "tailwindcss": "^4.0.0",
     "topojson-client": "^3.1.0",
