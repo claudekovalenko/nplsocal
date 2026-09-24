@@ -43,10 +43,7 @@ function Totals({ rows }: { rows: DayTotals[] }) {
 function Day({ day }: { day: ScheduleDay }) {
   return (
     <div>
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-        <h3 className="text-2xl md:text-3xl">{day.title}</h3>
-        {day.draft && <span className="eyebrow !text-faint">Draft schedule</span>}
-      </div>
+      <h3 className="text-2xl md:text-3xl">{day.title}</h3>
       <p className="mt-2 text-muted">{day.summary}</p>
       {day.place && (
         <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-muted">
@@ -78,6 +75,7 @@ function Day({ day }: { day: ScheduleDay }) {
 }
 
 export default function Push() {
+  const isDraft = push.scheduleStatus === 'draft';
   const event = events.find((e) => e.id === PUSH_EVENT_ID);
   const days = useMemo(() => (event ? eventDays(event.start, event.end) : push.schedule.map((d) => d.date)), [event]);
   const [active, setActive] = useState(0);
@@ -149,6 +147,12 @@ export default function Push() {
         <div className="container-x py-16 md:py-24">
           <div className="eyebrow">Schedule</div>
           <h2 className="mt-3 text-3xl md:text-5xl">What happens each day.</h2>
+          {isDraft && (
+            <p className="mt-4 max-w-xl text-muted">
+              These times are a placeholder while the plan is being set. The shape of the days is right; do not book
+              travel around the exact hours yet.
+            </p>
+          )}
 
           <div className="mt-8 flex flex-wrap gap-2">
             {push.schedule.map((d, i) => (
@@ -160,6 +164,7 @@ export default function Push() {
 
           <div className="mt-10">
             <Day day={push.schedule[active]} />
+            {isDraft && <p className="mt-4 text-xs text-faint">Placeholder schedule — times will change.</p>}
           </div>
 
           <div className="mt-14 grid gap-10 md:grid-cols-2">

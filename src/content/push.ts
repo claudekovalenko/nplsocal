@@ -1,9 +1,12 @@
 /**
  * The L.A. Metro Gospel Push — the network's central event.
  *
- * Everything on the /push page reads from here. The schedule below is a DRAFT:
- * replace the blocks with the real plan as it is set, and delete `draft: true`
- * from a day once its schedule is final (the page stops labelling it).
+ * Everything on the /push page reads from here.
+ *
+ * The schedule below is a PLACEHOLDER standing in until the real plan is set.
+ * While `scheduleStatus` is 'draft' the page says so plainly, so nobody books
+ * travel around invented times. Replace the blocks, flip that one word to
+ * 'final', and the warnings disappear.
  */
 
 export interface ScheduleBlock {
@@ -22,7 +25,6 @@ export interface ScheduleDay {
   title: string;
   summary: string;
   place?: string;
-  draft?: boolean;
   blocks: ScheduleBlock[];
 }
 
@@ -35,6 +37,12 @@ export const push = {
   tagline: 'Four days. One city. Every neighborhood we can reach.',
   intro:
     'Teams from across the network converge on the L.A. metro to pray, share the gospel, and start new groups. You do not need experience — you will be trained on the first day and sent out with a team.',
+
+  /**
+   * 'draft' while the times below are a placeholder; 'final' once the real
+   * plan is in. The only thing that needs changing to stop the warnings.
+   */
+  scheduleStatus: 'draft' as 'draft' | 'final',
 
   /** Paste the Signal group invite link here to switch the button on. */
   signalUrl: '',
@@ -54,7 +62,6 @@ export const push = {
       title: 'Day one · Gather and train',
       summary: 'Everyone arrives, gets trained, and goes out for a first afternoon in the field.',
       place: 'Host site, Downtown L.A.',
-      draft: true,
       blocks: [
         { time: '09:00', title: 'Arrive and check in', kind: 'gather' },
         { time: '10:00', title: 'Vision and training', detail: 'The Four Fields, your 100 List, and the gospel tools you will use this week.', kind: 'train' },
@@ -69,7 +76,6 @@ export const push = {
       date: '2026-12-31',
       title: 'Day two · Full day out',
       summary: 'A full day in the field, then bringing in the new year together in prayer.',
-      draft: true,
       blocks: [
         { time: '08:30', title: 'Prayer and sending', kind: 'pray' },
         { time: '09:30', title: 'Out in the field', kind: 'field' },
@@ -84,7 +90,6 @@ export const push = {
       date: '2027-01-01',
       title: 'Day three · Follow up',
       summary: 'Going back to the people who were open, and starting groups where there is interest.',
-      draft: true,
       blocks: [
         { time: '09:30', title: 'Prayer and sending', kind: 'pray' },
         { time: '10:30', title: 'Follow-up visits', detail: 'Return to households of peace from the first two days.', kind: 'field' },
@@ -98,7 +103,6 @@ export const push = {
       date: '2027-01-02',
       title: 'Day four · Hand off and send',
       summary: 'Making sure every new person and group is connected to someone local before we scatter.',
-      draft: true,
       blocks: [
         { time: '09:30', title: 'Prayer', kind: 'pray' },
         { time: '10:00', title: 'Hand off', detail: 'Connect every new contact and group to a local practitioner.', kind: 'debrief' },

@@ -103,7 +103,8 @@ Edit `src/content/push.ts` to change any of it. Two things there need your input
 | Field | What to do |
 | --- | --- |
 | `signalUrl` | Paste the Signal group invite link. The button is disabled and labelled "link coming" until you do. |
-| `schedule` | The blocks are a **draft**. Replace them with the real plan, then delete `draft: true` from a day and the page stops labelling it as draft. |
+| `schedule` | The blocks are a placeholder. Replace them with the real plan. |
+| `scheduleStatus` | `'draft'` while the times are invented; the page says so plainly. Change the one word to `'final'` and every warning disappears. |
 
 **Daily reports** collect conversations, gospel shared, responded, baptized and groups started, plus a story and a prayer request. They work with no signal: a failed send is queued on the phone and goes out by itself on the next attempt, so a team in a dead zone never loses a report.
 
