@@ -204,7 +204,9 @@ Serve over HTTPS (required for service workers and install prompts).
 
 - The manifest is generated from `vite.config.ts`. Change the app name, colors, or shortcuts there.
 - Icons are rendered from `public/icons/icon.svg` by `npm run icons`.
-- Updates: when a new version is deployed, users see an "Update" banner on their next visit; the app also checks hourly while open.
+- Updates are automatic. A new deploy is picked up and applied on the next launch, and the app also checks whenever it comes back to the foreground, regains a connection, or every 30 minutes while open. It used to wait for someone to tap an "Update" banner, which on a phone meant people sat on old builds for days without knowing.
+- The footer shows a build stamp, so "am I on the latest?" has an answer at a glance.
+- An already-installed app still holds the old service worker until it next launches with a connection. To force it: close the app fully (swipe it away) and reopen. Failing that, remove it from the home screen and add it again.
 - Offline: the whole app shell and content is precached at install. Images fetched at runtime are cached on first view.
 - The 100 List is stored in `localStorage` on the device only. Users can back up and restore it as JSON.
 

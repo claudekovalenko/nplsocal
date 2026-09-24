@@ -23,7 +23,12 @@ export default function Footer() {
           <a href={`mailto:${site.contact.email}`} className="transition hover:text-fg">
             {site.contact.email}
           </a>
-          <span>{site.scripture.ref}</span>
+          <span className="flex items-center gap-3">
+            <span>{site.scripture.ref}</span>
+            <span title={`Build ${__BUILD_TIME__}`} className="text-faint">
+              v{__BUILD_TIME__.slice(0, 10).replace(/-/g, '.')}
+            </span>
+          </span>
         </div>
       </div>
     </footer>

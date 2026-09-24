@@ -16,13 +16,36 @@ export default function PwaBanners() {
   const [showIosHint, setShowIosHint] = useState(false);
 
   const {
-    needRefresh: [needRefresh, setNeedRefresh],
+    needRefresh: [needRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(_url, reg) {
-      if (reg) setInterval(() => reg.update(), 60 * 60 * 1000);
+      if (!reg) return;
+      // A phone app is opened, glanced at and backgrounded, so an hourly timer
+      // alone meant people sat on an old build for days. Check whenever the app
+      // comes back to the foreground or regains a connection as well.
+      const check = () => {
+        if (document.visibilityState === 'visible' && navigator.onLine) reg.update();
+      };
+      const timer = setInterval(check, 30 * 60 * 1000);
+      document.addEventListener('visibilitychange', check);
+      window.addEventListener('online', check);
+      window.addEventListener('focus', check);
+      check();
+      return () => {
+        clearInterval(timer);
+        document.removeEventListener('visibilitychange', check);
+        window.removeEventListener('online', check);
+        window.removeEventListener('focus', check);
+      };
     },
   });
+
+  // Apply a new build the moment one lands, rather than waiting for a tap.
+  // People were sitting on stale versions without realising it.
+  useEffect(() => {
+    if (needRefresh) updateServiceWorker(true);
+  }, [needRefresh, updateServiceWorker]);
 
   useEffect(() => {
     if (!isIOS || installed || dismissed) return;
@@ -42,19 +65,9 @@ export default function PwaBanners() {
         </div>
       )}
       {needRefresh && (
-        <Toast>
-          <span className="flex items-center gap-2 text-muted">
-            <RefreshCw className="h-4 w-4" /> A new version is ready.
-          </span>
-          <div className="flex items-center gap-1">
-            <button className="btn-primary !h-8 !px-4 !text-xs" onClick={() => updateServiceWorker(true)}>
-              Update
-            </button>
-            <button className="p-1.5 text-muted" aria-label="Dismiss" onClick={() => setNeedRefresh(false)}>
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </Toast>
+        <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-line bg-bg/90 px-4 py-2 text-xs text-muted backdrop-blur-xl">
+          <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Updating to the latest version…
+        </div>
       )}
       {canInstall && !dismissed && (
         <Toast>
