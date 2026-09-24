@@ -20,6 +20,19 @@ export const events: Event[] = [
     registerUrl: '#',
   },
   {
+    id: 'internship-summit-2027',
+    title: 'Internship Summit',
+    type: 'summit',
+    tier: 'network',
+    hub: 'socal',
+    // Monday and Tuesday, two days after the push ends.
+    start: '2027-01-04T09:00:00-08:00',
+    end: '2027-01-05T17:00:00-08:00',
+    location: 'Southern California',
+    description: 'Two days for current and prospective interns, right after the push.',
+    registerUrl: '#',
+  },
+  {
     id: 'oc-mid-level-2027',
     title: 'Orange County Mid-Level',
     type: 'training',

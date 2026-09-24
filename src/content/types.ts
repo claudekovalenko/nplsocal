@@ -59,7 +59,7 @@ export type EventTier = 'network' | 'hub' | 'group';
 export interface Event {
   id: string;
   title: string;
-  type: 'training' | 'gathering' | 'prayer' | 'outreach' | 'online' | 'push';
+  type: 'training' | 'summit' | 'gathering' | 'prayer' | 'outreach' | 'online' | 'push';
   tier: EventTier;
   hub: HubId;
   /** ISO date, Pacific time. For network events with unsettled dates, keep a best guess here and set dateLabel. */

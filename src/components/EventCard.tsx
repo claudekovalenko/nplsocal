@@ -6,6 +6,7 @@ import { formatRange, monthDay, formatDate, sameDay } from '@/lib/format';
 
 export const typeLabel: Record<Event['type'], string> = {
   training: 'Training',
+  summit: 'Summit',
   gathering: 'Iron on Iron',
   prayer: 'Prayer',
   outreach: 'Outreach',
