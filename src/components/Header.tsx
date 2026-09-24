@@ -45,7 +45,12 @@ export default function Header() {
   const solid = scrolled || open || !onHero;
 
   return (
-    <header className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${solid ? 'border-b border-line bg-bg/80 backdrop-blur-xl' : 'bg-transparent'}`}>
+    <header
+      // Installed on a phone the web view starts behind the status bar, so the
+      // bar sits over the logo and menu button unless we push the row down.
+      style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${solid ? 'border-b border-line bg-bg/80 backdrop-blur-xl' : 'bg-transparent'}`}
+    >
       <div className="container-x flex h-14 items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
           <Logo className="h-6 w-6" />

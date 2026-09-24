@@ -33,8 +33,9 @@ export default function PwaBanners() {
     } catch {}
   }, [isIOS, installed, dismissed]);
 
+  // Sits above the tab bar, which grows by the home-indicator inset.
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[4.5rem] z-50 flex flex-col items-center gap-2 px-4 md:bottom-5">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(4.5rem_+_env(safe-area-inset-bottom))] z-50 flex flex-col items-center gap-2 px-4 md:bottom-5">
       {!online && (
         <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-line bg-bg/90 px-4 py-2 text-xs text-muted backdrop-blur-xl">
           <WifiOff className="h-3.5 w-3.5" /> Offline — saved pages and your 100 List still work.
