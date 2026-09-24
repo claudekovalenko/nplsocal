@@ -28,7 +28,7 @@ export const events: Event[] = [
     // Monday and Tuesday, two days after the push ends.
     start: '2027-01-04T09:00:00-08:00',
     end: '2027-01-05T17:00:00-08:00',
-    location: 'Southern California',
+    location: 'Neighbors and Nations',
     description: 'Two days for current and prospective interns, right after the push.',
     registerUrl: '#',
   },

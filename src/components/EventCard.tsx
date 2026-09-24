@@ -46,6 +46,11 @@ export function FeaturedEvent({ event }: { event: Event }) {
         </div>
         <h3 className="mt-4 text-3xl md:text-4xl">{event.title}</h3>
         <p className="mt-3 text-muted">{event.description}</p>
+        {/* Where it is matters as much as when, once a venue is named. */}
+        <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-muted">
+          {event.online ? <Video className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
+          {event.city ? `${event.location} · ${event.city}` : event.location}
+        </p>
       </div>
       <div className="relative mt-8 flex items-end justify-between gap-4">
         <div>
