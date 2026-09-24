@@ -15,7 +15,7 @@ export default function Layout() {
     // grows by the bottom inset, hence more padding than the bar's own height.
     <div className="flex min-h-dvh flex-col pb-[calc(4.25rem_+_env(safe-area-inset-bottom))] md:pb-0">
       <Header />
-      <main className={`flex-1 ${onHero ? '' : 'pt-[calc(3.5rem_+_env(safe-area-inset-top))]'}`}>
+      <main className={`flex-1 ${onHero ? '' : 'pt-[var(--header-h)]'}`}>
         <Outlet />
       </main>
       <Footer />

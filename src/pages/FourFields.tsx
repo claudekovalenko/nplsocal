@@ -34,7 +34,7 @@ export default function FourFields() {
       </section>
 
       {fields.map((f, i) => (
-        <section key={f.id} id={f.id} className={`scroll-mt-16 border-t border-line ${i % 2 === 0 ? 'bg-elev' : ''}`}>
+        <section key={f.id} id={f.id} className={`scroll-mt-[var(--header-h)] border-t border-line ${i % 2 === 0 ? 'bg-elev' : ''}`}>
           <div className="container-x py-16 md:py-24">
             <div className="eyebrow">Field 0{f.number}</div>
             <h2 className="mt-3 text-3xl md:text-5xl">{f.name}</h2>

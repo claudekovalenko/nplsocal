@@ -46,6 +46,15 @@
   --radius-xl: 0.75rem;
 }
 
+/**
+ * How much room the fixed header takes, including the status-bar inset that an
+ * installed app runs underneath. Anything that must clear the header measures
+ * from this, so a notch cannot eat a page's breathing room.
+ */
+:root {
+  --header-h: calc(3.5rem + env(safe-area-inset-top));
+}
+
 html {
   -webkit-tap-highlight-color: transparent;
   scroll-behavior: smooth;

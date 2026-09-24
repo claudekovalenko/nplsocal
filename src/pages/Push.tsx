@@ -143,7 +143,7 @@ export default function Push() {
       </div>
 
       {/* Schedule */}
-      <section id="schedule" className="scroll-mt-16 border-t border-line">
+      <section id="schedule" className="scroll-mt-[var(--header-h)] border-t border-line">
         <div className="container-x py-16 md:py-24">
           <div className="eyebrow">Schedule</div>
           <h2 className="mt-3 text-3xl md:text-5xl">What happens each day.</h2>
@@ -190,7 +190,7 @@ export default function Push() {
       </section>
 
       {/* Daily report */}
-      <section id="report" className="scroll-mt-16 border-t border-line bg-elev">
+      <section id="report" className="scroll-mt-[var(--header-h)] border-t border-line bg-elev">
         <div className="container-x py-16 md:py-24">
           <div className="eyebrow">Daily report</div>
           <h2 className="mt-3 text-3xl md:text-5xl">End of the day, two minutes.</h2>
@@ -205,7 +205,7 @@ export default function Push() {
       </section>
 
       {/* Stay connected */}
-      <section id="connect" className="scroll-mt-16 border-t border-line">
+      <section id="connect" className="scroll-mt-[var(--header-h)] border-t border-line">
         <div className="container-x py-16 md:py-24">
           <div className="eyebrow">Stay connected</div>
           <h2 className="mt-3 text-3xl md:text-5xl">Want to hear more?</h2>
