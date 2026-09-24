@@ -53,7 +53,7 @@ export default function Training() {
             <Link to="/connect" className="btn-primary">
               Request a training
             </Link>
-            <Link to="/gatherings" className="btn-secondary">
+            <Link to="/events" className="btn-secondary">
               All events
             </Link>
           </div>

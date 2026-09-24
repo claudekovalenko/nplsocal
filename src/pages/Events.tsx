@@ -53,7 +53,7 @@ export default function Events() {
           {groupCount > 0 && (
             <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
               <input type="checkbox" checked={showGroups} onChange={(e) => setShowGroups(e.target.checked)} className="accent-current" />
-              Include group gatherings ({groupCount})
+              Include group-only events ({groupCount})
             </label>
           )}
         </div>

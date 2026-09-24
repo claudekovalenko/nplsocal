@@ -34,8 +34,10 @@ export default function App() {
           <Route path="tools/:slug" element={<ToolDetail />} />
           <Route path="three-thirds" element={<ThreeThirds />} />
           <Route path="training" element={<Training />} />
-          <Route path="gatherings" element={<Events />} />
-          <Route path="events" element={<Navigate to="/gatherings" replace />} />
+          <Route path="events" element={<Events />} />
+          {/* "Gatherings" meant house-church gatherings to practitioners, so the
+              section was renamed. Keep the old path working for saved links. */}
+          <Route path="gatherings" element={<Navigate to="/events" replace />} />
           <Route path="regions" element={<Hubs />} />
           <Route path="regions/:id" element={<HubDetail />} />
           <Route path="hubs" element={<Navigate to="/regions" replace />} />

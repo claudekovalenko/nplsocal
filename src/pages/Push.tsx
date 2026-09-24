@@ -223,7 +223,7 @@ export default function Push() {
               Register here
             </Link>
             , or see{' '}
-            <Link to="/gatherings" className="text-fg underline-offset-4 hover:underline">
+            <Link to="/events" className="text-fg underline-offset-4 hover:underline">
               everything else on the calendar
             </Link>
             .

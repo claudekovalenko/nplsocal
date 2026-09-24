@@ -64,11 +64,11 @@ Two doors and an About menu:
 
 | Door | What's inside |
 | --- | --- |
-| Gatherings | Network-wide events up top, then a compact calendar |
+| Events | Network-wide events up top, then a compact calendar |
 | Tools | Run a 3/3rds, the Tracker, My 100 List, Four Fields, Training, and every tool |
 | About ▾ | About (vision, convictions, FAQ), Regions (the LA/OC map), Connect |
 
-The home page is the map, the network-wide gatherings, and nothing else.
+The home page is the map, the network-wide events, and nothing else.
 
 ### Events have three tiers
 
@@ -76,7 +76,7 @@ Set `tier` on each event in `src/content/events.ts`:
 
 - `network` — for everyone. Big cards on Home and at the top of Events (LA Push, OC Mid-Level, SoCal Prayer Night). Use `dateLabel` like "Early 2027" until dates are fixed.
 - `hub` — open to a whole region. The normal calendar, grouped by month.
-- `group` — contained to a specific group or location. Hidden until someone ticks "Include group gatherings". Set `audience` to say who it's for.
+- `group` — contained to a specific group or location. Hidden until someone ticks "Include group-only events". Set `audience` to say who it's for.
 
 ### Event registration
 
@@ -140,7 +140,7 @@ Contact details are never readable by the public. A visitor's browser can insert
 | `/four-fields` | Interactive Four Fields diagram and each field with its tools |
 | `/tools`, `/tools/:slug` | Searchable, filterable toolbox and tool detail pages |
 | `/training` | The training pathway and upcoming trainings |
-| `/gatherings` | Network-wide events, then a month-grouped calendar |
+| `/events` | Network-wide events, then a month-grouped calendar (`/gatherings` redirects here) |
 | `/regions`, `/regions/:id` | Map and region pages (`la`, `oc`) |
 | `/three-thirds` | Live 3/3rds meeting runner with timers and weekly goals |
 | `/track`, `/track/new`, `/track/:id` | Generational tracker |

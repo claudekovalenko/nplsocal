@@ -15,7 +15,7 @@ export default function Register() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!event) return <Navigate to="/gatherings" replace />;
+  if (!event) return <Navigate to="/events" replace />;
 
   const days = eventDays(event.start, event.end);
   const multiDay = days.length > 1;
@@ -76,8 +76,8 @@ export default function Register() {
             Your email app should have opened with the details. If it didn't, send them to {site.contact.email}.
           </p>
         )}
-        <Link to="/gatherings" className="btn-secondary mt-8">
-          Back to gatherings
+        <Link to="/events" className="btn-secondary mt-8">
+          Back to events
         </Link>
       </section>
     );
@@ -87,8 +87,8 @@ export default function Register() {
 
   return (
     <section className="container-x max-w-2xl py-12 md:py-16">
-      <Link to="/gatherings" className="inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-fg">
-        <ArrowLeft className="h-4 w-4" /> Gatherings
+      <Link to="/events" className="inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-fg">
+        <ArrowLeft className="h-4 w-4" /> Events
       </Link>
 
       <div className="eyebrow mt-8">Register · {hub ? hub.shortName : 'All SoCal'}</div>

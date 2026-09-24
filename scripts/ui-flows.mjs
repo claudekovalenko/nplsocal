@@ -28,11 +28,11 @@ page.on('pageerror', (e) => jsErrors.push(String(e.message)));
 
 console.log(`\nCritical journeys at ${BASE}`);
 
-// 1. Every event on the gatherings page offers a way to register.
-await page.goto(BASE + '/gatherings', { waitUntil: 'networkidle' });
+// 1. Every event on the events page offers a way to register.
+await page.goto(BASE + '/events', { waitUntil: 'networkidle' });
 const cards = await page.locator('article').count();
 const registerLinks = await page.getByRole('link', { name: /Register/ }).count();
-check('gatherings page lists events', cards > 0, `${cards} featured`);
+check('events page lists events', cards > 0, `${cards} featured`);
 check('featured events offer registration', registerLinks > 0, `${registerLinks} register links`);
 
 // 2. Registering takes you to a working form and through to a confirmation.

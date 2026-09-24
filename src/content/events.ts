@@ -25,11 +25,11 @@ export const events: Event[] = [
     type: 'training',
     tier: 'network',
     hub: 'oc',
-    start: '2027-03-05T09:00:00-08:00',
-    end: '2027-03-07T17:00:00-08:00',
-    dateLabel: 'Spring 2027',
+    // Friday and Saturday, Feb 19–20 2027.
+    start: '2027-02-19T09:00:00-08:00',
+    end: '2027-02-20T17:00:00-08:00',
     location: 'Orange County',
-    description: 'Multi-day intensive for practitioners past the 4 Fields, taking a stream toward generations.',
+    description: 'Two-day intensive for practitioners past the 4 Fields, taking a stream toward generations.',
     registerUrl: '#',
   },
   {

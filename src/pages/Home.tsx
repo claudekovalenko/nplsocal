@@ -22,8 +22,8 @@ export default function Home() {
           <div className="eyebrow fade-up">{site.hashtag} · Los Angeles · Orange County</div>
           <h1 className="fade-up fade-up-2 mt-5 text-5xl leading-[0.95] sm:text-6xl md:text-7xl lg:text-8xl">No Place Left.</h1>
           <div className="fade-up fade-up-3 mt-8 flex flex-wrap justify-center gap-3">
-            <Link to="/gatherings" className="btn-primary min-w-40">
-              Gatherings
+            <Link to="/events" className="btn-primary min-w-40">
+              Events
             </Link>
             <Link to="/tools" className="btn-secondary min-w-40">
               Tools
@@ -44,8 +44,8 @@ export default function Home() {
               <div className="eyebrow">For everyone</div>
               <h2 className="mt-3 text-3xl md:text-5xl">Next up.</h2>
             </div>
-            <Link to="/gatherings" className="btn-ghost">
-              All gatherings <ArrowRight className="h-4 w-4" />
+            <Link to="/events" className="btn-ghost">
+              All events <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
           <div className="mt-10 grid gap-4 md:grid-cols-2">
