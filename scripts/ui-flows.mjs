@@ -49,10 +49,19 @@ await page.fill('input[autocomplete="name"]', 'Audit Person');
 await page.fill('input[autocomplete="email"]', 'audit@example.com');
 await page.fill('input[autocomplete="tel"]', '555-0100');
 await page.fill('input[type="number"]', '3');
-const cityInput = page.locator('input[placeholder="Santa Ana"]');
-if (await cityInput.count()) await cityInput.fill('Long Beach');
-const churchInput = page.locator('label').filter({ hasText: /Church \/ Network/ }).locator('input');
-if (await churchInput.count()) await churchInput.fill('Audit Church');
+// Find fields by their visible label, not by placeholder text: a placeholder
+// is copy that changes, and selecting on it made this journey fail the moment
+// an example city was removed.
+const byLabel = (text) => page.locator('label').filter({ hasText: text }).locator('input, textarea');
+await byLabel(/^City$/).fill('Long Beach');
+await byLabel(/Church \/ Network/).fill('Audit Church');
+
+// Every field the form marks required must actually be filled, or the browser
+// silently blocks submit and the failure looks like a broken form.
+const unfilled = await page.$$eval('input[required], select[required], textarea[required]', (els) =>
+  els.filter((e) => !e.value.trim()).map((e) => e.name || e.getAttribute('autocomplete') || e.type),
+);
+check('every required field got filled before submitting', unfilled.length === 0, unfilled.join(', '));
 
 // Multi-day events must let people pick days.
 const dayChips = await page.locator('fieldset button').count();
