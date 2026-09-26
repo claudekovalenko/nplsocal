@@ -5,4 +5,5 @@ export * from './fourFields';
 export * from './tools';
 export * from './trainings';
 export * from './events';
+export * from './venues';
 export * from './faq';

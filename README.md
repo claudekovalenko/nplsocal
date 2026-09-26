@@ -54,7 +54,15 @@ Everything visible on the site comes from `src/content/`:
 | `tools.ts` | Every tool in the toolbox: summary, description, steps, scripture, optional links |
 | `trainings.ts` | The training pathway (411 → 4 Fields → Iron on Iron → Coaching) |
 | `events.ts` | Upcoming events. **The current entries are samples** — replace with real dates |
+| `venues.ts` | Street addresses for named venues, typed once and picked up by every event held there |
 | `faq.ts` | Questions on the Vision page |
+
+**Venues.** An event's `location` is matched against `venues.ts`. Fill in the
+`address` and it appears under the venue name on the featured card, on the
+registration form and on the confirmation screen — the card links it to a maps
+app, the form shows it as plain text because that page deliberately has nothing
+to click out of. An empty `address` shows nothing at all: better than sending
+somebody driving to a guess. `Neighbors and Nations` is waiting on its address.
 
 Adding a tool is one new object in `tools.ts` plus its slug in the right field's `toolSlugs` list. It gets a card, a detail page, search, and offline caching automatically.
 
@@ -124,14 +132,47 @@ Tables are prefixed `npl_` because the database is shared with other small apps.
 
 | Table | Who can read | Who can write |
 | --- | --- | --- |
-| `npl_registrations` | Signed-in organizers only | Anyone may submit a sign-up; organizers may edit or delete |
-| `npl_groups` | Signed-in practitioners only | Signed-in practitioners |
+| `npl_registrations` | `admin`, `leads` | Anyone may submit a sign-up; `admin` may edit or delete |
+| `npl_interest` | `admin`, `leads` | Anyone may leave their details; `admin` may edit or delete |
+| `npl_push_reports` | `admin` | Any team may submit a report; `admin` may edit or delete |
+| `npl_groups` | `admin` | `admin` |
+| `npl_members` | Anyone signed in | `admin` |
 
 Contact details are never readable by the public. A visitor's browser can insert a registration but cannot read a single row back.
 
-`supabase/schema.sql` is the source of truth for this structure. To move to a dedicated project later, run that file there and change the two values in `.env`.
+`supabase/schema.sql` is the source of truth for this structure, and it can be re-run safely. To move to a dedicated project later, run that file there and change the two values in `.env`.
 
-**Still to do in the Supabase dashboard** (it was returning 500 errors when this was set up): confirm Email auth is enabled under Authentication → Providers, and add the deployed site URL to Authentication → URL Configuration so magic-link sign-in redirects back correctly. Public registration works without either; only the organizer sign-in needs them.
+### Signing in
+
+Private pages (`/roster`, `/track`) ask for an email and password. There is no
+emailed link: organizers open these on a phone mid-event, and a round trip
+through an inbox is where that falls down.
+
+Two roles, held in `npl_members` and enforced by row-level security:
+
+| Role | Sees |
+| --- | --- |
+| `admin` | Everything — rosters, the tracker, push reports — and is the only role that can change anything |
+| `leads` | The leads only: who registered, and who asked to hear more |
+
+The checks in `src/lib/auth.ts` and `src/hooks/useAuth.ts` decide what the
+screen shows. They are not the lock — the database is. Someone who edits their
+own browser gets a page with buttons on it and nothing behind them.
+
+To add somebody: create their user under Authentication → Users in the Supabase
+dashboard, then insert their row:
+
+```sql
+insert into public.npl_members (email, role, name)
+values ('someone@example.com', 'leads', 'Their Name');
+```
+
+To take access away, delete their `npl_members` row — it takes effect on their
+next page load, without waiting for a session to expire.
+
+**Still to check in the Supabase dashboard** (it was returning 500 errors when
+this was set up): confirm Email auth is enabled under Authentication →
+Providers. Nothing else is needed — password sign-in does not use redirect URLs.
 
 ## Routes
 
@@ -168,7 +209,20 @@ npm run typecheck   # types only
 npm run keepalive   # touch the database so the free project never pauses
 ```
 
-`npm run audit` builds **without** database credentials on purpose, so the journey tests submit real forms without writing rows to the live database. It reports broken routes, uncaught errors, failed requests, controls a screen reader cannot name, images without alt text, horizontal overflow at phone width, and any click that blanks the page. It exits non-zero on a problem, and runs on every push through `.github/workflows/ci.yml`.
+`npm run audit` runs two passes and exits non-zero on any problem. It runs on
+every push through `.github/workflows/ci.yml`.
+
+**Pass one** builds **without** database credentials on purpose, so the journey
+tests submit real forms without writing rows to the live database. It reports
+broken routes, uncaught errors, failed requests, controls a screen reader cannot
+name, images without alt text, horizontal overflow at phone width, and any click
+that blanks the page, then drives the critical journeys end to end.
+
+**Pass two** builds **with** credentials — not the real project, just non-empty
+values — which turns sign-in on, and checks that a signed-out visitor is met by
+a sign-in form and not by somebody's phone number. It also checks the things
+that must stay open: registering, and the push hub. No database is reached and
+none is needed; signed out is signed out.
 
 ## Keeping the database awake
 

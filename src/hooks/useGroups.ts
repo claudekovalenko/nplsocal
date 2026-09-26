@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Group } from '@/lib/groups';
 import { getStore, type GroupStore } from '@/lib/store';
+import { onAuthChange } from '@/lib/auth';
 
 export function useGroups() {
   const [store, setStore] = useState<GroupStore | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<{ email: string } | null>(null);
 
   const refresh = useCallback(async (s: GroupStore) => {
     try {
@@ -27,10 +27,9 @@ export function useGroups() {
       setStore(s);
       refresh(s);
       off = s.subscribe(() => refresh(s));
-      if (s.auth) {
-        s.auth.user().then(setUser);
-        offAuth = s.auth.onChange(() => s.auth!.user().then(setUser));
-      }
+      // The tracker is admin-only in the database, so signing in or out changes
+      // what comes back.
+      offAuth = onAuthChange(() => refresh(s));
     });
     return () => {
       off();
@@ -55,6 +54,5 @@ export function useGroups() {
     [store, refresh],
   );
 
-  const canEdit = !store?.auth || !!user;
-  return { store, groups, loading, error, upsert, remove, user, canEdit };
+  return { store, groups, loading, error, upsert, remove };
 }

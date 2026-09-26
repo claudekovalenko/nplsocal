@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Lock, Wifi, HardDrive } from 'lucide-react';
+import { Plus, Wifi, HardDrive } from 'lucide-react';
 import { useGroups } from '@/hooks/useGroups';
+import { useAuth } from '@/hooks/useAuth';
+import { NoAccess, SignedInBar, SignIn } from '@/components/SignIn';
 import { summarize, generations, ELEMENTS, type Group } from '@/lib/groups';
 import { hubs } from '@/content';
 
@@ -19,10 +21,10 @@ function Circle({ g, gen }: { g: Group; gen: number }) {
 }
 
 export default function Track() {
-  const { store, groups, loading, error, user, canEdit } = useGroups();
+  const { store, groups, loading, error } = useGroups();
+  const auth = useAuth();
   const [hub, setHub] = useState<'all' | 'la' | 'oc'>('all');
-  const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
+  const canEdit = auth.isAdmin;
 
   const stats = useMemo(() => summarize(groups), [groups]);
   const gens = useMemo(() => generations(groups), [groups]);
@@ -55,6 +57,26 @@ export default function Track() {
     ['Baptized', view.baptized],
     ['Generations', view.maxGen],
   ] as const;
+
+  /**
+   * The tracker names groups, leaders and areas. That is the most sensitive
+   * thing on the site, so it is admin only — in the database and here.
+   */
+  if (!auth.isAdmin) {
+    return (
+      <section className="container-x py-12 md:py-16">
+        <div className="eyebrow">Track</div>
+        <h1 className="mt-3 text-4xl md:text-6xl">The map, live.</h1>
+        {auth.loading ? (
+          <p className="py-16 text-muted">Checking your sign-in…</p>
+        ) : auth.email ? (
+          <NoAccess auth={auth} what="The tracker" />
+        ) : (
+          <SignIn auth={auth} what="The tracker is admin only. Sign in to see it." />
+        )}
+      </section>
+    );
+  }
 
   return (
     <>
@@ -101,36 +123,7 @@ export default function Track() {
       </section>
 
       <section className="container-x py-10 md:py-14">
-        {store?.auth && !user && (
-          <div className="card mb-8 flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <span className="flex items-center gap-2 text-sm text-muted">
-              <Lock className="h-4 w-4" /> Sign in to add or edit. Anyone can view.
-            </span>
-            {sent ? (
-              <span className="text-sm">Check your email for a sign-in link.</span>
-            ) : (
-              <form
-                className="flex gap-2"
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  await store.auth!.signIn(email);
-                  setSent(true);
-                }}
-              >
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" className="field !py-2 sm:w-56" />
-                <button className="btn-secondary !h-9">Send link</button>
-              </form>
-            )}
-          </div>
-        )}
-        {store?.auth && user && (
-          <div className="mb-8 flex items-center justify-between text-xs text-faint">
-            <span>Signed in as {user.email}</span>
-            <button onClick={() => store.auth!.signOut()} className="underline-offset-4 hover:underline">
-              Sign out
-            </button>
-          </div>
-        )}
+        <SignedInBar auth={auth} className="mb-8" />
 
         {error && <p className="mb-6 text-sm text-red-400">{error}</p>}
 

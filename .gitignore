@@ -4,3 +4,4 @@ dev-dist
 *.local
 .DS_Store
 ui-audit-report.json
+dist-gated/

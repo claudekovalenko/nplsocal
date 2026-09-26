@@ -13,13 +13,6 @@ export interface GroupStore {
   remove(id: string): Promise<void>;
   /** Called whenever data changes (locally or remotely). Returns an unsubscribe. */
   subscribe(cb: () => void): () => void;
-  /** Auth is only meaningful for the shared store. */
-  auth?: {
-    user(): Promise<{ email: string } | null>;
-    signIn(email: string): Promise<void>;
-    signOut(): Promise<void>;
-    onChange(cb: () => void): () => void;
-  };
 }
 
 const KEY = 'npl:groups';

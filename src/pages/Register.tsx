@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { CheckCircle2, Lock } from 'lucide-react';
 import { events, site, hubById } from '@/content';
+import { VenueAddress } from '@/components/EventCard';
 import { formatRange, eventDays, dayLabel } from '@/lib/format';
 import { emptyRegistration, uid, type Registration } from '@/lib/registrations';
 import { LIMITS } from '@/lib/limits';
@@ -72,6 +73,7 @@ export default function Register() {
           {form.party > 1 ? ` with ${form.party - 1} other${form.party > 2 ? 's' : ''}` : ''}. We'll be in touch at{' '}
           {form.email}.
         </p>
+        <VenueAddress location={event.location} link={false} className="mt-4" />
         {store.kind === 'local' && (
           <p className="mt-4 text-xs text-faint">
             Your email app should have opened with the details. If it didn't, send them to {site.contact.email}.
@@ -93,6 +95,7 @@ export default function Register() {
       <p className="mt-3 text-muted">
         {event.dateLabel ?? formatRange(event.start, event.end)} · {event.city ?? event.location}
       </p>
+      <VenueAddress location={event.location} link={false} className="mt-1" />
 
       <form onSubmit={submit} className="mt-10 space-y-7">
         <div className="grid gap-5 sm:grid-cols-2">

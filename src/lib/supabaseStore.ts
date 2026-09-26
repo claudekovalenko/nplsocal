@@ -84,22 +84,5 @@ export function createSupabaseStore(): GroupStore {
       subs.add(cb);
       return () => subs.delete(cb);
     },
-    auth: {
-      async user() {
-        const { data } = await sb.auth.getUser();
-        return data.user?.email ? { email: data.user.email } : null;
-      },
-      async signIn(email) {
-        const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } });
-        if (error) throw error;
-      },
-      async signOut() {
-        await sb.auth.signOut();
-      },
-      onChange(cb) {
-        const { data } = sb.auth.onAuthStateChange(() => cb());
-        return () => data.subscription.unsubscribe();
-      },
-    },
   };
 }

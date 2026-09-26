@@ -1,20 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Registration } from '@/lib/registrations';
 import { getRegStore } from '@/lib/regStore';
+import { onAuthChange } from '@/lib/auth';
 
 export function useRegistrations(eventId?: string) {
   const store = getRegStore();
   const [rows, setRows] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<{ email: string } | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       setRows(await store.list(eventId));
       setError(null);
     } catch (e) {
-      // A permission error here is expected when signed out on the shared store.
+      // Signed out, row-level security returns nothing rather than an error, so
+      // this is a real fault: no network, or a table that has gone away.
       setError((e as Error).message);
       setRows([]);
     } finally {
@@ -25,14 +26,8 @@ export function useRegistrations(eventId?: string) {
   useEffect(() => {
     refresh();
     const off = store.subscribe(refresh);
-    let offAuth = () => {};
-    if (store.auth) {
-      store.auth.user().then(setUser);
-      offAuth = store.auth.onChange(() => {
-        store.auth!.user().then(setUser);
-        refresh();
-      });
-    }
+    // Signing in changes what the database will hand back, so reload with it.
+    const offAuth = onAuthChange(refresh);
     return () => {
       off();
       offAuth();
@@ -61,6 +56,5 @@ export function useRegistrations(eventId?: string) {
     [store, refresh],
   );
 
-  const canRead = !store.auth || !!user;
-  return { store, rows, loading, error, add, addMany, remove, user, canRead };
+  return { store, rows, loading, error, add, addMany, remove, refresh };
 }

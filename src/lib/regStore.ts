@@ -5,8 +5,10 @@ import { isShared, supabase } from './supabaseClient';
  * Where sign-ups are kept.
  *  - 'local': this device only. Used until a shared database is connected;
  *    the form also emails the organizer so nothing is lost.
- *  - 'shared': a Supabase table. Anyone may submit; only signed-in
- *    organizers can read the roster (names, emails and phones are private).
+ *  - 'shared': a Supabase table. Anyone may submit; only signed-in members with
+ *    the admin or leads role can read the roster (names, emails and phones are
+ *    private). Sign-in itself lives in `./auth`, not here: it is the same
+ *    session for every table in the app.
  */
 export interface RegistrationStore {
   readonly kind: 'local' | 'shared';
@@ -15,12 +17,6 @@ export interface RegistrationStore {
   addMany(regs: Registration[]): Promise<void>;
   remove(id: string): Promise<void>;
   subscribe(cb: () => void): () => void;
-  auth?: {
-    user(): Promise<{ email: string } | null>;
-    signIn(email: string): Promise<void>;
-    signOut(): Promise<void>;
-    onChange(cb: () => void): () => void;
-  };
 }
 
 const KEY = 'npl:registrations';
@@ -138,26 +134,6 @@ class SharedRegStore implements RegistrationStore {
     this.subs.add(cb);
     return () => this.subs.delete(cb);
   }
-  auth = {
-    async user() {
-      const { data } = await supabase().auth.getUser();
-      return data.user?.email ? { email: data.user.email } : null;
-    },
-    async signIn(email: string) {
-      const { error } = await supabase().auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: window.location.href },
-      });
-      if (error) throw error;
-    },
-    async signOut() {
-      await supabase().auth.signOut();
-    },
-    onChange(cb: () => void) {
-      const { data } = supabase().auth.onAuthStateChange(() => cb());
-      return () => data.subscription.unsubscribe();
-    },
-  };
 }
 
 let instance: RegistrationStore | null = null;

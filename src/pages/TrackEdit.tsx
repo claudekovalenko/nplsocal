@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { useGroups } from '@/hooks/useGroups';
+import { useAuth } from '@/hooks/useAuth';
 import { emptyGroup, uid, ELEMENTS, type Group } from '@/lib/groups';
 import { hubs } from '@/content';
 
 export default function TrackEdit() {
   const { id } = useParams();
   const nav = useNavigate();
-  const { groups, loading, upsert, remove, canEdit } = useGroups();
+  const { groups, upsert, remove } = useGroups();
+  const auth = useAuth();
+  const canEdit = auth.isAdmin;
   const [g, setG] = useState<Group>(() => ({ ...emptyGroup(), id: uid() }));
   const isNew = !id;
 
@@ -22,10 +25,21 @@ export default function TrackEdit() {
   const set = <K extends keyof Group>(k: K, v: Group[K]) => setG((x) => ({ ...x, [k]: v }));
   const num = (k: 'attending' | 'believers' | 'baptized') => (e: React.ChangeEvent<HTMLInputElement>) => set(k, Math.max(0, Number(e.target.value) || 0));
 
-  if (!loading && !canEdit) {
+  // Default to shut, never to open: while the session is still being looked up
+  // there is no editing here. Showing the form first and revoking it a moment
+  // later hands somebody a form they cannot save.
+  if (auth.loading) {
     return (
       <section className="container-x py-24 text-center">
-        <p className="text-muted">Sign in on the Track page to edit.</p>
+        <p className="text-muted">Checking your sign-in…</p>
+      </section>
+    );
+  }
+
+  if (!canEdit) {
+    return (
+      <section className="container-x py-24 text-center">
+        <p className="text-muted">Sign in as an admin on the Track page to edit.</p>
         <Link to="/track" className="btn-secondary mt-6">
           Back
         </Link>

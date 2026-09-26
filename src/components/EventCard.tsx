@@ -1,8 +1,45 @@
 import { Link } from 'react-router-dom';
 import { MapPin, Video, ArrowUpRight } from 'lucide-react';
 import type { Event } from '@/content';
-import { hubById } from '@/content';
+import { hubById, mapsUrl, venueFor } from '@/content';
 import { formatRange, monthDay, formatDate, sameDay } from '@/lib/format';
+
+/**
+ * The street address for a named venue, with a tap-to-navigate link. Renders
+ * nothing until the address is filled in, so a half-known venue never shows a
+ * dead link.
+ */
+export function VenueAddress({
+  location,
+  className = 'mt-1',
+  // The registration form deliberately has nothing to click out of, so there
+  // the address is plain text.
+  link = true,
+}: {
+  location: string;
+  className?: string;
+  link?: boolean;
+}) {
+  const venue = venueFor(location);
+  if (!venue?.address) return null;
+  return (
+    <p className={`text-sm ${className}`}>
+      {link ? (
+        <a
+          href={mapsUrl(venue)}
+          target="_blank"
+          rel="noreferrer"
+          className="text-muted underline-offset-4 hover:text-fg hover:underline"
+        >
+          {venue.address}
+        </a>
+      ) : (
+        <span className="text-muted">{venue.address}</span>
+      )}
+      {venue.arrival && <span className="mt-0.5 block text-xs text-faint">{venue.arrival}</span>}
+    </p>
+  );
+}
 
 export const typeLabel: Record<Event['type'], string> = {
   training: 'Training',
@@ -51,6 +88,7 @@ export function FeaturedEvent({ event }: { event: Event }) {
           {event.online ? <Video className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
           {event.city ? `${event.location} · ${event.city}` : event.location}
         </p>
+        <VenueAddress location={event.location} />
       </div>
       <div className="relative mt-8 flex items-end justify-between gap-4">
         <div>
