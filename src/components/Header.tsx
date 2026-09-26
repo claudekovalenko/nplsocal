@@ -8,7 +8,7 @@ import Logo from './Logo';
 const linkClass = (isActive: boolean) =>
   `rounded-md px-3 py-1.5 text-[13px] font-medium transition ${isActive ? 'bg-fg/8 text-fg' : 'text-muted hover:bg-fg/5 hover:text-fg'}`;
 
-export default function Header() {
+export default function Header({ minimal = false }: { minimal?: boolean } = {}) {
   const [open, setOpen] = useState(false);
   const [about, setAbout] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -42,7 +42,34 @@ export default function Header() {
     };
   }, [about]);
 
-  const solid = scrolled || open || !onHero;
+  const solid = scrolled || open || !onHero || minimal;
+
+  // On the form route the wordmark is not a link either: the whole point is
+  // that there is nothing to click away to.
+  if (minimal) {
+    return (
+      <header
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+        className="fixed inset-x-0 top-0 z-40 border-b border-line bg-bg/80 backdrop-blur-xl"
+      >
+        <div className="container-x flex h-14 items-center justify-between">
+          <span className="flex items-center gap-2.5">
+            <Logo className="h-6 w-6" />
+            <span className="text-sm font-semibold uppercase tracking-[0.12em]">{site.shortName}</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="rounded-md p-2 text-muted transition hover:bg-fg/5 hover:text-fg"
+            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+        </div>
+      </header>
+    );
+  }
+
 
   return (
     <header

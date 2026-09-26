@@ -2,7 +2,19 @@ import { Link } from 'react-router-dom';
 import { site, navigation, aboutMenu } from '@/content';
 import Logo from './Logo';
 
-export default function Footer() {
+export default function Footer({ minimal = false }: { minimal?: boolean } = {}) {
+  if (minimal) {
+    // Wordmark only. No links, so the form cannot be clicked out of.
+    return (
+      <footer className="mt-24 border-t border-line">
+        <div className="container-x flex items-center gap-2.5 py-8">
+          <Logo className="h-6 w-6" />
+          <span className="text-sm font-semibold uppercase tracking-[0.12em]">{site.shortName}</span>
+        </div>
+      </footer>
+    );
+  }
+
   return (
     <footer className="mt-24 border-t border-line">
       <div className="container-x flex flex-col gap-8 py-10 md:flex-row md:items-center md:justify-between">

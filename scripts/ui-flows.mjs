@@ -124,6 +124,16 @@ if (await notes.count()) {
   check('notes input caps at the database limit', cappedNotes === 4000, `${cappedNotes} chars kept of 5000`);
 }
 
+// 4c. The form link is sent to people with one job. Nothing on that page may
+// lead anywhere else, or someone wanders off mid-registration.
+await page.goto(BASE + '/register/socal-gospel-conversation-nov', { waitUntil: 'networkidle' });
+const escapes = await page.evaluate(() => ({
+  links: document.querySelectorAll('a[href]').length,
+  tabBar: document.querySelectorAll('nav[aria-label="Quick"]').length,
+}));
+check('form page offers no way to click out', escapes.links === 0 && escapes.tabBar === 0,
+  `${escapes.links} links, ${escapes.tabBar} tab bars`);
+
 // 5. The push hub carries the whole event.
 await page.goto(BASE + '/push', { waitUntil: 'networkidle' });
 const pushHeading = (await page.textContent('h1')) || '';

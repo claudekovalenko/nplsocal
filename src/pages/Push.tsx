@@ -115,9 +115,6 @@ export default function Push() {
                 <MessageCircle className="h-4 w-4" /> Signal chat — link coming
               </button>
             )}
-            <a href="#connect" className="btn-ghost">
-              Not sure yet?
-            </a>
           </div>
 
           <nav className="mt-10 flex flex-wrap gap-2" aria-label="On this page">
