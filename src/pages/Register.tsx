@@ -123,7 +123,7 @@ export default function Register() {
           </label>
           <label className="block">
             <span className="eyebrow">City</span>
-            <input required className="field mt-2" value={form.city} onChange={text('city')} placeholder="Santa Ana" maxLength={LIMITS.city} />
+            <input required className="field mt-2" value={form.city} onChange={text('city')} maxLength={LIMITS.city} />
           </label>
           <label className="block sm:col-span-2">
             <span className="eyebrow">Church / Network</span>
@@ -133,7 +133,6 @@ export default function Register() {
               value={form.church}
               onChange={text('church')}
               maxLength={LIMITS.church}
-              placeholder="Grace Fullerton, NPL SoCal, or both"
             />
           </label>
           {multiDay && (

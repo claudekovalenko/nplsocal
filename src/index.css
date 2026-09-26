@@ -56,8 +56,22 @@
 }
 
 html {
+  /* The grey flash the browser paints on tap is suppressed because it looks
+     wrong over this palette. Every control below replaces it with its own
+     :active state — without one, a press gives no feedback at all until React
+     re-renders, which reads as lag. */
   -webkit-tap-highlight-color: transparent;
   scroll-behavior: smooth;
+}
+
+/* Respond to the finger, not to the state change. `manipulation` also drops the
+   wait for a possible double-tap-to-zoom that some browsers still apply. */
+button,
+a,
+[role='button'],
+label,
+summary {
+  touch-action: manipulation;
 }
 body {
   @apply bg-bg text-fg antialiased;
@@ -87,33 +101,35 @@ h1, h2, h3, h4 {
 @utility btn {
   @apply inline-flex h-10 items-center justify-center gap-2 rounded-md px-6 text-sm font-medium tracking-wide transition
     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60
-    disabled:pointer-events-none disabled:opacity-40;
+    disabled:pointer-events-none disabled:opacity-40
+    duration-100 active:scale-[0.97];
 }
 @utility btn-primary {
   @apply inline-flex h-10 items-center justify-center gap-2 rounded-md px-6 text-sm font-medium tracking-wide transition
     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60
     disabled:pointer-events-none disabled:opacity-40
-    bg-fg text-bg hover:opacity-90;
+    bg-fg text-bg hover:opacity-90 duration-100 active:scale-[0.97];
 }
 @utility btn-secondary {
   @apply inline-flex h-10 items-center justify-center gap-2 rounded-md px-6 text-sm font-medium tracking-wide transition
     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60
     disabled:pointer-events-none disabled:opacity-40
-    border border-line-strong bg-fg/5 text-fg backdrop-blur-md hover:bg-fg/10;
+    border border-line-strong bg-fg/5 text-fg backdrop-blur-md hover:bg-fg/10 duration-100 active:scale-[0.97];
 }
 @utility btn-ghost {
   @apply inline-flex h-10 items-center justify-center gap-2 rounded-md px-4 text-sm font-medium tracking-wide transition
     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60
     disabled:pointer-events-none disabled:opacity-40
-    text-fg hover:bg-fg/5;
+    text-fg hover:bg-fg/5 duration-100 active:scale-[0.97];
 }
 
 @utility pill {
   @apply inline-flex h-8 items-center rounded-full border border-line px-3 text-xs font-medium text-muted transition
-    hover:border-line-strong hover:text-fg;
+    duration-100 hover:border-line-strong hover:text-fg active:scale-[0.95] active:bg-fg/10;
 }
 @utility pill-active {
-  @apply inline-flex h-8 items-center rounded-full border border-fg bg-fg px-3 text-xs font-medium text-bg transition;
+  @apply inline-flex h-8 items-center rounded-full border border-fg bg-fg px-3 text-xs font-medium text-bg transition
+    duration-100 active:scale-[0.95];
 }
 
 @utility field {

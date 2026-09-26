@@ -80,7 +80,7 @@ export default function PushReportForm({ eventId, days }: { eventId: string; day
         </label>
         <label className="block">
           <span className="eyebrow">Team or area</span>
-          <input className="field mt-2" value={form.area} onChange={(e) => set('area', e.target.value)} placeholder="South LA" maxLength={LIMITS.area} />
+          <input className="field mt-2" value={form.area} onChange={(e) => set('area', e.target.value)} maxLength={LIMITS.area} />
         </label>
       </div>
 
