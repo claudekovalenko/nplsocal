@@ -167,25 +167,34 @@ export async function submitInterest(interest: Interest) {
   }
 }
 
-/** Retry anything queued while offline. Safe to call often; does nothing when empty. */
+/**
+ * Retry anything queued while offline. Safe to call often; does nothing when empty.
+ *
+ * The two kinds are flushed independently: if reports send but interest fails
+ * (or the other way around), only the batch that actually failed goes back on
+ * the queue. Requeuing both on any failure would resend — and duplicate — the
+ * batch that already made it to the database.
+ */
 export async function flushPending() {
   if (!isShared) return;
   const reports = drain<PushReport>(PENDING_REPORTS);
   const interest = drain<Interest>(PENDING_INTEREST);
-  if (!reports.length && !interest.length) return;
-  try {
-    if (reports.length) {
+  if (reports.length) {
+    try {
       const { error } = await supabase().from('npl_push_reports').insert(reports.map(reportRow));
       if (error) throw error;
+    } catch {
+      // Put them back rather than losing them.
+      reports.forEach((r) => queue(PENDING_REPORTS, r));
     }
-    if (interest.length) {
+  }
+  if (interest.length) {
+    try {
       const { error } = await supabase().from('npl_interest').insert(interest.map(interestRow));
       if (error) throw error;
+    } catch {
+      interest.forEach((i) => queue(PENDING_INTEREST, i));
     }
-  } catch {
-    // Put them back rather than losing them.
-    reports.forEach((r) => queue(PENDING_REPORTS, r));
-    interest.forEach((i) => queue(PENDING_INTEREST, i));
   }
 }
 

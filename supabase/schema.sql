@@ -110,3 +110,57 @@ create policy "npl_heartbeat public read" on public.npl_heartbeat
 drop policy if exists "npl_heartbeat public touch" on public.npl_heartbeat;
 create policy "npl_heartbeat public touch" on public.npl_heartbeat
   for update to anon, authenticated using (id = 1) with check (id = 1);
+
+-- ── Hardening for the public insert endpoints ─────────────────────
+-- npl_registrations, npl_push_reports and npl_interest accept inserts from
+-- anyone on the internet, so the database enforces its own limits rather than
+-- trusting the form. src/lib/limits.ts mirrors these numbers and caps each
+-- input at the same value, so nobody fills in a form and is refused afterwards.
+-- Change a limit in both places or the two drift apart.
+
+-- Every day must look like a date AND be a date that exists: a plain regex
+-- passes 2027-02-30, which Postgres and JavaScript both quietly roll into March.
+create or replace function public.npl_days_are_valid(days text[])
+returns boolean language plpgsql immutable as $$
+declare d text;
+begin
+  if days is null then return true; end if;
+  foreach d in array days loop
+    if d !~ '^\d{4}-\d{2}-\d{2}$' then return false; end if;
+    begin
+      perform d::date;
+    exception when others then
+      return false;
+    end;
+  end loop;
+  return true;
+end $$;
+
+alter table public.npl_registrations drop constraint if exists npl_registrations_sane;
+alter table public.npl_registrations add constraint npl_registrations_sane check (
+  length(btrim(name)) > 0 and length(name) <= 200
+  and length(btrim(event_id)) > 0 and length(event_id) <= 100
+  and length(email) <= 320 and length(phone) <= 50
+  and length(city) <= 120 and length(church) <= 200 and length(notes) <= 4000
+  and coalesce(array_length(days, 1), 0) <= 60
+  and public.npl_days_are_valid(days)
+);
+
+alter table public.npl_push_reports drop constraint if exists npl_push_reports_sane;
+alter table public.npl_push_reports add constraint npl_push_reports_sane check (
+  length(btrim(reporter)) > 0 and length(reporter) <= 200
+  and length(btrim(event_id)) > 0 and length(event_id) <= 100
+  and length(team) <= 200 and length(area) <= 200
+  and length(story) <= 8000 and length(prayer) <= 4000
+  and conversations <= 100000 and gospel_shared <= 100000
+  and responded <= 100000 and baptized <= 100000 and groups_started <= 100000
+);
+
+alter table public.npl_interest drop constraint if exists npl_interest_sane;
+alter table public.npl_interest add constraint npl_interest_sane check (
+  length(btrim(name)) > 0 and length(name) <= 200
+  and length(email) <= 320 and length(phone) <= 50
+  and length(city) <= 120 and length(church) <= 200
+  and length(notes) <= 4000 and length(source) <= 100
+  and coalesce(array_length(wants, 1), 0) <= 20
+);

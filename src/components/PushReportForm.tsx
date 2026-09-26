@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { CheckCircle2, CloudOff } from 'lucide-react';
 import { dayLabel } from '@/lib/format';
 import { emptyReport, submitReport, type PushReport } from '@/lib/pushStore';
+import { LIMITS } from '@/lib/limits';
 
 const COUNTS: { key: keyof PushReport; label: string; hint: string }[] = [
   { key: 'conversations', label: 'Conversations', hint: 'Spiritual conversations started' },
@@ -75,11 +76,11 @@ export default function PushReportForm({ eventId, days }: { eventId: string; day
         </label>
         <label className="block">
           <span className="eyebrow">Your name</span>
-          <input required className="field mt-2" value={form.reporter} onChange={(e) => set('reporter', e.target.value)} />
+          <input required className="field mt-2" value={form.reporter} onChange={(e) => set('reporter', e.target.value)} maxLength={LIMITS.reporter} />
         </label>
         <label className="block">
           <span className="eyebrow">Team or area</span>
-          <input className="field mt-2" value={form.area} onChange={(e) => set('area', e.target.value)} placeholder="South LA" />
+          <input className="field mt-2" value={form.area} onChange={(e) => set('area', e.target.value)} placeholder="South LA" maxLength={LIMITS.area} />
         </label>
       </div>
 
@@ -94,6 +95,7 @@ export default function PushReportForm({ eventId, days }: { eventId: string; day
                 min={0}
                 inputMode="numeric"
                 className="field mt-1.5 text-center text-lg"
+                max={LIMITS.count}
                 value={form[c.key] as number}
                 onChange={num(c.key)}
               />
@@ -108,6 +110,7 @@ export default function PushReportForm({ eventId, days }: { eventId: string; day
         <textarea
           rows={3}
           className="field mt-2"
+          maxLength={LIMITS.story}
           value={form.story}
           onChange={(e) => set('story', e.target.value)}
           placeholder="Who did you meet? What happened?"
@@ -116,7 +119,7 @@ export default function PushReportForm({ eventId, days }: { eventId: string; day
 
       <label className="block">
         <span className="eyebrow">Anything to pray for</span>
-        <textarea rows={2} className="field mt-2" value={form.prayer} onChange={(e) => set('prayer', e.target.value)} />
+        <textarea rows={2} className="field mt-2" maxLength={LIMITS.prayer} value={form.prayer} onChange={(e) => set('prayer', e.target.value)} />
       </label>
 
       <button type="submit" className="btn-primary min-w-40" disabled={state === 'sending'}>

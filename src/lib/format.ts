@@ -61,8 +61,25 @@ export function eventDays(start: string, end?: string): string[] {
   return days.length ? days : [first];
 }
 
-/** "Fri Jan 15" for a YYYY-MM-DD day string. */
+/**
+ * Is this really a calendar day (not just three numbers shaped like one)?
+ * `new Date(Date.UTC(2025, 1, 30))` quietly rolls Feb 30 over into March, so
+ * format-only checks like `/^\d{4}-\d{2}-\d{2}$/` let bad data — a typo in a
+ * CSV, a hand-edited record — through as a wrong-but-plausible date. This
+ * round-trips the value and rejects anything that didn't survive intact.
+ */
+export function isValidDay(day: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day);
+  if (!m) return false;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  if (mo < 1 || mo > 12 || d < 1 || d > 31) return false;
+  const date = new Date(Date.UTC(y, mo - 1, d, 12));
+  return date.getUTCFullYear() === y && date.getUTCMonth() === mo - 1 && date.getUTCDate() === d;
+}
+
+/** "Fri Jan 15" for a YYYY-MM-DD day string. Falls back to the raw string for anything malformed. */
 export function dayLabel(day: string) {
+  if (!isValidDay(day)) return day;
   const [y, m, d] = day.split('-').map(Number);
   return new Intl.DateTimeFormat('en-US', { timeZone: TZ, weekday: 'short', month: 'short', day: 'numeric' }).format(
     new Date(Date.UTC(y, m - 1, d, 20)),

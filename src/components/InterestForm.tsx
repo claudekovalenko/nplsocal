@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { emptyInterest, submitInterest, type Interest } from '@/lib/pushStore';
+import { LIMITS } from '@/lib/limits';
 
 const WANTS = [
   'Come to the push',
@@ -46,13 +47,14 @@ export default function InterestForm({ source, compact = false }: { source: stri
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="block">
           <span className="eyebrow">Name</span>
-          <input required className="field mt-2" value={form.name} onChange={(e) => set('name', e.target.value)} autoComplete="name" />
+          <input required className="field mt-2" value={form.name} onChange={(e) => set('name', e.target.value)} autoComplete="name" maxLength={LIMITS.name} />
         </label>
         <label className="block">
           <span className="eyebrow">Email or phone</span>
           <input
             required
             className="field mt-2"
+            maxLength={LIMITS.email}
             value={form.email || form.phone}
             onChange={(e) => {
               const v = e.target.value;
@@ -69,11 +71,11 @@ export default function InterestForm({ source, compact = false }: { source: stri
         </label>
         <label className="block">
           <span className="eyebrow">City</span>
-          <input className="field mt-2" value={form.city} onChange={(e) => set('city', e.target.value)} />
+          <input className="field mt-2" value={form.city} onChange={(e) => set('city', e.target.value)} maxLength={LIMITS.city} />
         </label>
         <label className="block">
           <span className="eyebrow">Church / Network</span>
-          <input className="field mt-2" value={form.church} onChange={(e) => set('church', e.target.value)} />
+          <input className="field mt-2" value={form.church} onChange={(e) => set('church', e.target.value)} maxLength={LIMITS.church} />
         </label>
       </div>
 

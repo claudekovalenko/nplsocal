@@ -29,6 +29,7 @@ export default function Roster() {
   const [q, setQ] = useState('');
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
   const event = events.find((e) => e.id === eventId);
 
   const days = event ? eventDays(event.start, event.end) : [];
@@ -51,10 +52,25 @@ export default function Roster() {
   };
 
   const upload = (file: File) => {
-    file.text().then(async (t) => {
-      const parsed = fromCsv(t, eventId ?? '');
-      if (parsed.length) await addMany(parsed);
-    });
+    setImportError(null);
+    file
+      .text()
+      .then(async (t) => {
+        const parsed = fromCsv(t, eventId ?? '');
+        if (!parsed.length) {
+          setImportError('No rows found in that file — check it has a header row and at least one sign-up.');
+          return;
+        }
+        await addMany(parsed);
+      })
+      .catch((err) => {
+        // A batch import is one database call: if any row is rejected (bad data,
+        // dropped connection), none of it is saved. Say so — a silent failure here
+        // would look like the import worked when nothing came in.
+        setImportError(
+          `Import failed, nothing was saved: ${(err as Error).message || 'unknown error'}. Fix the file and try again.`,
+        );
+      });
   };
 
   // Index page: one card per event with counts.
@@ -182,6 +198,7 @@ export default function Roster() {
           </div>
 
           {error && <p className="mt-6 text-sm text-red-400">{error}</p>}
+          {importError && <p className="mt-6 text-sm text-red-400">{importError}</p>}
 
           {loading ? (
             <p className="py-16 text-center text-muted">Loading…</p>

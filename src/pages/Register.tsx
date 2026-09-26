@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle2, Lock } from 'lucide-react';
 import { events, site, hubById } from '@/content';
 import { formatRange, eventDays, dayLabel } from '@/lib/format';
 import { emptyRegistration, uid, type Registration } from '@/lib/registrations';
+import { LIMITS } from '@/lib/limits';
 import { useRegistrations } from '@/hooks/useRegistrations';
 
 export default function Register() {
@@ -101,15 +102,15 @@ export default function Register() {
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="block sm:col-span-2">
             <span className="eyebrow">Your name</span>
-            <input required className="field mt-2" value={form.name} onChange={text('name')} autoComplete="name" />
+            <input required className="field mt-2" value={form.name} onChange={text('name')} autoComplete="name" maxLength={LIMITS.name} />
           </label>
           <label className="block">
             <span className="eyebrow">Email</span>
-            <input required type="email" className="field mt-2" value={form.email} onChange={text('email')} autoComplete="email" />
+            <input required type="email" className="field mt-2" value={form.email} onChange={text('email')} autoComplete="email" maxLength={LIMITS.email} />
           </label>
           <label className="block">
             <span className="eyebrow">Phone</span>
-            <input required type="tel" className="field mt-2" value={form.phone} onChange={text('phone')} autoComplete="tel" />
+            <input required type="tel" className="field mt-2" value={form.phone} onChange={text('phone')} autoComplete="tel" maxLength={LIMITS.phone} />
           </label>
           <label className="block">
             <span className="eyebrow">How many in your party?</span>
@@ -117,7 +118,7 @@ export default function Register() {
               required
               type="number"
               min={1}
-              max={200}
+              max={LIMITS.partyForm}
               className="field mt-2"
               value={form.party}
               onChange={(e) => set('party', Math.max(1, Number(e.target.value) || 1))}
@@ -126,7 +127,7 @@ export default function Register() {
           </label>
           <label className="block">
             <span className="eyebrow">City</span>
-            <input required className="field mt-2" value={form.city} onChange={text('city')} placeholder="Santa Ana" />
+            <input required className="field mt-2" value={form.city} onChange={text('city')} placeholder="Santa Ana" maxLength={LIMITS.city} />
           </label>
           <label className="block sm:col-span-2">
             <span className="eyebrow">Church / Network</span>
@@ -135,6 +136,7 @@ export default function Register() {
               className="field mt-2"
               value={form.church}
               onChange={text('church')}
+              maxLength={LIMITS.church}
               placeholder="Grace Fullerton, NPL SoCal, or both"
             />
           </label>
@@ -171,7 +173,7 @@ export default function Register() {
 
           <label className="block sm:col-span-2">
             <span className="eyebrow">Anything else?</span>
-            <textarea rows={3} className="field mt-2" value={form.notes} onChange={text('notes')} placeholder="Questions, dietary needs, arrival time" />
+            <textarea rows={3} className="field mt-2" maxLength={LIMITS.notes} value={form.notes} onChange={text('notes')} placeholder="Questions, dietary needs, arrival time" />
           </label>
         </div>
 

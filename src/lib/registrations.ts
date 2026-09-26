@@ -1,3 +1,8 @@
+import { isValidDay } from './format';
+
+/** Matches the database's `check (party between 1 and 500)`. Keep in sync with supabase/schema.sql. */
+export const MAX_PARTY = 500;
+
 /** One sign-up for an event. `party` includes the person registering. */
 export interface Registration {
   id: string;
@@ -127,14 +132,14 @@ export function fromCsv(text: string, eventId: string): Registration[] {
     name: at(row, idx.name),
     email: at(row, idx.email),
     phone: at(row, idx.phone),
-    party: Math.max(1, parseInt(at(row, idx.party), 10) || 1),
+    party: Math.min(MAX_PARTY, Math.max(1, parseInt(at(row, idx.party), 10) || 1)),
     city: at(row, idx.city),
     church: [at(row, idx.church), at(row, idx.network)]
       .map((v) => v.trim())
       .filter(Boolean)
       .filter((v, i, all) => all.indexOf(v) === i)
       .join(' / '),
-    days: at(row, idx.days).split(/[\s,;]+/).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)),
+    days: at(row, idx.days).split(/[\s,;]+/).filter(isValidDay),
     notes: at(row, idx.notes),
   }));
 }

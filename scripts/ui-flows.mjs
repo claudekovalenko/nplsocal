@@ -38,6 +38,7 @@ check('featured events offer registration', registerLinks > 0, `${registerLinks}
 // 2. Registering takes you to a working form and through to a confirmation.
 await page.getByRole('link', { name: /Register/ }).first().click();
 await page.waitForURL(/\/register\//, { timeout: 10000 });
+const eventId = page.url().split('/register/')[1];
 const heading = (await page.textContent('h1')) || '';
 check('register link opens a form', heading.length > 0, heading);
 
@@ -72,6 +73,33 @@ const rosterText = (await page.textContent('body')) || '';
 const rosterWorks = rosterText.includes('Who') || rosterText.includes('People') || rosterText.includes('Sign in');
 check('roster page renders', rosterWorks);
 
+// 3b. Importing a messy CSV must not corrupt the roster: a party size over the
+// database's cap of 500 has to be clamped (a whole batch insert is rejected if
+// even one row is out of range), and a day that isn't a real calendar date
+// must not silently become a different, wrong-looking date.
+if (eventId) {
+  await page.goto(`${BASE}/roster/${eventId}`, { waitUntil: 'networkidle' });
+  const csv = [
+    'Name,Party size,Email,Phone,City,Church / Network,Days,Notes',
+    '"CSV Edge Case",99999,csvcase@example.com,555-2000,Anaheim,Test Church,2025-02-30,Should clamp party and drop the bad day',
+  ].join('\n');
+  await page.setInputFiles('input[type="file"]', {
+    name: 'edge-cases.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(csv),
+  });
+  await page.waitForTimeout(800);
+  const row = page.locator('tr', { hasText: 'CSV Edge Case' });
+  const rowText = (await row.textContent().catch(() => '')) || '';
+  check('CSV import brings in the row', rowText.includes('CSV Edge Case'), rowText.replace(/\s+/g, ' ').trim());
+  check('CSV import clamps an over-limit party size to the database max', rowText.includes('500'), rowText);
+  check(
+    'CSV import drops a day that is not a real calendar date, rather than mislabeling it',
+    !rowText.includes('2025-02-30') && !rowText.includes('Mar'),
+    rowText,
+  );
+}
+
 // 4. The 3/3rds runner drives a meeting.
 await page.goto(BASE + '/three-thirds', { waitUntil: 'networkidle' });
 const thirds = await page.locator('ol li button').count();
@@ -81,6 +109,20 @@ await page.getByRole('button', { name: /^(Start|Pause)$/ }).first().click().catc
 await page.waitForTimeout(1200);
 const timerAfter = await page.locator('.tabular-nums').first().textContent();
 check('3/3rds timer counts down', timerBefore !== timerAfter, `${timerBefore} to ${timerAfter}`);
+
+// 4b. Every field stops at the database's limit, so nobody fills in a form and
+// is refused only after submitting.
+await page.goto(BASE + '/register/socal-gospel-conversation-nov', { waitUntil: 'networkidle' });
+const longText = 'x'.repeat(600);
+await page.fill('input[autocomplete="name"]', longText);
+const cappedName = (await page.inputValue('input[autocomplete="name"]')).length;
+check('name input caps at the database limit', cappedName === 200, `${cappedName} chars kept of 600`);
+const notes = page.locator('textarea');
+if (await notes.count()) {
+  await notes.first().fill('y'.repeat(5000));
+  const cappedNotes = (await notes.first().inputValue()).length;
+  check('notes input caps at the database limit', cappedNotes === 4000, `${cappedNotes} chars kept of 5000`);
+}
 
 // 5. The push hub carries the whole event.
 await page.goto(BASE + '/push', { waitUntil: 'networkidle' });
