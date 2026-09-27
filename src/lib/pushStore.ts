@@ -240,3 +240,54 @@ export const sumTotals = (rows: DayTotals[]) =>
     }),
     { day: 'all', conversations: 0, gospelShared: 0, responded: 0, baptized: 0, groupsStarted: 0, reports: 0 },
   );
+
+/**
+ * Everyone who left their details asking to hear more. Readable by the admin and
+ * leads roles; row-level security returns nothing to anyone else, so an empty
+ * list here means "not yours to see" as much as "nobody yet".
+ */
+export async function listInterest(): Promise<(Interest & { createdAt: string })[]> {
+  if (!isShared) return [];
+  const { data, error } = await supabase()
+    .from('npl_interest')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(
+    (r: {
+      id: string;
+      source: string;
+      name: string;
+      email: string;
+      phone: string;
+      city: string;
+      church: string;
+      wants: string[];
+      notes: string;
+      created_at: string;
+    }) => ({
+      id: r.id,
+      source: r.source ?? '',
+      name: r.name,
+      email: r.email ?? '',
+      phone: r.phone ?? '',
+      city: r.city ?? '',
+      church: r.church ?? '',
+      wants: r.wants ?? [],
+      notes: r.notes ?? '',
+      createdAt: r.created_at,
+    }),
+  );
+}
+
+/** One row per person, as a spreadsheet. Same shape as the roster export. */
+export function interestToCsv(rows: (Interest & { createdAt: string })[]): string {
+  const cell = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+  const head = ['Name', 'Email', 'Phone', 'City', 'Church / Network', 'Asked about', 'Notes', 'Where', 'When'];
+  const body = rows.map((r) =>
+    [r.name, r.email, r.phone, r.city, r.church, r.wants.join('; '), r.notes, r.source, r.createdAt]
+      .map((v) => cell(String(v ?? '')))
+      .join(','),
+  );
+  return [head.join(','), ...body].join('\n');
+}

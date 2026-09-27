@@ -30,6 +30,7 @@ page.on('pageerror', (e) => jsErrors.push(String(e.message)));
 console.log(`\nSign-in gates at ${BASE}`);
 
 const PRIVATE = [
+  ['/admin', 'the back end'],
   ['/roster', 'roster index'],
   ['/roster/socal-gospel-conversation-nov', 'one event roster'],
   ['/track', 'tracker'],

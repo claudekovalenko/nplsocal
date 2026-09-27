@@ -23,7 +23,8 @@ export default function Footer({ minimal = false }: { minimal?: boolean } = {}) 
           <span className="text-sm font-semibold uppercase tracking-[0.12em]">{site.shortName}</span>
         </Link>
         <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm" aria-label="Footer">
-          {[...navigation, ...aboutMenu, { to: '/track', label: 'Tracker' }, { to: '/roster', label: 'Rosters' }].map((n) => (
+          {/* One organizer entry point rather than three: /admin is the door. */}
+          {[...navigation, ...aboutMenu, { to: '/admin', label: 'Organizers' }].map((n) => (
             <Link key={n.to} to={n.to} className="text-muted transition hover:text-fg">
               {n.label}
             </Link>

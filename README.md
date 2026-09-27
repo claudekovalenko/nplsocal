@@ -144,7 +144,12 @@ Contact details are never readable by the public. A visitor's browser can insert
 
 ### Signing in
 
-Private pages (`/roster`, `/track`) ask for an email and password. There is no
+`/admin` is the back end: sign in there and it shows every sign-up, per event,
+with a link through to each roster, plus the "keep me posted" list and (for an
+admin) the tracker. It is linked from the bottom of the home page, the header,
+and the footer, so nobody has to be told a URL.
+
+Private pages (`/admin`, `/roster`, `/track`) ask for an email and password. There is no
 emailed link: organizers open these on a phone mid-event, and a round trip
 through an inbox is where that falls down.
 
@@ -188,6 +193,7 @@ Providers. Nothing else is needed — password sign-in does not use redirect URL
 | `/three-thirds` | Live 3/3rds meeting runner with timers and weekly goals |
 | `/track`, `/track/new`, `/track/:id` | Generational tracker |
 | `/register/:eventId` | Event registration form |
+| `/admin` | The back end: sign in, then every sign-up and the leads list (`/signin` redirects here) |
 | `/roster`, `/roster/:eventId` | Registration rosters, export and import |
 | `/connect` | Contact form (opens the user's mail client by default) |
 | `/my-100` | Personal, on-device 100 List with stages, backup, and restore |

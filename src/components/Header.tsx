@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon, ChevronDown } from 'lucide-react';
+import { Menu, X, Sun, Moon, ChevronDown, Lock } from 'lucide-react';
 import { navigation, aboutMenu, site } from '@/content';
 import { useTheme } from '@/hooks/useTheme';
 import Logo from './Logo';
@@ -115,6 +115,10 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
               </div>
             )}
           </div>
+          {/* The organizer way in, kept visually quieter than the real navigation. */}
+          <NavLink to="/admin" className={({ isActive }) => `${linkClass(isActive)} ml-1 inline-flex items-center gap-1.5`}>
+            <Lock className="h-3 w-3" /> Sign in
+          </NavLink>
         </nav>
 
         <div className="flex items-center gap-1">
@@ -151,6 +155,12 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
                 {n.label}
               </NavLink>
             ))}
+            <NavLink
+              to="/admin"
+              className={({ isActive }) => `inline-flex items-center gap-2 py-3.5 text-base font-medium ${isActive ? 'text-fg' : 'text-muted'}`}
+            >
+              <Lock className="h-3.5 w-3.5" /> Sign in
+            </NavLink>
           </div>
         </nav>
       )}

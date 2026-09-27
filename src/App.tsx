@@ -18,6 +18,7 @@ import Register from '@/pages/Register';
 import Roster from '@/pages/Roster';
 import Push from '@/pages/Push';
 import TrackEdit from '@/pages/TrackEdit';
+import Admin from '@/pages/Admin';
 import NotFound from '@/pages/NotFound';
 
 export default function App() {
@@ -51,6 +52,9 @@ export default function App() {
           <Route path="register/:eventId" element={<Register />} />
           <Route path="roster" element={<Roster />} />
           <Route path="roster/:eventId" element={<Roster />} />
+          {/* The back end: sign in here, reach everything that is not public. */}
+          <Route path="admin" element={<Admin />} />
+          <Route path="signin" element={<Navigate to="/admin" replace />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
