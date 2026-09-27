@@ -68,6 +68,13 @@ export interface Event {
   /** Human date when exact dates are not set yet, e.g. "Early 2027". */
   dateLabel?: string;
   location: string;
+  /**
+   * The named place people actually show up, when that differs from `location`.
+   * The push runs across the whole metro, so "Across the L.A. metro" is where it
+   * happens and this is where you check in. Must match a key in venues.ts for an
+   * address to appear.
+   */
+  venue?: string;
   city?: string;
   /** Who this is for, e.g. "Practitioners", "Santa Ana leaders". Shown on group-tier events. */
   audience?: string;

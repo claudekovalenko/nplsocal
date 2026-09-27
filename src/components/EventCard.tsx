@@ -52,6 +52,12 @@ export const typeLabel: Record<Event['type'], string> = {
 };
 
 const hubName = (e: Event) => hubById(e.hub)?.shortName ?? 'All SoCal';
+
+/**
+ * Where people physically turn up. Usually the event's location; for something
+ * that spans a region, the named check-in place instead.
+ */
+export const venueName = (e: Event) => e.venue ?? e.location;
 const isReal = (url?: string) => !!url && /^https?:\/\//.test(url);
 
 /** Real sign-up link opens in a new tab; otherwise go to Connect with the event pre-filled. */
@@ -88,7 +94,10 @@ export function FeaturedEvent({ event }: { event: Event }) {
           {event.online ? <Video className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
           {event.city ? `${event.location} · ${event.city}` : event.location}
         </p>
-        <VenueAddress location={event.location} />
+        {event.venue && (
+          <p className="mt-1 text-sm text-muted">Check in at {event.venue}</p>
+        )}
+        <VenueAddress location={venueName(event)} />
       </div>
       <div className="relative mt-8 flex items-end justify-between gap-4">
         <div>

@@ -5,6 +5,7 @@ import { push, blockKindLabel, PUSH_EVENT_ID, type ScheduleDay } from '@/content
 import { events } from '@/content';
 import { dayLabel, eventDays, formatRange } from '@/lib/format';
 import { fetchTotals, flushPending, pendingCount, sumTotals, type DayTotals } from '@/lib/pushStore';
+import { VenueAddress, venueName } from '@/components/EventCard';
 import PushReportForm from '@/components/PushReportForm';
 import InterestForm from '@/components/InterestForm';
 
@@ -101,6 +102,13 @@ export default function Push() {
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted">{push.tagline}</p>
           <p className="mt-4 text-muted">{event ? formatRange(event.start, event.end) : 'Dec 30 – Jan 2'}</p>
+          {/* Teams scatter across the metro, so the one fixed place matters. */}
+          {event?.venue && (
+            <p className="mt-4 inline-flex items-center gap-1.5 text-muted">
+              <MapPin className="h-4 w-4" /> Check in at {event.venue}
+            </p>
+          )}
+          {event && <VenueAddress location={venueName(event)} className="mt-1" />}
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to={`/register/${PUSH_EVENT_ID}`} className="btn-primary min-w-40">

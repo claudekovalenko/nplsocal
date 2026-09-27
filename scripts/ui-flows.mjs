@@ -142,6 +142,18 @@ check(
   formText.includes('6575 Crescent Ave, Buena Park, CA 90620'),
   formText.split('\n').find((l) => /Crescent/.test(l)) ?? 'no address line found',
 );
+// The push is the form that actually gets sent out. It runs across the whole
+// metro, so the one place people check in has to be on it.
+await page.goto(BASE + '/register/la-metro-gospel-push-2027', { waitUntil: 'networkidle' });
+const pushForm = await page.evaluate(() => document.body.innerText);
+check(
+  'the push registration form shows where to check in',
+  pushForm.includes('Neighbors and Nations') && pushForm.includes('6575 Crescent Ave, Buena Park, CA 90620'),
+  pushForm.split('\n').filter((l) => /Check in|Crescent/.test(l)).join(' | ') || 'neither line found',
+);
+const pushLinks = await page.evaluate(() => document.querySelectorAll('a[href]').length);
+check('the push form still has nothing to click out to', pushLinks === 0, `${pushLinks} links`);
+
 // An event held elsewhere must not inherit it.
 await page.goto(BASE + '/register/oc-mid-level-2027', { waitUntil: 'networkidle' });
 const otherText = await page.evaluate(() => document.body.innerText);

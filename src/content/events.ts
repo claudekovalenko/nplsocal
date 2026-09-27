@@ -16,6 +16,8 @@ export const events: Event[] = [
     start: '2026-12-30T09:00:00-08:00',
     end: '2027-01-02T21:00:00-08:00',
     location: 'Across the L.A. metro',
+    // Teams go out across the metro; everyone checks in here.
+    venue: 'Neighbors and Nations',
     description: 'Four days of prayer, gospel conversations, and training across the L.A. metro. Open to the whole network.',
     registerUrl: '#',
   },
