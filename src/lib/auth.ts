@@ -45,13 +45,19 @@ export async function signIn(email: string, password: string): Promise<void> {
     password,
   });
   if (error) {
-    // Supabase says "Invalid login credentials" for a wrong password and for an
-    // address that has no account at all. Neither is worth spelling out.
-    throw new Error(
-      /invalid login/i.test(error.message)
-        ? 'That email and password do not match an account.'
-        : error.message,
-    );
+    // A wrong password and an address with no account both say "Invalid login
+    // credentials", and neither is worth spelling out to the person typing.
+    if (/invalid login/i.test(error.message)) {
+      throw new Error('That email and password do not match an account.');
+    }
+    // Anything else is a fault on our side, not theirs. Carry the status and
+    // code through: "Database error querying schema" with no HTTP status told
+    // us almost nothing, and the difference between a 400, a 422 and a 500 is
+    // the difference between a disabled provider, a bad request and a broken
+    // backend. Whoever reports this next should not have to guess.
+    const { status, code } = error as { status?: number; code?: string };
+    const detail = [status && `HTTP ${status}`, code && `code ${code}`].filter(Boolean).join(', ');
+    throw new Error(detail ? `${error.message} (${detail})` : error.message);
   }
 }
 
