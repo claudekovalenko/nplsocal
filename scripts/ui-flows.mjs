@@ -148,6 +148,12 @@ const whereInForm = await page.evaluate(() => {
   return cards.some((c) => /Where/i.test(c.textContent || '') && /6575 Crescent Ave/.test(c.textContent || ''));
 });
 check('the address sits in a Where block on the form, not just the heading', whereInForm);
+// A venue we have no address for must not get an almost-empty Where block that
+// only repeats the line above it.
+await page.goto(BASE + '/register/oc-mid-level-2027', { waitUntil: 'networkidle' });
+const noAddrForm = await page.evaluate(() => document.body.innerText);
+check('no Where block on an event whose address we do not have', !/\bWHERE\b/i.test(noAddrForm));
+await page.goto(BASE + '/register/socal-gospel-conversation-nov', { waitUntil: 'networkidle' });
 // A stale cached copy must be tellable apart from a missing change.
 const stamped = /\bv\d{4}\.\d{2}\.\d{2}\b/.test(formText);
 check('the form shows which build it is', stamped, formText.match(/v\d{4}\.\d{2}\.\d{2}/)?.[0] ?? 'no build stamp');

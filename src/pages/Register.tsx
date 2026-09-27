@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { CheckCircle2, Lock } from 'lucide-react';
-import { events, site, hubById } from '@/content';
+import { events, site, hubById, venueFor } from '@/content';
 import { VenueAddress, venueName } from '@/components/EventCard';
 import { formatRange, eventDays, dayLabel } from '@/lib/format';
 import { emptyRegistration, uid, type Registration } from '@/lib/registrations';
@@ -103,16 +103,18 @@ export default function Register() {
         rather than above the heading where it reads as decoration. Plain text and
         no link: this page still has nothing to click out to.
       */}
-      <div className="card mt-8 p-5">
-        <div className="eyebrow">Where</div>
-        <p className="mt-2 text-base">{venueName(event)}</p>
-        <VenueAddress location={venueName(event)} link={false} className="mt-0.5" />
-        {event.venue && (
-          <p className="mt-2 text-xs text-faint">
-            Teams go out {event.location.replace(/^Across the /i, 'across the ')} from here.
-          </p>
-        )}
-      </div>
+      {venueFor(venueName(event))?.address && (
+        <div className="card mt-8 p-5">
+          <div className="eyebrow">Where</div>
+          <p className="mt-2 text-base">{venueName(event)}</p>
+          <VenueAddress location={venueName(event)} link={false} className="mt-0.5" />
+          {event.venue && (
+            <p className="mt-2 text-xs text-faint">
+              Teams go out {event.location.replace(/^Across the /i, 'across the ')} from here.
+            </p>
+          )}
+        </div>
+      )}
 
       <form onSubmit={submit} className="mt-8 space-y-7">
         <div className="grid gap-5 sm:grid-cols-2">
