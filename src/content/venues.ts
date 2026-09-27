@@ -22,7 +22,7 @@ export interface Venue {
 export const venues: Record<string, Venue> = {
   'Neighbors and Nations': {
     name: 'Neighbors and Nations',
-    address: '',
+    address: '6575 Crescent Ave, Buena Park, CA 90620',
   },
 };
 

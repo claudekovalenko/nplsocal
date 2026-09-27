@@ -62,7 +62,7 @@ Everything visible on the site comes from `src/content/`:
 registration form and on the confirmation screen — the card links it to a maps
 app, the form shows it as plain text because that page deliberately has nothing
 to click out of. An empty `address` shows nothing at all: better than sending
-somebody driving to a guess. `Neighbors and Nations` is waiting on its address.
+somebody driving to a guess.
 
 Adding a tool is one new object in `tools.ts` plus its slug in the right field's `toolSlugs` list. It gets a card, a detail page, search, and offline caching automatically.
 
