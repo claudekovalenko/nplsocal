@@ -109,6 +109,10 @@ begin
   end if;
 end $$;
 
+-- A maintenance helper, not an API endpoint: without this it is exposed as a
+-- callable /rpc/npl_publish to every visitor.
+revoke execute on function public.npl_publish(text) from anon, authenticated;
+
 select public.npl_publish('npl_groups');
 
 -- ── Event registrations ────────────────────────────────────────────
