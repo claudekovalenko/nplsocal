@@ -133,6 +133,23 @@ if (await notes.count()) {
   check('notes input caps at the database limit', cappedNotes === 4000, `${cappedNotes} chars kept of 5000`);
 }
 
+// 4b-ii. People turn up at a building. The venue's address has to be on the form
+// they are looking at, not only on a card they may never have seen.
+await page.goto(BASE + '/register/socal-gospel-conversation-nov', { waitUntil: 'networkidle' });
+const formText = await page.evaluate(() => document.body.innerText);
+check(
+  'the registration form shows the venue address',
+  formText.includes('6575 Crescent Ave, Buena Park, CA 90620'),
+  formText.split('\n').find((l) => /Crescent/.test(l)) ?? 'no address line found',
+);
+// An event held elsewhere must not inherit it.
+await page.goto(BASE + '/register/oc-mid-level-2027', { waitUntil: 'networkidle' });
+const otherText = await page.evaluate(() => document.body.innerText);
+check(
+  'an event at another venue does not show that address',
+  !otherText.includes('6575 Crescent Ave'),
+);
+
 // 4c. The form link is sent to people with one job. Nothing on that page may
 // lead anywhere else, or someone wanders off mid-registration.
 await page.goto(BASE + '/register/socal-gospel-conversation-nov', { waitUntil: 'networkidle' });
