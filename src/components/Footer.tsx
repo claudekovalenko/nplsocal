@@ -4,12 +4,20 @@ import Logo from './Logo';
 
 export default function Footer({ minimal = false }: { minimal?: boolean } = {}) {
   if (minimal) {
-    // Wordmark only. No links, so the form cannot be clicked out of.
+    // Wordmark only. No links, so the form cannot be clicked out of. The build
+    // date is here because an installed app serves the last version it cached,
+    // and without a stamp there is no way to tell a missing change from a stale
+    // copy — which has caught us out more than once.
     return (
       <footer className="mt-24 border-t border-line">
-        <div className="container-x flex items-center gap-2.5 py-8">
-          <Logo className="h-6 w-6" />
-          <span className="text-sm font-semibold uppercase tracking-[0.12em]">{site.shortName}</span>
+        <div className="container-x flex items-center justify-between gap-2.5 py-8">
+          <span className="flex items-center gap-2.5">
+            <Logo className="h-6 w-6" />
+            <span className="text-sm font-semibold uppercase tracking-[0.12em]">{site.shortName}</span>
+          </span>
+          <span className="text-xs text-faint" title={`Build ${__BUILD_TIME__}`}>
+            v{__BUILD_TIME__.slice(0, 10).replace(/-/g, '.')}
+          </span>
         </div>
       </footer>
     );

@@ -142,6 +142,15 @@ check(
   formText.includes('6575 Crescent Ave, Buena Park, CA 90620'),
   formText.split('\n').find((l) => /Crescent/.test(l)) ?? 'no address line found',
 );
+// It has to be inside the form block, not only in the page heading.
+const whereInForm = await page.evaluate(() => {
+  const cards = [...document.querySelectorAll('.card')];
+  return cards.some((c) => /Where/i.test(c.textContent || '') && /6575 Crescent Ave/.test(c.textContent || ''));
+});
+check('the address sits in a Where block on the form, not just the heading', whereInForm);
+// A stale cached copy must be tellable apart from a missing change.
+const stamped = /\bv\d{4}\.\d{2}\.\d{2}\b/.test(formText);
+check('the form shows which build it is', stamped, formText.match(/v\d{4}\.\d{2}\.\d{2}/)?.[0] ?? 'no build stamp');
 // The push is the form that actually gets sent out. It runs across the whole
 // metro, so the one place people check in has to be on it.
 await page.goto(BASE + '/register/la-metro-gospel-push-2027', { waitUntil: 'networkidle' });

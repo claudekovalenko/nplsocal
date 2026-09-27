@@ -96,11 +96,25 @@ export default function Register() {
       <p className="mt-3 text-muted">
         {event.dateLabel ?? formatRange(event.start, event.end)} · {event.city ?? event.location}
       </p>
-      {/* An event spanning a region still has one place people show up. */}
-      {event.venue && <p className="mt-1 text-muted">Check in at {event.venue}</p>}
-      <VenueAddress location={venueName(event)} link={false} className="mt-1" />
 
-      <form onSubmit={submit} className="mt-10 space-y-7">
+      {/*
+        Where to go is part of the form, not a subtitle. Somebody filling this in
+        on a phone scrolls straight to the fields, so the address sits with them
+        rather than above the heading where it reads as decoration. Plain text and
+        no link: this page still has nothing to click out to.
+      */}
+      <div className="card mt-8 p-5">
+        <div className="eyebrow">Where</div>
+        <p className="mt-2 text-base">{venueName(event)}</p>
+        <VenueAddress location={venueName(event)} link={false} className="mt-0.5" />
+        {event.venue && (
+          <p className="mt-2 text-xs text-faint">
+            Teams go out {event.location.replace(/^Across the /i, 'across the ')} from here.
+          </p>
+        )}
+      </div>
+
+      <form onSubmit={submit} className="mt-8 space-y-7">
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="block sm:col-span-2">
             <span className="eyebrow">Your name</span>
