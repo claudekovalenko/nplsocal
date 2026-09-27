@@ -9,9 +9,27 @@
 -- An address that is not in this table can still register for an event and
 -- submit a daily report, and can read nothing.
 --
--- To add somebody: create their Supabase auth user, then insert a row here.
---   insert into public.npl_members (email, role, name)
---   values ('someone@example.com', 'leads', 'Their Name');
+-- To add somebody:
+--   1. Create their login in the Supabase dashboard, under
+--      Authentication -> Users -> Add user. Do NOT insert into auth.users by
+--      hand: the auth service reads several token columns into non-nullable
+--      strings, so the NULLs a manual insert leaves behind make every sign-in
+--      fail with "Database error querying schema" before the password is even
+--      checked. The dashboard fills them in; a raw insert does not.
+--   2. Give them a role here:
+--        insert into public.npl_members (email, role, name)
+--        values ('someone@example.com', 'leads', 'Their Name');
+--
+-- If a login was created by hand and sign-in fails that way, this repairs it:
+--   update auth.users set
+--     confirmation_token = coalesce(confirmation_token, ''),
+--     recovery_token = coalesce(recovery_token, ''),
+--     email_change = coalesce(email_change, ''),
+--     email_change_token_new = coalesce(email_change_token_new, ''),
+--     email_change_token_current = coalesce(email_change_token_current, ''),
+--     phone_change = coalesce(phone_change, ''),
+--     phone_change_token = coalesce(phone_change_token, ''),
+--     reauthentication_token = coalesce(reauthentication_token, '');
 
 create table if not exists public.npl_members (
   email    text primary key,

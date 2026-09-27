@@ -164,13 +164,24 @@ The checks in `src/lib/auth.ts` and `src/hooks/useAuth.ts` decide what the
 screen shows. They are not the lock — the database is. Someone who edits their
 own browser gets a page with buttons on it and nothing behind them.
 
-To add somebody: create their user under Authentication → Users in the Supabase
-dashboard, then insert their row:
+To add somebody, two steps:
 
-```sql
-insert into public.npl_members (email, role, name)
-values ('someone@example.com', 'leads', 'Their Name');
-```
+1. Create their login in the Supabase dashboard, under **Authentication → Users
+   → Add user**.
+2. Give them a role:
+
+   ```sql
+   insert into public.npl_members (email, role, name)
+   values ('someone@example.com', 'leads', 'Their Name');
+   ```
+
+**Do not create the login by inserting into `auth.users` directly.** The auth
+service reads several token columns into non-nullable strings, so the NULLs a
+manual insert leaves behind make every sign-in fail with *"Database error
+querying schema"* — before the password is even checked, so the account looks
+correct in every way you would think to check it. Both original accounts were
+created this way and hit exactly that. `supabase/schema.sql` carries the repair
+statement if it happens again.
 
 To take access away, delete their `npl_members` row — it takes effect on their
 next page load, without waiting for a session to expire.
