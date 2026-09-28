@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Lock } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { site, featuredEvents } from '@/content';
 import NetworkMap from '@/components/NetworkMap';
 import { FeaturedEvent } from '@/components/EventCard';
@@ -53,20 +53,6 @@ export default function Home() {
               <FeaturedEvent key={e.id} event={e} />
             ))}
           </div>
-        </div>
-      </section>
-
-      {/*
-        The way in for organizers. Deliberately quiet and at the very bottom —
-        it is not what a visitor came for — but present on the home page so
-        nobody has to be told a URL to reach the sign-up data.
-      */}
-      <section className="border-t border-line">
-        <div className="container-x flex flex-wrap items-center justify-between gap-3 py-8">
-          <p className="text-sm text-muted">Organizing an event?</p>
-          <Link to="/admin" className="btn-secondary">
-            <Lock className="h-4 w-4" /> Sign in
-          </Link>
         </div>
       </section>
     </>

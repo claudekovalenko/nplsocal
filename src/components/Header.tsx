@@ -1,9 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon, ChevronDown, Lock } from 'lucide-react';
+import { Menu, X, Sun, Moon, ChevronDown, Lock, UserRound, LogOut } from 'lucide-react';
 import { navigation, aboutMenu, site } from '@/content';
 import { useTheme } from '@/hooks/useTheme';
+import { useAuth } from '@/hooks/useAuth';
+import { roleLabel } from '@/lib/auth';
 import Logo from './Logo';
+
+/** Close a dropdown on an outside click or Escape. */
+function useDismiss(open: boolean, close: (v: false) => void, ref: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && close(false);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close(false);
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open, close, ref]);
+}
 
 const linkClass = (isActive: boolean) =>
   `rounded-md px-3 py-1.5 text-[13px] font-medium transition ${isActive ? 'bg-fg/8 text-fg' : 'text-muted hover:bg-fg/5 hover:text-fg'}`;
@@ -11,10 +28,13 @@ const linkClass = (isActive: boolean) =>
 export default function Header({ minimal = false }: { minimal?: boolean } = {}) {
   const [open, setOpen] = useState(false);
   const [about, setAbout] = useState(false);
+  const [account, setAccount] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { theme, setTheme } = useTheme();
+  const auth = useAuth();
   const { pathname } = useLocation();
   const aboutRef = useRef<HTMLDivElement>(null);
+  const accountRef = useRef<HTMLDivElement>(null);
   const onHero = pathname === '/';
   const aboutActive = aboutMenu.some((a) => pathname.startsWith(a.to));
 
@@ -27,20 +47,12 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
 
   useEffect(() => {
     setAbout(false);
+    setAccount(false);
     setOpen(false);
   }, [pathname]);
 
-  useEffect(() => {
-    if (!about) return;
-    const onDown = (e: MouseEvent) => !aboutRef.current?.contains(e.target as Node) && setAbout(false);
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setAbout(false);
-    document.addEventListener('mousedown', onDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [about]);
+  useDismiss(about, setAbout, aboutRef);
+  useDismiss(account, setAccount, accountRef);
 
   const solid = scrolled || open || !onHero || minimal;
 
@@ -117,13 +129,59 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
               </div>
             )}
           </div>
-          {/* The organizer way in, kept visually quieter than the real navigation. */}
-          <NavLink to="/admin" className={({ isActive }) => `${linkClass(isActive)} ml-1 inline-flex items-center gap-1.5`}>
-            <Lock className="h-3 w-3" /> Sign in
-          </NavLink>
         </nav>
 
         <div className="flex items-center gap-1">
+          {/*
+            Organizers reach everything private from here. It lives in the top
+            corner at every width rather than in the page: it is not a section
+            of the site, and a visitor should be able to ignore it entirely.
+          */}
+          <div ref={accountRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setAccount((a) => !a)}
+              aria-expanded={account}
+              aria-haspopup="menu"
+              aria-label={auth.email ? `Signed in as ${auth.email}` : 'Sign in'}
+              className={`rounded-md p-2 transition hover:bg-fg/5 ${auth.email ? 'text-fg' : 'text-muted hover:text-fg'}`}
+            >
+              {auth.email ? <UserRound className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+            </button>
+            {account && (
+              <div
+                role="menu"
+                className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-lg border border-line bg-bg/95 py-1 shadow-2xl backdrop-blur-xl"
+              >
+                {auth.email ? (
+                  <>
+                    <div className="border-b border-line px-4 py-2.5">
+                      <div className="truncate text-xs text-muted">{auth.email}</div>
+                      {auth.role && <div className="eyebrow mt-0.5">{roleLabel[auth.role]}</div>}
+                    </div>
+                    <Link to="/admin" role="menuitem" className="block px-4 py-2.5 text-sm text-muted transition hover:bg-fg/5 hover:text-fg">
+                      Sign-ups and leads
+                    </Link>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setAccount(false);
+                        auth.signOut();
+                      }}
+                      className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-muted transition hover:bg-fg/5 hover:text-fg"
+                    >
+                      <LogOut className="h-3.5 w-3.5" /> Sign out
+                    </button>
+                  </>
+                ) : (
+                  <Link to="/admin" role="menuitem" className="flex items-center gap-2 px-4 py-2.5 text-sm text-muted transition hover:bg-fg/5 hover:text-fg">
+                    <Lock className="h-3.5 w-3.5" /> Sign in
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
           <button
             type="button"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -157,12 +215,6 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
                 {n.label}
               </NavLink>
             ))}
-            <NavLink
-              to="/admin"
-              className={({ isActive }) => `inline-flex items-center gap-2 py-3.5 text-base font-medium ${isActive ? 'text-fg' : 'text-muted'}`}
-            >
-              <Lock className="h-3.5 w-3.5" /> Sign in
-            </NavLink>
           </div>
         </nav>
       )}

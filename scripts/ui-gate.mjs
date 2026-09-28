@@ -52,6 +52,19 @@ for (const [path, label] of PRIVATE) {
   check(`${label} shows no rows while signed out`, state.tables === 0, `${state.tables} tables`);
 }
 
+// The account menu is the only way in now, so it has to be present on an
+// ordinary page at phone width, and open to a sign-in.
+await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+await page.waitForTimeout(600);
+const acct = page.getByRole('button', { name: /Sign in|Signed in as/ });
+check('the header offers an account menu', (await acct.count()) > 0);
+if (await acct.count()) {
+  await acct.first().click();
+  await page.waitForTimeout(250);
+  const menuText = await page.evaluate(() => document.querySelector('[role="menu"]')?.textContent ?? '');
+  check('the account menu offers a sign-in', /Sign in/i.test(menuText), menuText.trim());
+}
+
 // Registering must stay open to everyone — the gate is on reading, never on
 // signing up.
 await page.goto(BASE + '/register/socal-gospel-conversation-nov', { waitUntil: 'networkidle' });
@@ -70,7 +83,8 @@ await page.goto(BASE + '/roster', { waitUntil: 'networkidle' });
 await page.waitForTimeout(1200);
 await page.locator('input[type="email"]').fill('nobody@example.com');
 await page.locator('input[type="password"]').fill('wrong-password');
-await page.getByRole('button', { name: /^Sign in$/ }).click();
+// Scoped to the form: the header's account button is also labelled "Sign in".
+await page.locator('form').getByRole('button', { name: /^Sign in$/ }).click();
 await page.waitForTimeout(4000);
 const afterTry = await page.evaluate(() => ({
   button: document.querySelector('button[class*="btn-primary"]')?.textContent?.trim() ?? '',
