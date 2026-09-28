@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, MessageCircle, MapPin } from 'lucide-react';
+import { MessageCircle, MapPin } from 'lucide-react';
 import { push, blockKindLabel, PUSH_EVENT_ID, type ScheduleDay } from '@/content/push';
 import { events } from '@/content';
 import { dayLabel, eventDays, formatRange } from '@/lib/format';
@@ -93,7 +93,7 @@ export default function Push() {
     <>
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-line">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_50%_0%,var(--glow),transparent_70%)] opacity-40" />
+        <div className="pointer-events-none absolute inset-0 aurora opacity-80" />
         <div className="container-x relative py-16 md:py-24">
           <div className="eyebrow">#NoPlaceLeft · Los Angeles</div>
           <h1 className="mt-4 text-5xl leading-[0.95] md:text-7xl">
@@ -172,24 +172,9 @@ export default function Push() {
             {isDraft && <p className="mt-4 text-xs text-faint">Placeholder schedule — times will change.</p>}
           </div>
 
-          <div className="mt-14 grid gap-10 md:grid-cols-2">
-            <div>
-              <div className="eyebrow">Bring</div>
-              <ul className="mt-3 divide-y divide-line border-y border-line text-sm">
-                {push.bring.map((b) => (
-                  <li key={b} className="py-3">
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <div className="eyebrow">New to this?</div>
-              <p className="mt-3 text-muted">{push.intro}</p>
-              <Link to="/tools" className="btn-secondary mt-5">
-                See the tools you'll use
-              </Link>
-            </div>
+          <div className="mt-12">
+            <div className="eyebrow">Bring</div>
+            <p className="mt-3 text-muted">{push.bring.join(' · ')}</p>
           </div>
         </div>
       </section>
@@ -221,29 +206,9 @@ export default function Push() {
           <div className="mt-10 max-w-3xl">
             <InterestForm source="push" />
           </div>
-
-          <p className="mt-10 text-sm text-muted">
-            Already coming?{' '}
-            <Link to={`/register/${PUSH_EVENT_ID}`} className="text-fg underline-offset-4 hover:underline">
-              Register here
-            </Link>
-            , or see{' '}
-            <Link to="/events" className="text-fg underline-offset-4 hover:underline">
-              everything else on the calendar
-            </Link>
-            .
-          </p>
         </div>
       </section>
 
-      <section className="border-t border-line">
-        <div className="container-x py-10 text-center text-sm text-muted">
-          Organizers:{' '}
-          <Link to={`/roster/${PUSH_EVENT_ID}`} className="inline-flex items-center gap-1 text-fg underline-offset-4 hover:underline">
-            push roster <ArrowUpRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-      </section>
     </>
   );
 }

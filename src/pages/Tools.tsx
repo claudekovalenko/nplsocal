@@ -26,13 +26,12 @@ export default function Tools() {
           <h1 className="mt-4 text-4xl md:text-6xl">Simple. Reproducible. Yours.</h1>
 
           {/* Practitioner tools */}
-          <div className="mt-12 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-12 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
             {[
               { to: '/three-thirds', eyebrow: 'House church', title: 'Run a 3/3rds', text: 'Live meeting guide with timers.', icon: Play },
               { to: '/track', eyebrow: 'Live map', title: 'Tracker', text: 'Groups, churches, generations.', icon: ArrowRight },
-              { to: '/my-100', eyebrow: 'Personal', title: 'My 100 List', text: 'The people in your life.', icon: ArrowRight },
               { to: '/four-fields', eyebrow: 'Framework', title: 'Four Fields', text: 'The whole process, one drawing.', icon: ArrowRight },
-              { to: '/training', eyebrow: 'Pathway', title: 'Training', text: '411 → 4 Fields → Iron on Iron.', icon: ArrowRight },
+              { to: '/training', eyebrow: 'Training', title: 'Get trained', text: 'Come to whichever fits where you are.', icon: ArrowRight },
             ].map(({ to, eyebrow, title, text, icon: Icon }) => (
               <Link key={to} to={to} className="group bg-bg p-6 transition hover:bg-surface">
                 <div className="eyebrow">{eyebrow}</div>

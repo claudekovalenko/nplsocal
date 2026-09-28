@@ -12,7 +12,6 @@ import Events from '@/pages/Events';
 import Hubs from '@/pages/Hubs';
 import HubDetail from '@/pages/HubDetail';
 import Connect from '@/pages/Connect';
-import My100 from '@/pages/My100';
 import Track from '@/pages/Track';
 import Register from '@/pages/Register';
 import Roster from '@/pages/Roster';
@@ -44,7 +43,6 @@ export default function App() {
           <Route path="hubs" element={<Navigate to="/regions" replace />} />
           <Route path="hubs/:id" element={<HubRedirect />} />
           <Route path="connect" element={<Connect />} />
-          <Route path="my-100" element={<My100 />} />
           <Route path="track" element={<Track />} />
           <Route path="track/new" element={<TrackEdit />} />
           <Route path="track/:id" element={<TrackEdit />} />

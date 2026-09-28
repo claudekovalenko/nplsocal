@@ -11,17 +11,19 @@ export default function Training() {
     <>
       <PageHeader
         eyebrow="Training"
-        title="From first step to multiplying leader."
-        lead="Hands-on, free, taught by practitioners."
+        title="Start wherever you are."
+        lead="Hands-on, free, taught by practitioners. There is no required first course — come to whichever of these fits where you are, or ask someone in your region."
       />
 
       <Section>
-        <ol className="grid gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-2">
-          {trainings.map((t, i) => (
+        {/* Not numbered steps. People arrive having already done some of this
+            elsewhere, and telling them to start at the beginning anyway is the
+            fastest way to lose them. */}
+        <ul className="grid gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-2">
+          {trainings.map((t) => (
             <li key={t.slug} className="bg-bg p-8 md:p-10">
               <div className="flex items-center justify-between">
-                <span className="eyebrow">Step 0{i + 1}</span>
-                <span className="text-xs text-faint">{t.length}</span>
+                <span className="eyebrow">{t.length}</span>
               </div>
               <h2 className="mt-4 text-2xl md:text-3xl">{t.name}</h2>
               <p className="mt-1 text-sm text-muted">{t.audience}</p>
@@ -35,7 +37,7 @@ export default function Training() {
               </ul>
             </li>
           ))}
-        </ol>
+        </ul>
       </Section>
 
       <section className="border-t border-line bg-elev">

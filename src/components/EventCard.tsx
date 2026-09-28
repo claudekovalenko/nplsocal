@@ -82,7 +82,7 @@ export function FeaturedEvent({ event }: { event: Event }) {
   const hub = event.id === 'la-metro-gospel-push-2027' ? '/push' : null;
   return (
     <article className="card group relative flex flex-col justify-between overflow-hidden p-7 transition hover:border-line-strong md:p-9">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_100%_0%,var(--glow),transparent_70%)] opacity-25" />
+      <div className="pointer-events-none absolute inset-0 aurora opacity-[0.28]" />
       <div className="relative">
         <div className="eyebrow">
           {typeLabel[event.type]} · {hubName(event)}

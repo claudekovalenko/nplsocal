@@ -89,15 +89,6 @@ export default function ToolDetail() {
             </div>
           ) : null}
 
-          {tool.slug === '100-list' && (
-            <div className="card p-6">
-              <div className="eyebrow">Try it now</div>
-              <Link to="/my-100" className="btn-primary mt-5 w-full">
-                Open My 100 List
-              </Link>
-            </div>
-          )}
-
           {siblings.length > 0 && (
             <div>
               <div className="eyebrow">More in Field 0{field.number}</div>

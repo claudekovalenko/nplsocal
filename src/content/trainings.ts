@@ -5,7 +5,7 @@ export const trainings: Training[] = [
     slug: '411',
     name: '411 Training',
     length: '2–3 hours',
-    audience: 'Every believer — first step for anyone new to the network.',
+    audience: 'Every believer. A good starting point if you are new to this.',
     summary:
       'The on-ramp. Jesus\' four calls, one commission, one vision — then hands-on practice with your 100 List, testimony, and the 3 Circles gospel so you leave ready to share this week.',
     outcomes: [
@@ -19,7 +19,7 @@ export const trainings: Training[] = [
     slug: 'four-fields',
     name: '4 Fields Training',
     length: '2 days',
-    audience: 'Anyone who has done the 411 and wants the full framework.',
+    audience: 'Anyone who wants the full framework.',
     summary:
       'A deep dive into all Four Fields plus leadership: entry, gospel, discipleship, church, and leadership development. Heavy on practice, with coaching built in.',
     outcomes: [

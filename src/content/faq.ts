@@ -15,7 +15,7 @@ export const faqs: Faq[] = [
   },
   {
     q: 'Where do I start?',
-    a: 'Come to a 411 Training in your hub, or ask a practitioner to walk you through it. Then build your 100 List and start praying and sharing. That is genuinely it.',
+    a: 'Come to whatever is next on the calendar, or ask a practitioner near you. There is no required first course — people start at different places depending on what they have already done. Then start praying for the people already around you, and share. That is genuinely it.',
   },
   {
     q: 'Are the tools free?',

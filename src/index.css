@@ -2,32 +2,44 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * The palette is blue the whole way down, not neutral grey with a blue button
+ * bolted on. Every surface, line and muted text carries a little of the accent
+ * hue, which is what stops a minimal layout reading as flat and empty. Two
+ * accent stops rather than one so glows and gradients have somewhere to travel.
+ */
 /* ───────────── Semantic tokens (light) ───────────── */
 :root {
   --bg: #ffffff;
-  --bg-elev: #f7f7f8;
-  --surface: #f2f2f3;
-  --line: rgba(23, 26, 32, 0.10);
-  --line-strong: rgba(23, 26, 32, 0.22);
-  --fg: #171a20;
-  --muted: #5c5e62;
-  --faint: #9a9ca0;
-  --accent: #2f6fed;
-  --glow: rgba(47, 111, 237, 0.35);
+  --bg-elev: #f4f7fd;
+  --surface: #e9eff9;
+  --line: rgba(20, 44, 89, 0.11);
+  --line-strong: rgba(20, 44, 89, 0.24);
+  --fg: #0e1729;
+  --muted: #4d5b75;
+  --faint: #8794ab;
+  --accent: #1d5cf0;
+  --accent-2: #07b6d5;
+  --glow: rgba(29, 92, 240, 0.30);
+  --glow-2: rgba(7, 182, 213, 0.22);
   color-scheme: light;
 }
 /* ───────────── Semantic tokens (dark) ───────────── */
 .dark {
-  --bg: #000000;
-  --bg-elev: #0a0a0b;
-  --surface: #111113;
-  --line: rgba(255, 255, 255, 0.10);
-  --line-strong: rgba(255, 255, 255, 0.24);
-  --fg: #f5f5f7;
-  --muted: #9a9ca3;
-  --faint: #5d5f66;
-  --accent: #7fb0ff;
-  --glow: rgba(127, 176, 255, 0.45);
+  /* Not pure black: a near-black with blue in it reads as depth rather than a
+     hole, and keeps the accent from looking stuck on top of the page. */
+  --bg: #04070e;
+  --bg-elev: #0a1019;
+  --surface: #111a27;
+  --line: rgba(142, 176, 235, 0.13);
+  --line-strong: rgba(142, 176, 235, 0.28);
+  --fg: #eef3fb;
+  --muted: #94a5c2;
+  --faint: #5a6880;
+  --accent: #6ea8ff;
+  --accent-2: #3fd9e8;
+  --glow: rgba(110, 168, 255, 0.40);
+  --glow-2: rgba(63, 217, 232, 0.24);
   color-scheme: dark;
 }
 
@@ -42,6 +54,7 @@
   --color-muted: var(--muted);
   --color-faint: var(--faint);
   --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
 }
@@ -91,11 +104,21 @@ h1, h2, h3, h4 {
 }
 
 @utility eyebrow {
-  @apply text-[11px] font-medium uppercase tracking-[0.22em] text-muted;
+  @apply text-[11px] font-medium uppercase tracking-[0.22em];
+  /* Mostly accent, pulled back toward muted so a page full of these reads as a
+     tint rather than a shout. */
+  color: color-mix(in oklab, var(--accent) 62%, var(--muted));
 }
 
 @utility card {
   @apply rounded-xl border border-line bg-elev;
+}
+@utility card-hover {
+  @apply transition duration-200;
+  &:hover {
+    border-color: var(--line-strong);
+    background-color: color-mix(in oklab, var(--accent) 5%, var(--bg-elev));
+  }
 }
 
 @utility btn {
@@ -135,6 +158,23 @@ h1, h2, h3, h4 {
 @utility field {
   @apply w-full rounded-md border border-line bg-transparent px-3.5 py-2.5 text-sm outline-none transition
     placeholder:text-faint focus:border-line-strong focus:ring-2 focus:ring-accent/30;
+}
+
+/**
+ * Ambient colour wash. Two stops from opposite ends of the accent range, offset
+ * from each other, so the fade has a hue shift in it — that shift is the whole
+ * difference between "tinted" and "flat".
+ */
+@utility aurora {
+  background-image:
+    radial-gradient(60% 55% at 22% 18%, var(--glow-2), transparent 68%),
+    radial-gradient(65% 60% at 78% 4%, var(--glow), transparent 72%);
+}
+
+/* A hairline of accent under the header, so the chrome is not pure grey. */
+@utility accent-rule {
+  background-image: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
+  opacity: 0.55;
 }
 
 /* map glow + pulse */

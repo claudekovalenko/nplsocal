@@ -109,7 +109,7 @@ export const events: Event[] = [
     end: '2026-11-07T17:00:00-08:00',
     location: 'Host church — details on registration',
     city: 'Pasadena',
-    description: 'Two days, all Four Fields. Prerequisite: 411.',
+    description: 'Two days, all Four Fields.',
     registerUrl: '#',
   },
   {

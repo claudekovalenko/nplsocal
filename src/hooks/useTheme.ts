@@ -15,8 +15,12 @@ function apply(theme: Theme) {
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const dark = theme === 'dark' || (theme === 'system' && prefersDark);
   document.documentElement.classList.toggle('dark', dark);
+  // The phone paints its status bar this colour, so it has to track --bg. Read
+  // it rather than repeating the hex here, which is how it ended up stuck on
+  // pure black after the palette changed.
   const meta = document.querySelector('meta[name="theme-color"]');
-  meta?.setAttribute('content', dark ? '#000000' : '#ffffff');
+  const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  meta?.setAttribute('content', bg || (dark ? '#04070e' : '#ffffff'));
 }
 
 export function useTheme() {

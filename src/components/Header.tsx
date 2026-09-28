@@ -78,6 +78,8 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
       className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${solid ? 'border-b border-line bg-bg/80 backdrop-blur-xl' : 'bg-transparent'}`}
     >
+      {/* Keeps the chrome from being a plain grey rule. */}
+      {solid && <span aria-hidden className="accent-rule pointer-events-none absolute inset-x-0 bottom-0 h-px" />}
       <div className="container-x flex h-14 items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
           <Logo className="h-6 w-6" />

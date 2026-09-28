@@ -14,7 +14,7 @@ export default function HubDetail() {
   return (
     <>
       <section className="relative overflow-hidden border-b border-line">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_80%_50%,var(--glow),transparent_70%)] opacity-30" />
+        <div className="pointer-events-none absolute inset-0 aurora opacity-50" />
         <div className="container-x relative grid items-center gap-10 py-16 md:grid-cols-[1.2fr_1fr] md:py-24">
           <div>
             <Link to="/regions" className="inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-fg">
