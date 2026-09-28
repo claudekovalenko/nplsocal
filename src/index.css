@@ -65,7 +65,8 @@
  * from this, so a notch cannot eat a page's breathing room.
  */
 :root {
-  --header-h: calc(3.5rem + env(safe-area-inset-top));
+  /* 3.5rem bar + the gap the floating pill leaves above it + the status bar. */
+  --header-h: calc(3.5rem + 0.75rem + env(safe-area-inset-top));
 }
 
 html {
@@ -171,11 +172,6 @@ h1, h2, h3, h4 {
     radial-gradient(65% 60% at 78% 4%, var(--glow), transparent 72%);
 }
 
-/* A hairline of accent under the header, so the chrome is not pure grey. */
-@utility accent-rule {
-  background-image: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
-  opacity: 0.55;
-}
 
 /* map glow + pulse */
 @keyframes pulse-ring {

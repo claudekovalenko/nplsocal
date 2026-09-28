@@ -24,15 +24,20 @@ export default function Footer({ minimal = false }: { minimal?: boolean } = {}) 
   }
 
   return (
-    <footer className="mt-24 border-t border-line">
-      <div className="container-x flex flex-col gap-8 py-10 md:flex-row md:items-center md:justify-between">
+    <footer className="mt-16 border-t border-line">
+      <div className="container-x flex flex-col gap-8 py-8 md:flex-row md:items-center md:justify-between">
         <Link to="/" className="flex items-center gap-2.5">
           <Logo className="h-6 w-6" />
           <span className="text-sm font-semibold uppercase tracking-[0.12em]">{site.shortName}</span>
         </Link>
-        <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm" aria-label="Footer">
-          {/* Organizers get in from the account menu in the header, at every
-              width. No reason to repeat it down here. */}
+        {/*
+          Hidden on phones on purpose. The fixed tab bar at the bottom of the
+          screen already carries this navigation, so on a phone these links were
+          the same words a second time, and they were most of the height of the
+          footer. Desktop has no tab bar, so they stay there.
+          Organizers get in from the account menu in the header at every width.
+        */}
+        <nav className="hidden flex-wrap gap-x-5 gap-y-2 text-sm md:flex" aria-label="Footer">
           {[...navigation, ...aboutMenu].map((n) => (
             <Link key={n.to} to={n.to} className="text-muted transition hover:text-fg">
               {n.label}
@@ -41,7 +46,7 @@ export default function Footer({ minimal = false }: { minimal?: boolean } = {}) 
         </nav>
       </div>
       <div className="border-t border-line">
-        <div className="container-x flex flex-col gap-2 py-5 text-xs text-faint sm:flex-row sm:items-center sm:justify-between">
+        <div className="container-x flex flex-col gap-2 py-4 text-xs text-faint sm:flex-row sm:items-center sm:justify-between">
           <a href={`mailto:${site.contact.email}`} className="transition hover:text-fg">
             {site.contact.email}
           </a>

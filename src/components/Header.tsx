@@ -88,11 +88,23 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
       // Installed on a phone the web view starts behind the status bar, so the
       // bar sits over the logo and menu button unless we push the row down.
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
-      className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${solid ? 'border-b border-line bg-bg/80 backdrop-blur-xl' : 'bg-transparent'}`}
+      className="pointer-events-none fixed inset-x-0 top-0 z-40"
     >
-      {/* Keeps the chrome from being a plain grey rule. */}
-      {solid && <span aria-hidden className="accent-rule pointer-events-none absolute inset-x-0 bottom-0 h-px" />}
-      <div className="container-x flex h-14 items-center justify-between">
+      {/*
+        Over the hero it is full width and invisible. Once you scroll it pulls
+        in from the edges and rounds into a floating pill, so the chrome reads
+        as sitting above the page rather than being welded to the top of it.
+        Width, radius and colour all animate, which is what makes it feel like
+        one object moving rather than two states swapping.
+      */}
+      <div
+        className={`pointer-events-auto mx-auto overflow-hidden transition-all duration-300 ease-out ${
+          solid
+            ? 'mt-2 w-[calc(100%-1rem)] max-w-5xl rounded-2xl border border-line bg-bg/75 shadow-[0_10px_34px_-14px_var(--glow)] backdrop-blur-xl sm:mt-3 sm:w-[calc(100%-2rem)]'
+            : 'mt-0 w-full max-w-none rounded-none border border-transparent bg-transparent'
+        }`}
+      >
+      <div className={`flex h-14 items-center justify-between ${solid ? 'px-4 sm:px-5' : 'container-x'}`}>
         <Link to="/" className="flex items-center gap-2.5">
           <Logo className="h-6 w-6" />
           <span className="text-sm font-semibold uppercase tracking-[0.12em]">{site.shortName}</span>
@@ -204,8 +216,8 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
       </div>
 
       {open && (
-        <nav id="mobile-nav" className="border-t border-line bg-bg md:hidden" aria-label="Mobile">
-          <div className="container-x grid py-2">
+        <nav id="mobile-nav" className="border-t border-line md:hidden" aria-label="Mobile">
+          <div className="grid px-4 py-2 sm:px-5">
             {[...navigation, ...aboutMenu].map((n) => (
               <NavLink
                 key={n.to}
@@ -218,6 +230,7 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
           </div>
         </nav>
       )}
+      </div>
     </header>
   );
 }
