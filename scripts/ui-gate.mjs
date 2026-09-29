@@ -63,6 +63,52 @@ if (await acct.count()) {
   await page.waitForTimeout(250);
   const menuText = await page.evaluate(() => document.querySelector('[role="menu"]')?.textContent ?? '');
   check('the account menu offers a sign-in', /Sign in/i.test(menuText), menuText.trim());
+  // Text in the DOM is not the same as text on the screen. The header's pill
+  // once clipped this menu to a 5px sliver and every text-based check still
+  // passed, so measure how much of it a person can actually see.
+  const seen = await page.evaluate(() => {
+    const menu = document.querySelector('[role="menu"]');
+    if (!menu) return null;
+    const m = menu.getBoundingClientRect();
+    let clipBottom = window.innerHeight;
+    for (let el = menu.parentElement; el; el = el.parentElement) {
+      if (getComputedStyle(el).overflow !== 'visible') {
+        clipBottom = Math.min(clipBottom, el.getBoundingClientRect().bottom);
+      }
+    }
+    return { height: Math.round(m.height), visible: Math.round(Math.min(m.bottom, clipBottom) - m.top) };
+  });
+  check(
+    'the account menu is not clipped by the header',
+    !!seen && seen.visible >= seen.height - 1,
+    seen ? `${seen.visible}px of ${seen.height}px visible` : 'no menu',
+  );
+  await page.keyboard.press('Escape');
+}
+
+// The About dropdown hangs out of the same pill and had the same bug.
+await page.setViewportSize({ width: 1280, height: 900 });
+await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+await page.getByRole('button', { name: /^About/ }).click();
+await page.waitForTimeout(250);
+{
+  const seen = await page.evaluate(() => {
+    const menu = document.querySelector('[role="menu"]');
+    if (!menu) return null;
+    const m = menu.getBoundingClientRect();
+    let clipBottom = window.innerHeight;
+    for (let el = menu.parentElement; el; el = el.parentElement) {
+      if (getComputedStyle(el).overflow !== 'visible') {
+        clipBottom = Math.min(clipBottom, el.getBoundingClientRect().bottom);
+      }
+    }
+    return { height: Math.round(m.height), visible: Math.round(Math.min(m.bottom, clipBottom) - m.top) };
+  });
+  check(
+    'the About menu is not clipped by the header',
+    !!seen && seen.visible >= seen.height - 1,
+    seen ? `${seen.visible}px of ${seen.height}px visible` : 'no menu',
+  );
   await page.keyboard.press('Escape');
 }
 

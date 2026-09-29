@@ -98,7 +98,7 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
         one object moving rather than two states swapping.
       */}
       <div
-        className={`pointer-events-auto mx-auto overflow-hidden transition-all duration-300 ease-out ${
+        className={`pointer-events-auto mx-auto transition-all duration-300 ease-out ${
           solid
             ? 'mt-2 w-[calc(100%-1rem)] max-w-5xl rounded-2xl border border-line bg-bg/75 shadow-[0_10px_34px_-14px_var(--glow)] backdrop-blur-xl sm:mt-3 sm:w-[calc(100%-2rem)]'
             : 'mt-0 w-full max-w-none rounded-none border border-transparent bg-transparent'
@@ -152,7 +152,10 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
           <div ref={accountRef} className="relative">
             <button
               type="button"
-              onClick={() => setAccount((a) => !a)}
+              onClick={() => {
+                setOpen(false);
+                setAccount((a) => !a);
+              }}
               aria-expanded={account}
               aria-haspopup="menu"
               aria-label={auth.email ? `Account — signed in as ${auth.email}` : 'Account — sign in'}
@@ -207,7 +210,10 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
           </button>
           <button
             type="button"
-            onClick={() => setOpen((o) => !o)}
+            onClick={() => {
+              setAccount(false);
+              setOpen((o) => !o);
+            }}
             className="rounded-md p-2 text-fg transition hover:bg-fg/5 md:hidden"
             aria-expanded={open}
             aria-controls="mobile-nav"
@@ -219,7 +225,7 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
       </div>
 
       {open && (
-        <nav id="mobile-nav" className="border-t border-line md:hidden" aria-label="Mobile">
+        <nav id="mobile-nav" className="rounded-b-2xl border-t border-line md:hidden" aria-label="Mobile">
           <div className="grid px-4 py-2 sm:px-5">
             {[...navigation, ...aboutMenu].map((n) => (
               <NavLink
