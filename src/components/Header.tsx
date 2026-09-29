@@ -155,10 +155,10 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
               onClick={() => setAccount((a) => !a)}
               aria-expanded={account}
               aria-haspopup="menu"
-              aria-label={auth.email ? `Signed in as ${auth.email}` : 'Sign in'}
+              aria-label={auth.email ? `Account — signed in as ${auth.email}` : 'Account — sign in'}
               className={`rounded-md p-2 transition hover:bg-fg/5 ${auth.email ? 'text-fg' : 'text-muted hover:text-fg'}`}
             >
-              {auth.email ? <UserRound className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+              <UserRound className="h-4 w-4" />
             </button>
             {account && (
               <div
@@ -187,9 +187,12 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
                     </button>
                   </>
                 ) : (
-                  <Link to="/admin" role="menuitem" className="flex items-center gap-2 px-4 py-2.5 text-sm text-muted transition hover:bg-fg/5 hover:text-fg">
-                    <Lock className="h-3.5 w-3.5" /> Sign in
-                  </Link>
+                  <div className="px-3 py-3">
+                    <div className="px-1 text-xs text-muted">Organizers</div>
+                    <Link to="/admin" role="menuitem" className="btn-primary mt-2.5 w-full">
+                      <Lock className="h-3.5 w-3.5" /> Sign in
+                    </Link>
+                  </div>
                 )}
               </div>
             )}
@@ -227,6 +230,32 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
                 {n.label}
               </NavLink>
             ))}
+            {/* Set apart from the sections above: this is not a page of the
+                site, it is the way in for the people running the events. */}
+            <div className="mt-3 border-t border-line pt-4">
+              {auth.email ? (
+                <>
+                  <div className="px-0.5 text-xs text-muted">{auth.email}</div>
+                  <Link to="/admin" className="btn-primary mt-2.5 w-full">
+                    Sign-ups and leads
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      auth.signOut();
+                    }}
+                    className="btn-ghost mt-2 w-full"
+                  >
+                    <LogOut className="h-4 w-4" /> Sign out
+                  </button>
+                </>
+              ) : (
+                <Link to="/admin" className="btn-primary w-full">
+                  <Lock className="h-4 w-4" /> Sign in
+                </Link>
+              )}
+            </div>
           </div>
         </nav>
       )}

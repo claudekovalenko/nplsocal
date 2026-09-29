@@ -56,14 +56,24 @@ for (const [path, label] of PRIVATE) {
 // ordinary page at phone width, and open to a sign-in.
 await page.goto(BASE + '/', { waitUntil: 'networkidle' });
 await page.waitForTimeout(600);
-const acct = page.getByRole('button', { name: /Sign in|Signed in as/ });
+const acct = page.getByRole('button', { name: /^Account/ });
 check('the header offers an account menu', (await acct.count()) > 0);
 if (await acct.count()) {
   await acct.first().click();
   await page.waitForTimeout(250);
   const menuText = await page.evaluate(() => document.querySelector('[role="menu"]')?.textContent ?? '');
   check('the account menu offers a sign-in', /Sign in/i.test(menuText), menuText.trim());
+  await page.keyboard.press('Escape');
 }
+
+// The three-lines menu must carry the same obvious way in, not only the icon.
+await page.setViewportSize({ width: 390, height: 800 });
+await page.reload({ waitUntil: 'networkidle' });
+await page.getByRole('button', { name: /Toggle menu/i }).click();
+await page.waitForTimeout(250);
+const burger = await page.evaluate(() => document.querySelector('#mobile-nav')?.textContent ?? '');
+check('the three-lines menu offers a sign-in', /Sign in/i.test(burger), burger.replace(/\s+/g, ' ').trim());
+await page.setViewportSize({ width: 1280, height: 900 });
 
 // Registering must stay open to everyone — the gate is on reading, never on
 // signing up.
