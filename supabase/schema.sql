@@ -148,10 +148,15 @@ create table if not exists public.npl_registrations (
   church     text not null default '',
   days       text[] not null default '{}',
   notes      text not null default '',
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- Removing somebody is a soft delete: the row is marked and kept for 30 days
+  -- so a mis-tap is recoverable. npl_purge_trash() takes it from there.
+  deleted_at timestamptz
 );
 
 create index if not exists npl_registrations_event_idx on public.npl_registrations (event_id, created_at desc);
+create index if not exists npl_registrations_deleted_idx
+  on public.npl_registrations (deleted_at) where deleted_at is not null;
 
 alter table public.npl_registrations enable row level security;
 
@@ -161,11 +166,17 @@ drop policy if exists "npl_registrations anyone can sign up" on public.npl_regis
 create policy "npl_registrations anyone can sign up" on public.npl_registrations
   for insert to anon, authenticated with check (true);
 
--- Leads and admins see the roster.
+-- Leads see the live roster; admins additionally see the trash, which is the
+-- only way anything gets restored.
 drop policy if exists "organizers read" on public.npl_registrations;
 drop policy if exists "npl_registrations leads read" on public.npl_registrations;
 create policy "npl_registrations leads read" on public.npl_registrations
-  for select to authenticated using (public.npl_can_see_leads());
+  for select to authenticated
+  using (public.npl_can_see_leads() and deleted_at is null);
+
+drop policy if exists "npl_registrations admin read trash" on public.npl_registrations;
+create policy "npl_registrations admin read trash" on public.npl_registrations
+  for select to authenticated using (public.npl_is_admin());
 
 -- Only an admin changes it.
 drop policy if exists "organizers write" on public.npl_registrations;
@@ -179,6 +190,23 @@ create policy "npl_registrations admin delete" on public.npl_registrations
   for delete to authenticated using (public.npl_is_admin());
 
 select public.npl_publish('npl_registrations');
+
+-- Anything sitting in the trash past the retention window goes for good. The
+-- function is bounded to exactly that window, so the worst any caller can do is
+-- carry out the published policy a few hours early: it cannot touch a live
+-- sign-up or recent trash. scripts/db-keepalive.mjs calls it twice a day on the
+-- anon key, which is why anon may execute it.
+create or replace function public.npl_purge_trash() returns integer
+  language plpgsql security definer set search_path = public as $$
+declare n integer;
+begin
+  delete from public.npl_registrations
+  where deleted_at is not null and deleted_at < now() - interval '30 days';
+  get diagnostics n = row_count;
+  return n;
+end $$;
+
+grant execute on function public.npl_purge_trash() to anon, authenticated;
 
 -- ── Daily push reports ─────────────────────────────────────────────
 -- Any team can turn in a report from the street with no sign-in, because that

@@ -132,7 +132,7 @@ Tables are prefixed `npl_` because the database is shared with other small apps.
 
 | Table | Who can read | Who can write |
 | --- | --- | --- |
-| `npl_registrations` | `admin`, `leads` | Anyone may submit a sign-up; `admin` may edit or delete |
+| `npl_registrations` | `admin` (incl. trash), `leads` (live rows only) | Anyone may submit a sign-up; `admin` may edit or remove |
 | `npl_interest` | `admin`, `leads` | Anyone may leave their details; `admin` may edit or delete |
 | `npl_push_reports` | `admin` | Any team may submit a report; `admin` may edit or delete |
 | `npl_groups` | `admin` | `admin` |
@@ -141,6 +141,19 @@ Tables are prefixed `npl_` because the database is shared with other small apps.
 Contact details are never readable by the public. A visitor's browser can insert a registration but cannot read a single row back.
 
 `supabase/schema.sql` is the source of truth for this structure, and it can be re-run safely. To move to a dedicated project later, run that file there and change the two values in `.env`.
+
+### Removing a sign-up
+
+Removing somebody from a roster is a soft delete. The row is marked
+`deleted_at` and moves to a **Removed** list under the roster, where an admin
+can put it back for **30 days**; after that `npl_purge_trash()` deletes it for
+good. The confirmation says which of the two is about to happen, because the
+permanent one cannot be undone.
+
+Leads never see the trash — row-level security hides it — so restoring is an
+admin job. The purge runs from `scripts/db-keepalive.mjs`, which already runs
+twice a day; it is bounded to rows over 30 days old, so it can only ever carry
+out the policy the roster page promises.
 
 ### Signing in
 

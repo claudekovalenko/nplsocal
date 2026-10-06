@@ -4,7 +4,8 @@
  * A free-tier project is paused after roughly seven days of low database
  * activity. If that happened mid-event the registration form would simply stop
  * working, so a scheduled job runs this once a day: it reads and touches a
- * single heartbeat row, which counts as real user activity.
+ * single heartbeat row, which counts as real user activity. It also empties the
+ * roster trash of anything past its 30-day retention window.
  *
  *   node scripts/db-keepalive.mjs
  *
@@ -65,5 +66,23 @@ await withRetry('touch', async () => {
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} ${await res.text()}`);
 });
+
+// Empty the trash of anything past its retention window. The function is
+// bounded to exactly that window, so this only ever carries out the policy the
+// roster page already promises; it cannot touch a live sign-up or recent trash.
+// A failure here is worth reporting but must not fail the keepalive, whose job
+// is keeping the form working.
+try {
+  const res = await fetch(`${url.replace(/\/$/, '')}/rest/v1/rpc/npl_purge_trash`, {
+    method: 'POST',
+    headers,
+    body: '{}',
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status} ${await res.text()}`);
+  const purged = await res.json();
+  if (purged) console.log(`Purged ${purged} sign-up(s) that had been in the trash over 30 days.`);
+} catch (e) {
+  console.warn(`Trash purge skipped: ${e.message}`);
+}
 
 console.log(`Database awake. Previous ping: ${rows?.[0]?.last_ping ?? 'never'}; stamped a new one.`);
