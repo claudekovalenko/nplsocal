@@ -56,8 +56,8 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
 
   const solid = scrolled || open || !onHero || minimal;
 
-  // On the form route the wordmark is not a link either: the whole point is
-  // that there is nothing to click away to.
+  // On the form route the menu is gone, but the wordmark still goes home, so
+  // nobody is stuck on the form once they are done with it.
   if (minimal) {
     return (
       <header
@@ -65,10 +65,10 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
         className="fixed inset-x-0 top-0 z-40 border-b border-line bg-bg/80 backdrop-blur-xl"
       >
         <div className="container-x flex h-14 items-center justify-between">
-          <span className="flex items-center gap-2.5">
+          <Link to="/" className="flex items-center gap-2.5">
             <Logo className="h-6 w-6" />
             <span className="text-sm font-semibold uppercase tracking-[0.12em]">{site.shortName}</span>
-          </span>
+          </Link>
           <button
             type="button"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}

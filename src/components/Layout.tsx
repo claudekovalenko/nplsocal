@@ -11,8 +11,8 @@ export default function Layout() {
   /**
    * The registration form is sent to someone as a link with one job: fill it
    * in. On that route the site's navigation is stripped — no menu, no tab bar,
-   * no footer links — so there is nothing to wander off into mid-form. A way
-   * back goes in once there is somewhere useful to send people afterwards.
+   * no footer links — so there is nothing to wander off into mid-form. The
+   * wordmark and the confirmation screen still lead back to the homepage.
    */
   const focused = pathname.startsWith('/register/');
 

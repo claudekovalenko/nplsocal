@@ -166,8 +166,10 @@ check(
   pushForm.includes('Neighbors and Nations') && pushForm.includes('6575 Crescent Ave, Buena Park, CA 90620'),
   pushForm.split('\n').filter((l) => /Check in|Crescent/.test(l)).join(' | ') || 'neither line found',
 );
-const pushLinks = await page.evaluate(() => document.querySelectorAll('a[href]').length);
-check('the push form still has nothing to click out to', pushLinks === 0, `${pushLinks} links`);
+const pushAway = await page.evaluate(() =>
+  [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')).filter((h) => h !== '/'),
+);
+check('the push form links nowhere but home', pushAway.length === 0, pushAway.join(', ') || 'home only');
 
 // An event held elsewhere must not inherit it.
 await page.goto(BASE + '/register/oc-mid-level-2027', { waitUntil: 'networkidle' });
@@ -177,15 +179,16 @@ check(
   !otherText.includes('6575 Crescent Ave'),
 );
 
-// 4c. The form link is sent to people with one job. Nothing on that page may
-// lead anywhere else, or someone wanders off mid-registration.
+// 4c. The form link is sent to people with one job. The only way off that page
+// is home, or someone wanders off mid-registration.
 await page.goto(BASE + '/register/socal-gospel-conversation-nov', { waitUntil: 'networkidle' });
 const escapes = await page.evaluate(() => ({
-  links: document.querySelectorAll('a[href]').length,
+  away: [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')).filter((h) => h !== '/'),
+  home: document.querySelectorAll('a[href="/"]').length,
   tabBar: document.querySelectorAll('nav[aria-label="Quick"]').length,
 }));
-check('form page offers no way to click out', escapes.links === 0 && escapes.tabBar === 0,
-  `${escapes.links} links, ${escapes.tabBar} tab bars`);
+check('form page links only home', escapes.away.length === 0 && escapes.tabBar === 0 && escapes.home >= 1,
+  `${escapes.home} home links, ${escapes.away.length} other links, ${escapes.tabBar} tab bars`);
 
 // 5. The push hub carries the whole event.
 await page.goto(BASE + '/push', { waitUntil: 'networkidle' });

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { CheckCircle2, Lock } from 'lucide-react';
 import { events, site, hubById, venueFor } from '@/content';
 import { VenueAddress, venueName } from '@/components/EventCard';
@@ -80,6 +80,9 @@ export default function Register() {
             Your email app should have opened with the details. If it didn't, send them to {site.contact.email}.
           </p>
         )}
+        <Link to="/" className="btn-primary mt-10">
+          Back to home
+        </Link>
       </section>
     );
   }
@@ -88,9 +91,6 @@ export default function Register() {
 
   return (
     <section className="container-x max-w-2xl py-12 md:py-16">
-      {/* No way back on purpose: this link is sent to someone whose only job is
-          to fill the form in. A return link goes in once there is somewhere
-          useful to send them. */}
       <div className="eyebrow">Register · {hub ? hub.shortName : 'All SoCal'}</div>
       <h1 className="mt-3 text-4xl md:text-5xl">{event.title}</h1>
       <p className="mt-3 text-muted">

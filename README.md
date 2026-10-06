@@ -88,7 +88,7 @@ Set `tier` on each event in `src/content/events.ts`:
 
 ### Event registration
 
-The form at `/register/<event id>` is deliberately a dead end: no navigation, no tab bar, no footer links, not even a clickable wordmark. The link gets sent to someone whose only job is to fill it in, so there is nothing to wander into mid-form. A way back goes in once there is somewhere useful to send people afterwards.
+The form at `/register/<event id>` is deliberately focused: no menu, no tab bar, no footer links. The link gets sent to someone whose only job is to fill it in, so there is nothing to wander into mid-form. The only way out is home: the wordmark at the top and bottom links to the homepage, and the confirmation screen has a Back to home button.
 
 Every event's Register button opens that form, asking for name, email, phone, party size, city, and church / network. Organizers see the roster at `/roster` (all events) and `/roster/<event id>`, with totals, breakdowns by church / network and by city, search, CSV export, and CSV import for people who signed up somewhere else. The importer matches common column headers, so an export from another form usually drops straight in; a file with separate Church and Network columns is folded into the single field.
 
