@@ -18,7 +18,20 @@ export interface Registration {
   days: string[];
   notes: string;
   createdAt: string;
+  /**
+   * When this was moved to the trash, or null/absent when it is on the live
+   * roster. Removing somebody is reversible for TRASH_DAYS; after that a
+   * scheduled purge takes the row for good.
+   */
+  deletedAt?: string | null;
 }
+
+/** How long a removed sign-up stays recoverable. Mirrors npl_purge_trash(). */
+export const TRASH_DAYS = 30;
+
+/** Whole days left before a trashed row is purged. Never negative. */
+export const daysLeftInTrash = (deletedAt: string, now = new Date()) =>
+  Math.max(0, TRASH_DAYS - Math.floor((now.getTime() - new Date(deletedAt).getTime()) / 86_400_000));
 
 export const emptyRegistration = (eventId: string): Registration => ({
   id: '',

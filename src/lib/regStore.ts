@@ -15,7 +15,14 @@ export interface RegistrationStore {
   list(eventId?: string): Promise<Registration[]>;
   add(reg: Registration): Promise<void>;
   addMany(regs: Registration[]): Promise<void>;
+  /** Moves a sign-up to the trash. Reversible for TRASH_DAYS. */
   remove(id: string): Promise<void>;
+  /** Sign-ups in the trash, newest first. Admin only on the shared store. */
+  listTrash(eventId?: string): Promise<Registration[]>;
+  /** Puts a trashed sign-up back on the roster. */
+  restore(id: string): Promise<void>;
+  /** Deletes for good, now, skipping the retention window. */
+  purge(id: string): Promise<void>;
   subscribe(cb: () => void): () => void;
 }
 
@@ -35,9 +42,17 @@ class LocalRegStore implements RegistrationStore {
     localStorage.setItem(KEY, JSON.stringify(rows));
     this.subs.forEach((cb) => cb());
   }
+  private select(eventId: string | undefined, trashed: boolean) {
+    return this.read()
+      .filter((r) => (trashed ? !!r.deletedAt : !r.deletedAt))
+      .filter((r) => !eventId || r.eventId === eventId)
+      .sort((a, b) => (trashed ? (b.deletedAt ?? '').localeCompare(a.deletedAt ?? '') : b.createdAt.localeCompare(a.createdAt)));
+  }
   async list(eventId?: string) {
-    const all = this.read().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-    return eventId ? all.filter((r) => r.eventId === eventId) : all;
+    return this.select(eventId, false);
+  }
+  async listTrash(eventId?: string) {
+    return this.select(eventId, true);
   }
   async add(reg: Registration) {
     this.write([...this.read(), reg]);
@@ -46,6 +61,13 @@ class LocalRegStore implements RegistrationStore {
     this.write([...this.read(), ...regs]);
   }
   async remove(id: string) {
+    const when = new Date().toISOString();
+    this.write(this.read().map((r) => (r.id === id ? { ...r, deletedAt: when } : r)));
+  }
+  async restore(id: string) {
+    this.write(this.read().map((r) => (r.id === id ? { ...r, deletedAt: null } : r)));
+  }
+  async purge(id: string) {
     this.write(this.read().filter((r) => r.id !== id));
   }
   subscribe(cb: () => void) {
@@ -71,6 +93,7 @@ interface Row {
   days: string[];
   notes: string;
   created_at: string;
+  deleted_at: string | null;
 }
 
 const toReg = (r: Row): Registration => ({
@@ -85,6 +108,7 @@ const toReg = (r: Row): Registration => ({
   days: r.days ?? [],
   notes: r.notes ?? '',
   createdAt: r.created_at,
+  deletedAt: r.deleted_at,
 });
 
 const toRow = (r: Registration) => ({
@@ -112,7 +136,24 @@ class SharedRegStore implements RegistrationStore {
       .subscribe();
   }
   async list(eventId?: string) {
-    let q = supabase().from('npl_registrations').select('*').order('created_at', { ascending: false });
+    // Row-level security already hides the trash from the leads role, but an
+    // admin can see everything, so the filter has to be here too.
+    let q = supabase()
+      .from('npl_registrations')
+      .select('*')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
+    if (eventId) q = q.eq('event_id', eventId);
+    const { data, error } = await q;
+    if (error) throw error;
+    return (data as Row[]).map(toReg);
+  }
+  async listTrash(eventId?: string) {
+    let q = supabase()
+      .from('npl_registrations')
+      .select('*')
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false });
     if (eventId) q = q.eq('event_id', eventId);
     const { data, error } = await q;
     if (error) throw error;
@@ -127,6 +168,17 @@ class SharedRegStore implements RegistrationStore {
     if (error) throw error;
   }
   async remove(id: string) {
+    const { error } = await supabase()
+      .from('npl_registrations')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) throw error;
+  }
+  async restore(id: string) {
+    const { error } = await supabase().from('npl_registrations').update({ deleted_at: null }).eq('id', id);
+    if (error) throw error;
+  }
+  async purge(id: string) {
     const { error } = await supabase().from('npl_registrations').delete().eq('id', id);
     if (error) throw error;
   }

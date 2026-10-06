@@ -6,12 +6,16 @@ import { onAuthChange } from '@/lib/auth';
 export function useRegistrations(eventId?: string) {
   const store = getRegStore();
   const [rows, setRows] = useState<Registration[]>([]);
+  const [trash, setTrash] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       setRows(await store.list(eventId));
+      // Only an admin can read the trash; for anyone else this comes back empty
+      // rather than failing, so one rejection must not blank the roster.
+      setTrash(await store.listTrash(eventId).catch(() => []));
       setError(null);
     } catch (e) {
       // Signed out, row-level security returns nothing rather than an error, so
@@ -55,6 +59,20 @@ export function useRegistrations(eventId?: string) {
     },
     [store, refresh],
   );
+  const restore = useCallback(
+    async (id: string) => {
+      await store.restore(id);
+      await refresh();
+    },
+    [store, refresh],
+  );
+  const purge = useCallback(
+    async (id: string) => {
+      await store.purge(id);
+      await refresh();
+    },
+    [store, refresh],
+  );
 
-  return { store, rows, loading, error, add, addMany, remove, refresh };
+  return { store, rows, trash, loading, error, add, addMany, remove, restore, purge, refresh };
 }

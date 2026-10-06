@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Download, Upload, Search, Trash2, Wifi, HardDrive } from 'lucide-react';
+import { ArrowLeft, Download, Upload, Search, Trash2, Wifi, HardDrive, Undo2 } from 'lucide-react';
 import { events, hubById } from '@/content';
 import { formatRange, formatDate, eventDays, dayLabel } from '@/lib/format';
-import { countBy, fromCsv, peoplePerDay, toCsv, totalPeople } from '@/lib/registrations';
+import { countBy, daysLeftInTrash, fromCsv, peoplePerDay, toCsv, totalPeople, TRASH_DAYS, type Registration } from '@/lib/registrations';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useAuth } from '@/hooks/useAuth';
 import { NoAccess, SignedInBar, SignIn } from '@/components/SignIn';
+import Confirm from '@/components/Confirm';
 
 function Breakdown({ title, rows }: { title: string; rows: [string, number][] }) {
   if (!rows.length) return null;
@@ -27,10 +28,12 @@ function Breakdown({ title, rows }: { title: string; rows: [string, number][] })
 
 export default function Roster() {
   const { eventId } = useParams();
-  const { store, rows, loading, error, addMany, remove } = useRegistrations(eventId);
+  const { store, rows, trash, loading, error, addMany, remove, restore, purge } = useRegistrations(eventId);
   const auth = useAuth();
   const [q, setQ] = useState('');
   const [importError, setImportError] = useState<string | null>(null);
+  // What the open confirmation is about: trash a row, or destroy one for good.
+  const [confirming, setConfirming] = useState<{ row: Registration; forever: boolean } | null>(null);
   const event = events.find((e) => e.id === eventId);
   // Leads may look; only an admin may change the roster. The database enforces
   // the same split, so a hidden button is a courtesy, not the lock.
@@ -255,7 +258,11 @@ export default function Roster() {
                   <td className="py-3 pr-4 text-muted">{r.church}</td>
                   {canEdit && (
                     <td className="py-3">
-                      <button onClick={() => confirm(`Remove ${r.name}?`) && remove(r.id)} className="p-1.5 text-faint transition hover:text-fg" aria-label={`Remove ${r.name}`}>
+                      <button
+                        onClick={() => setConfirming({ row: r, forever: false })}
+                        className="p-1.5 text-faint transition hover:text-fg"
+                        aria-label={`Remove ${r.name}`}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </td>
@@ -266,6 +273,74 @@ export default function Roster() {
           </table>
         </div>
       )}
+
+      {/*
+        The trash. Only an admin can read it — row-level security hides it from
+        the leads role — and only until the retention window runs out.
+      */}
+      {canEdit && trash.length > 0 && (
+        <div className="mt-14">
+          <div className="eyebrow">Removed</div>
+          <p className="mt-2 text-sm text-muted">
+            Kept for {TRASH_DAYS} days, then deleted for good. Put anything back before then.
+          </p>
+          <ul className="mt-5 divide-y divide-line border-y border-line">
+            {trash.map((r) => {
+              const left = r.deletedAt ? daysLeftInTrash(r.deletedAt) : TRASH_DAYS;
+              return (
+                <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-3.5">
+                  <div className="min-w-0">
+                    <div className="text-sm">
+                      {r.name} <span className="text-muted">· {r.party}</span>
+                    </div>
+                    <div className="text-xs text-faint">
+                      {r.email || r.phone || r.city || '—'} · {left === 0 ? 'deleted today' : `${left} day${left === 1 ? '' : 's'} left`}
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 gap-2">
+                    <button onClick={() => restore(r.id)} className="btn-secondary !h-8 !px-3 !text-xs">
+                      <Undo2 className="h-3.5 w-3.5" /> Put back
+                    </button>
+                    <button
+                      onClick={() => setConfirming({ row: r, forever: true })}
+                      className="btn-ghost !h-8 !px-3 !text-xs text-faint"
+                    >
+                      Delete now
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      <Confirm
+        open={!!confirming}
+        danger={!!confirming?.forever}
+        title={confirming?.forever ? 'Delete for good?' : `Remove ${confirming?.row.name}?`}
+        confirmLabel={confirming?.forever ? 'Delete for good' : 'Remove'}
+        body={
+          confirming?.forever ? (
+            <>
+              <strong className="text-fg">{confirming.row.name}</strong> and their contact details will be deleted
+              immediately. This cannot be undone.
+            </>
+          ) : (
+            <>
+              <strong className="text-fg">{confirming?.row.name}</strong> comes off the roster and goes to Removed,
+              where you can put them back for {TRASH_DAYS} days. After that they are deleted for good.
+            </>
+          )
+        }
+        onCancel={() => setConfirming(null)}
+        onConfirm={() => {
+          if (!confirming) return;
+          const { row, forever } = confirming;
+          setConfirming(null);
+          void (forever ? purge(row.id) : remove(row.id));
+        }}
+      />
     </section>
   );
 }

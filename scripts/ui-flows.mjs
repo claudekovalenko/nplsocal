@@ -109,6 +109,38 @@ if (eventId) {
   );
 }
 
+// 3c. Removing somebody must be recoverable. A roster holds real people's
+// contact details, and a mis-tap used to destroy a row with one native confirm.
+if (eventId) {
+  await page.goto(`${BASE}/roster/${eventId}`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+  const before = await page.locator('tbody tr').count();
+  await page.getByRole('button', { name: /^Remove CSV Edge Case$/ }).click();
+  await page.waitForTimeout(250);
+  const dialog = page.locator('[role="alertdialog"]');
+  check('removing asks first', await dialog.isVisible());
+  const warning = (await dialog.textContent()) ?? '';
+  check('the warning says it can be undone', /put them back|30 days/i.test(warning), warning.replace(/\s+/g, ' ').trim().slice(0, 90));
+
+  // Backing out must change nothing at all.
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await page.waitForTimeout(300);
+  check('cancelling removes nobody', (await page.locator('tbody tr').count()) === before);
+
+  await page.getByRole('button', { name: /^Remove CSV Edge Case$/ }).click();
+  await page.waitForTimeout(250);
+  await page.locator('[role="alertdialog"]').getByRole('button', { name: 'Remove' }).click();
+  await page.waitForTimeout(500);
+  check('removing takes them off the roster', (await page.locator('tbody tr').count()) === before - 1);
+  const removedText = (await page.textContent('body')) ?? '';
+  check('the removed row shows up in the trash', /Removed/.test(removedText) && /CSV Edge Case/.test(removedText));
+  check('the trash says how long is left', /day[s]? left|deleted today/i.test(removedText));
+
+  await page.getByRole('button', { name: /Put back/ }).first().click();
+  await page.waitForTimeout(500);
+  check('putting it back restores the row', (await page.locator('tbody tr').count()) === before);
+}
+
 // 4. The 3/3rds runner drives a meeting.
 await page.goto(BASE + '/three-thirds', { waitUntil: 'networkidle' });
 const thirds = await page.locator('ol li button').count();
