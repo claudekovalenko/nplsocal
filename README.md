@@ -102,19 +102,18 @@ Contact details are private by design: the database policy lets anyone insert a 
 
 `/push` is the central page for the L.A. Metro Gospel Push and carries the whole event:
 
-- the schedule, day by day, with a block-by-block breakdown
+- the schedule, day by day
+- what a PUSH is (Prayer, Unity, Share, Houses of Peace), who is hosting, where to stay, and the FAQ
 - a link to the Signal group chat
 - registration
 - a two-minute end-of-day report from each team
 - a stay-connected form for anyone not ready to register
 
-Edit `src/content/push.ts` to change any of it. Two things there need your input:
+Edit `src/content/push.ts` to change any of it. The schedule, hosts, lodging note and FAQ are copied from lapush2027.com, so update both together. One thing still needs your input:
 
 | Field | What to do |
 | --- | --- |
 | `signalUrl` | Paste the Signal group invite link. The button is disabled and labelled "link coming" until you do. |
-| `schedule` | The blocks are a placeholder. Replace them with the real plan. |
-| `scheduleStatus` | `'draft'` while the times are invented; the page says so plainly. Change the one word to `'final'` and every warning disappears. |
 
 **Daily reports** collect conversations, gospel shared, responded, baptized and groups started, plus a story and a prayer request. They work with no signal: a failed send is queued on the phone and goes out by itself on the next attempt, so a team in a dead zone never loses a report.
 

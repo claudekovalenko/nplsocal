@@ -11,6 +11,8 @@ import InterestForm from '@/components/InterestForm';
 
 const SECTIONS = [
   ['schedule', 'Schedule'],
+  ['about', 'What is a PUSH?'],
+  ['faq', 'FAQ'],
   ['report', 'Daily report'],
   ['connect', 'Stay connected'],
 ] as const;
@@ -45,7 +47,7 @@ function Day({ day }: { day: ScheduleDay }) {
   return (
     <div>
       <h3 className="text-2xl md:text-3xl">{day.title}</h3>
-      <p className="mt-2 text-muted">{day.summary}</p>
+      {day.summary && <p className="mt-2 text-muted">{day.summary}</p>}
       {day.place && (
         <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-muted">
           <MapPin className="h-3.5 w-3.5" /> {day.place}
@@ -54,10 +56,10 @@ function Day({ day }: { day: ScheduleDay }) {
       <ol className="mt-6 divide-y divide-line border-y border-line">
         {day.blocks.map((b) => (
           <li key={b.time + b.title} className="flex gap-5 py-4">
-            <span className="w-14 shrink-0 tabular-nums text-sm text-muted">{b.time}</span>
+            <span className="w-28 shrink-0 text-sm text-muted">{b.time}</span>
             <span className="min-w-0">
               <span className="flex flex-wrap items-baseline gap-x-3">
-                <span className="text-base">{b.title}</span>
+                <span className={b.kind === 'celebrate' ? 'text-base text-accent' : 'text-base'}>{b.title}</span>
                 <span className="text-xs text-faint">{blockKindLabel[b.kind]}</span>
               </span>
               {b.detail && <span className="mt-0.5 block text-sm text-muted">{b.detail}</span>}
@@ -76,7 +78,6 @@ function Day({ day }: { day: ScheduleDay }) {
 }
 
 export default function Push() {
-  const isDraft = push.scheduleStatus === 'draft';
   const event = events.find((e) => e.id === PUSH_EVENT_ID);
   const days = useMemo(() => (event ? eventDays(event.start, event.end) : push.schedule.map((d) => d.date)), [event]);
   const [active, setActive] = useState(0);
@@ -152,12 +153,6 @@ export default function Push() {
         <div className="container-x py-16 md:py-24">
           <div className="eyebrow">Schedule</div>
           <h2 className="mt-3 text-3xl md:text-5xl">What happens each day.</h2>
-          {isDraft && (
-            <p className="mt-4 max-w-xl text-muted">
-              These times are a placeholder while the plan is being set. The shape of the days is right; do not book
-              travel around the exact hours yet.
-            </p>
-          )}
 
           <div className="mt-8 flex flex-wrap gap-2">
             {push.schedule.map((d, i) => (
@@ -169,13 +164,72 @@ export default function Push() {
 
           <div className="mt-10">
             <Day day={push.schedule[active]} />
-            {isDraft && <p className="mt-4 text-xs text-faint">Placeholder schedule — times will change.</p>}
           </div>
+        </div>
+      </section>
 
-          <div className="mt-12">
-            <div className="eyebrow">Bring</div>
-            <p className="mt-3 text-muted">{push.bring.join(' · ')}</p>
+      {/* What is a PUSH? */}
+      <section id="about" className="scroll-mt-[var(--header-h)] border-t border-line">
+        <div className="container-x py-16 md:py-24">
+          <div className="eyebrow">What is a PUSH?</div>
+          <h2 className="mt-3 max-w-3xl text-3xl md:text-5xl">{push.what.lead}</h2>
+          <p className="mt-6 text-muted">We will focus on:</p>
+          <ol className="mt-6 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2">
+            {push.what.focus.map((f) => (
+              <li key={f.letter} className="bg-bg p-6 md:p-8">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-5xl font-light leading-none text-accent">{f.letter}</span>
+                  <h3 className="text-xl">{f.word}</h3>
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-muted">{f.text}</p>
+              </li>
+            ))}
+          </ol>
+
+          <div className="mt-16 grid gap-10 md:grid-cols-2">
+            <div>
+              <div className="eyebrow">Who is hosting the PUSH?</div>
+              <p className="mt-4 text-muted">{push.hosts.lead}</p>
+              <ul className="mt-4 flex flex-wrap gap-2">
+                {push.hosts.names.map((n) => (
+                  <li key={n} className="rounded-full border border-line px-3 py-1 text-sm">
+                    {n}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-sm text-muted">{push.hosts.more}</p>
+            </div>
+            <div>
+              <div className="eyebrow">Where should we stay?</div>
+              {push.stay.map((s) => (
+                <p key={s} className="mt-4 text-muted">
+                  {s}
+                </p>
+              ))}
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="scroll-mt-[var(--header-h)] border-t border-line">
+        <div className="container-x py-16 md:py-24">
+          <div className="eyebrow">FAQ</div>
+          <h2 className="mt-3 text-3xl md:text-5xl">Questions people ask.</h2>
+          <div className="mt-10 divide-y divide-line border-y border-line">
+            {push.faq.map((f) => (
+              <details key={f.q} className="group py-5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-6">
+                  {f.q}
+                  <span className="text-faint transition group-open:rotate-45">+</span>
+                </summary>
+                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted">{f.a}</p>
+              </details>
+            ))}
+          </div>
+          <Link to={`/register/${PUSH_EVENT_ID}`} className="btn-primary mt-10 min-w-40">
+            Register
+          </Link>
         </div>
       </section>
 

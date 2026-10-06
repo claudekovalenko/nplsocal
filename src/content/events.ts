@@ -12,13 +12,14 @@ export const events: Event[] = [
     type: 'push',
     tier: 'network',
     hub: 'la',
-    // Runs over New Year: Dec 30 2026 through Jan 2 2027.
-    start: '2026-12-30T09:00:00-08:00',
+    // Runs over New Year: arrival and kick-off dinner Dec 30 at 6pm, through
+    // dinner and celebration on Jan 2 (schedule from lapush2027.com).
+    start: '2026-12-30T18:00:00-08:00',
     end: '2027-01-02T21:00:00-08:00',
     location: 'Across the L.A. metro',
     // Teams go out across the metro; everyone checks in here.
     venue: 'Neighbors and Nations',
-    description: 'Four days of prayer, gospel conversations, and training across the L.A. metro. Open to the whole network.',
+    description: 'There is no better way to start a new year than with the people of God out sharing the only hope for the world. Free; please register.',
     registerUrl: '#',
   },
   {
