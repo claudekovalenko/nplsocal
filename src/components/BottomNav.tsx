@@ -1,9 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { Home, CalendarDays, Wrench, Info } from 'lucide-react';
+import { Home, CalendarDays, Wrench, Info, Map as MapIcon } from 'lucide-react';
 
 const items = [
   { to: '/', label: 'Home', icon: Home, end: true },
   { to: '/events', label: 'Events', icon: CalendarDays },
+  { to: '/pray', label: 'Pray', icon: MapIcon },
   { to: '/tools', label: 'Tools', icon: Wrench },
   { to: '/about', label: 'About', icon: Info },
 ];
@@ -15,7 +16,7 @@ export default function BottomNav() {
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       aria-label="Quick"
     >
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-5">
         {items.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}

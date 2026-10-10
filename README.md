@@ -56,6 +56,7 @@ Everything visible on the site comes from `src/content/`:
 | `events.ts` | Upcoming events. **The current entries are samples** — replace with real dates |
 | `venues.ts` | Street addresses for named venues, typed once and picked up by every event held there |
 | `faq.ts` | Questions on the Vision page |
+| `pray/plan.ts` | The Pray page: the 100-day plan (regions, neighborhood groups, focus days, who lives where), the seven optional prayer topics, and the Spanish for all of it. The 365-day plan is built from it, one day per listed place. `pray/strings.ts` holds the page's interface text in both languages; `pray/map.json` is the ZIP-code map. |
 
 **Venues.** An event's `location` is matched against `venues.ts`. Fill in the
 `address` and it appears under the venue name on the featured card, on the

@@ -256,6 +256,29 @@ await page.waitForTimeout(1200);
 const interestDone = ((await page.textContent('#connect')) || '').includes("We've got you");
 check('stay-connected form submits', interestDone);
 
+// 5b. The Pray page: the map draws every area, marking a day counts it, and
+// both switches (plan and language) change what is shown.
+await page.goto(BASE + '/pray', { waitUntil: 'networkidle' });
+await page.evaluate(() => localStorage.clear());
+await page.reload({ waitUntil: 'networkidle' });
+const prayShapes = await page.locator('.praymap path[data-i]').count();
+check('pray map draws every area', prayShapes > 300, `${prayShapes} areas`);
+const lit = await page.locator('.praymap path.on').count();
+await page.getByRole('button', { name: /^Next day$/ }).click();
+await page.waitForTimeout(300);
+const litNext = await page.locator('.praymap path.on').count();
+check('pray map lights the day\'s place', lit === 0 && litNext > 0, `${lit} lit on day 1, ${litNext} on day 2`);
+await page.getByRole('button', { name: 'I prayed for this' }).click();
+const prayedText = (await page.locator('main').innerText()).match(/prayed for (\d+) of (\d+)/);
+check('marking a day prayed counts it', prayedText?.[1] === '1' && prayedText?.[2] === '100', prayedText?.[0]);
+await page.getByRole('button', { name: '365 days' }).click();
+const yearText = (await page.locator('main').innerText()).match(/of 365 days/);
+check('the 365-day plan switches on', !!yearText);
+await page.getByRole('button', { name: 'ES', exact: true }).click();
+const esHeading = (await page.textContent('main h1')) || '';
+check('the Pray page switches to Spanish', /oración/.test(esHeading), esHeading);
+await page.getByRole('button', { name: 'EN', exact: true }).click();
+
 // 6. The tracker accepts a group.
 await page.goto(BASE + '/track/new', { waitUntil: 'networkidle' });
 const trackForm = await page.locator('form input').count();

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -20,6 +21,10 @@ import TrackEdit from '@/pages/TrackEdit';
 import Admin from '@/pages/Admin';
 import NotFound from '@/pages/NotFound';
 
+// The Pray page carries its own map and two plans, so it loads on its own
+// rather than adding to every other page's download.
+const Pray = lazy(() => import('@/pages/Pray'));
+
 export default function App() {
   return (
     <>
@@ -35,6 +40,14 @@ export default function App() {
           <Route path="three-thirds" element={<ThreeThirds />} />
           <Route path="training" element={<Training />} />
           <Route path="events" element={<Events />} />
+          <Route
+            path="pray"
+            element={
+              <Suspense fallback={<div className="min-h-dvh" />}>
+                <Pray />
+              </Suspense>
+            }
+          />
           {/* "Gatherings" meant house-church gatherings to practitioners, so the
               section was renamed. Keep the old path working for saved links. */}
           <Route path="gatherings" element={<Navigate to="/events" replace />} />

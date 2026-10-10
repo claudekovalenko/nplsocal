@@ -38,7 +38,7 @@ const findings = [];
 const add = (severity, page, kind, detail) => findings.push({ severity, page, kind, detail });
 
 /** Routes to start from. Everything else is discovered by following links. */
-const SEEDS = ['/', '/events', '/tools', '/about', '/regions', '/connect', '/track', '/roster', '/admin'];
+const SEEDS = ['/', '/events', '/pray', '/tools', '/about', '/regions', '/connect', '/track', '/roster', '/admin'];
 
 const seen = new Set();
 const queue = [];

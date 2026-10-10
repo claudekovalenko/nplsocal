@@ -197,3 +197,28 @@ h1, h2, h3, h4 {
   html { scroll-behavior: auto; }
   * { animation: none !important; transition: none !important; }
 }
+
+/*
+ * The Pray map, in the style of PrayforGreece.com: a sea, pale land for every
+ * ZIP area, the day's region tinted, today's place in yellow, and places
+ * already prayed for shaded in.
+ */
+.praymap {
+  --sea: #cfdeea; --land: #eef1f2; --land-ctx: #e2e7ea; --land-line: #b9c3cc; --land-reg: #c9d9ea;
+  --hit: #ffd21f; --hit-line: #152234; --done: #f3e7a6;
+  background: var(--sea);
+}
+.dark .praymap {
+  --sea: #0b1a2b; --land: #1d2836; --land-ctx: #151f2c; --land-line: #33445a; --land-reg: #26405f;
+  --hit: #ffd84d; --hit-line: #fff6cc; --done: #4a4426;
+}
+.praymap .ctx { fill: var(--land-ctx); stroke: var(--land-line); stroke-width: .6px; vector-effect: non-scaling-stroke; }
+.praymap .base { fill: var(--land); stroke: none; }
+.praymap .z { fill: var(--land); stroke: var(--land-line); stroke-width: .5px; vector-effect: non-scaling-stroke; cursor: pointer; transition: fill .25s; }
+.praymap .z:hover { fill: var(--land-reg); }
+.praymap .z.reg { fill: var(--land-reg); }
+.praymap .z.done { fill: var(--done); }
+.praymap .z.on { fill: var(--hit); stroke: var(--hit-line); stroke-width: 1.4px; }
+.praymap .cline { fill: none; stroke: var(--land-line); stroke-width: 1.4px; vector-effect: non-scaling-stroke; pointer-events: none; }
+.praymap .pin { fill: none; stroke: var(--hit-line); stroke-width: 2px; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; pointer-events: none; }
+.praymap-swatch { background: var(--done); }
