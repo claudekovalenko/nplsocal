@@ -28,7 +28,7 @@ function Totals({ rows }: { rows: DayTotals[] }) {
     ['Groups started', all.groupsStarted],
   ] as const;
   return (
-    <section className="container-x pb-4">
+    <section className="container-x pb-4 pt-12 md:pt-16">
       <div className="eyebrow">So far</div>
       <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-5">
         {tiles.map(([label, n]) => (
@@ -93,9 +93,11 @@ export default function Push() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-line">
+      {/* The hero runs up behind the floating header, like the homepage's, so the
+          glow has no hard edge under it. */}
+      <section className="relative -mt-[var(--header-h)] overflow-hidden border-b border-line">
         <div className="pointer-events-none absolute inset-0 aurora opacity-80" />
-        <div className="container-x relative py-16 md:py-24">
+        <div className="container-x relative pb-16 pt-[calc(var(--header-h)_+_2.5rem)] md:pb-20 md:pt-[calc(var(--header-h)_+_4rem)]">
           <div className="eyebrow">#NoPlaceLeft · Los Angeles</div>
           <h1 className="mt-4 text-5xl leading-[0.95] md:text-7xl">
             {push.name}
@@ -144,9 +146,7 @@ export default function Push() {
         </div>
       )}
 
-      <div className="pt-12 md:pt-16">
-        <Totals rows={totals} />
-      </div>
+      <Totals rows={totals} />
 
       {/* Schedule */}
       <section id="schedule" className="scroll-mt-[var(--header-h)] border-t border-line">
