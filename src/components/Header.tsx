@@ -104,8 +104,13 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
             : 'mt-0 w-full max-w-none rounded-none border border-transparent bg-transparent'
         }`}
       >
-      <div className={`flex h-14 items-center justify-between ${solid ? 'px-4 sm:px-5' : 'container-x'}`}>
-        <Link to="/" className="flex items-center gap-2.5">
+      {/* Three equal-sided columns from md up, so the links sit at the true
+          centre of the page, under the hero's centred headline, however wide
+          the wordmark and the icons on either side are. */}
+      <div
+        className={`flex h-14 items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr] ${solid ? 'px-4 sm:px-5' : 'container-x'}`}
+      >
+        <Link to="/" className="flex items-center gap-2.5 md:justify-self-start">
           <Logo className="h-6 w-6" />
           <span className="text-sm font-semibold uppercase tracking-[0.12em]">{site.shortName}</span>
         </Link>
@@ -143,7 +148,7 @@ export default function Header({ minimal = false }: { minimal?: boolean } = {}) 
           </div>
         </nav>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 md:justify-self-end">
           {/*
             Organizers reach everything private from here. It lives in the top
             corner at every width rather than in the page: it is not a section
