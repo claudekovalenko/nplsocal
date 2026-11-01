@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useRegisterSW } from 'virtual:pwa-register/react';
-import { Download, RefreshCw, WifiOff, X, Share } from 'lucide-react';
+import { Download, WifiOff, X, Share } from 'lucide-react';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { useOnline } from '@/hooks/useOnline';
 
@@ -41,11 +42,24 @@ export default function PwaBanners() {
     },
   });
 
-  // Apply a new build the moment one lands, rather than waiting for a tap.
-  // People were sitting on stale versions without realising it.
+  // Apply a new build without waiting for a tap (people sat on stale versions
+  // without realising it), but never under someone's thumb: applying reloads
+  // the page, and doing that the moment a build landed made the app flash and
+  // jump mid-read, mid-form. So wait for the next natural break: the app going
+  // to the background, or a move to another page.
+  const { pathname } = useLocation();
+  const pathAtUpdate = useRef<string | null>(null);
   useEffect(() => {
-    if (needRefresh) updateServiceWorker(true);
-  }, [needRefresh, updateServiceWorker]);
+    if (!needRefresh) return;
+    if (pathAtUpdate.current === null) pathAtUpdate.current = pathname;
+    if (document.visibilityState === 'hidden' || pathname !== pathAtUpdate.current) {
+      updateServiceWorker(true);
+      return;
+    }
+    const onHide = () => document.visibilityState === 'hidden' && updateServiceWorker(true);
+    document.addEventListener('visibilitychange', onHide);
+    return () => document.removeEventListener('visibilitychange', onHide);
+  }, [needRefresh, pathname, updateServiceWorker]);
 
   useEffect(() => {
     if (!isIOS || installed || dismissed) return;
@@ -62,11 +76,6 @@ export default function PwaBanners() {
       {!online && (
         <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-line bg-bg/90 px-4 py-2 text-xs text-muted backdrop-blur-xl">
           <WifiOff className="h-3.5 w-3.5" /> Offline — saved pages and your 100 List still work.
-        </div>
-      )}
-      {needRefresh && (
-        <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-line bg-bg/90 px-4 py-2 text-xs text-muted backdrop-blur-xl">
-          <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Updating to the latest version…
         </div>
       )}
       {canInstall && !dismissed && (

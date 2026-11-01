@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -22,10 +22,17 @@ import Admin from '@/pages/Admin';
 import NotFound from '@/pages/NotFound';
 
 // The Pray page carries its own map and two plans, so it loads on its own
-// rather than adding to every other page's download.
-const Pray = lazy(() => import('@/pages/Pray'));
+// rather than adding to every other page's download. It is fetched once the
+// first page is up, so opening Pray never shows a blank screen while it loads.
+const loadPray = () => import('@/pages/Pray');
+const Pray = lazy(loadPray);
 
 export default function App() {
+  useEffect(() => {
+    const id = setTimeout(loadPray, 1500);
+    return () => clearTimeout(id);
+  }, []);
+
   return (
     <>
       <ScrollToTop />
