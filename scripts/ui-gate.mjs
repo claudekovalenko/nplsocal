@@ -32,7 +32,7 @@ console.log(`\nSign-in gates at ${BASE}`);
 const PRIVATE = [
   ['/admin', 'the back end'],
   ['/roster', 'roster index'],
-  ['/roster/socal-gospel-conversation-nov', 'one event roster'],
+  ['/roster/la-metro-gospel-push-2027', 'one event roster'],
   ['/track', 'tracker'],
   ['/track/new', 'new group form'],
 ];
@@ -123,7 +123,7 @@ await page.setViewportSize({ width: 1280, height: 900 });
 
 // Registering must stay open to everyone — the gate is on reading, never on
 // signing up.
-await page.goto(BASE + '/register/socal-gospel-conversation-nov', { waitUntil: 'networkidle' });
+await page.goto(BASE + '/register/la-metro-gospel-push-2027', { waitUntil: 'networkidle' });
 const formFields = await page.locator('input[required]').count();
 check('the registration form is still open to everyone', formFields >= 5, `${formFields} required fields`);
 

@@ -153,7 +153,7 @@ check('3/3rds timer counts down', timerBefore !== timerAfter, `${timerBefore} to
 
 // 4b. Every field stops at the database's limit, so nobody fills in a form and
 // is refused only after submitting.
-await page.goto(BASE + '/register/socal-gospel-conversation-nov', { waitUntil: 'networkidle' });
+await page.goto(BASE + '/register/la-metro-gospel-push-2027', { waitUntil: 'networkidle' });
 const longText = 'x'.repeat(600);
 await page.fill('input[autocomplete="name"]', longText);
 const cappedName = (await page.inputValue('input[autocomplete="name"]')).length;
@@ -167,7 +167,7 @@ if (await notes.count()) {
 
 // 4b-ii. People turn up at a building. The venue's address has to be on the form
 // they are looking at, not only on a card they may never have seen.
-await page.goto(BASE + '/register/socal-gospel-conversation-nov', { waitUntil: 'networkidle' });
+await page.goto(BASE + '/register/la-metro-gospel-push-2027', { waitUntil: 'networkidle' });
 const formText = await page.evaluate(() => document.body.innerText);
 check(
   'the registration form shows the venue address',
@@ -185,7 +185,7 @@ check('the address sits in a Where block on the form, not just the heading', whe
 await page.goto(BASE + '/register/oc-mid-level-2027', { waitUntil: 'networkidle' });
 const noAddrForm = await page.evaluate(() => document.body.innerText);
 check('no Where block on an event whose address we do not have', !/\bWHERE\b/i.test(noAddrForm));
-await page.goto(BASE + '/register/socal-gospel-conversation-nov', { waitUntil: 'networkidle' });
+await page.goto(BASE + '/register/la-metro-gospel-push-2027', { waitUntil: 'networkidle' });
 // A stale cached copy must be tellable apart from a missing change.
 const stamped = /\bv\d{4}\.\d{2}\.\d{2}\b/.test(formText);
 check('the form shows which build it is', stamped, formText.match(/v\d{4}\.\d{2}\.\d{2}/)?.[0] ?? 'no build stamp');
@@ -213,7 +213,7 @@ check(
 
 // 4c. The form link is sent to people with one job. The only way off that page
 // is home, or someone wanders off mid-registration.
-await page.goto(BASE + '/register/socal-gospel-conversation-nov', { waitUntil: 'networkidle' });
+await page.goto(BASE + '/register/la-metro-gospel-push-2027', { waitUntil: 'networkidle' });
 const escapes = await page.evaluate(() => ({
   away: [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')).filter((h) => h !== '/'),
   home: document.querySelectorAll('a[href="/"]').length,

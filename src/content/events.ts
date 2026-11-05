@@ -48,18 +48,6 @@ export const events: Event[] = [
     description: 'Two-day intensive for practitioners past the 4 Fields, taking a stream toward generations.',
     registerUrl: '#',
   },
-  {
-    id: 'socal-gospel-conversation-nov',
-    title: 'Gospel Conversation Training',
-    type: 'training',
-    tier: 'network',
-    hub: 'socal',
-    start: '2026-11-14T09:00:00-08:00',
-    end: '2026-11-14T17:00:00-08:00',
-    location: 'Neighbors and Nations',
-    description: 'A full day on starting and carrying gospel conversations. Open to the whole network.',
-    registerUrl: '#',
-  },
 
   // ── Hub: open to a hub ─────────────────────────────────────────
   {
