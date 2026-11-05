@@ -25,9 +25,6 @@ export default function Home() {
             <Link to="/events" className="btn-primary min-w-40">
               Events
             </Link>
-            <Link to="/tools" className="btn-secondary min-w-40">
-              Tools
-            </Link>
           </div>
         </div>
         <div className="relative z-0 mx-auto -mb-12 mt-2 w-full max-w-3xl px-2 md:-mb-20 md:mt-4">
