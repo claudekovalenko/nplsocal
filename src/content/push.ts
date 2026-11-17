@@ -130,3 +130,35 @@ export const blockKindLabel: Record<ScheduleBlock['kind'], string> = {
   rest: 'Rest',
   celebrate: 'Celebration',
 };
+
+/**
+ * Follow-ups from the field. A team logs the people who want to keep going —
+ * a phone number first — plus, if they kept count, how many red, yellow and
+ * green lights they found. Every entry carries the region it came from, so
+ * organizers can hand each follow-up to laborers who live nearby.
+ *
+ * This first version is for the L.A. push. Edit the regions to match how the
+ * teams are actually sent out; "Other" stays last as a catch-all.
+ */
+export const followUp = {
+  regions: [
+    'Central & Downtown LA',
+    'Westside & South Bay',
+    'San Fernando Valley',
+    'San Gabriel Valley',
+    'South LA & Gateway Cities',
+    'Long Beach',
+    'Antelope & Santa Clarita Valleys',
+    'North OC (Buena Park, Fullerton, Anaheim)',
+    'Central & West OC',
+    'Other',
+  ],
+  wants: ['Bible study', 'Learn to share the gospel', 'Prayer', 'Find a church', 'Something else'],
+  lights: [
+    { key: 'red', label: 'Red lights', hint: 'Not interested right now' },
+    { key: 'yellow', label: 'Yellow lights', hint: 'Open, curious, not ready yet' },
+    { key: 'green', label: 'Green lights', hint: 'Wants to meet again' },
+  ],
+} as const;
+
+export type LightKey = (typeof followUp.lights)[number]['key'];

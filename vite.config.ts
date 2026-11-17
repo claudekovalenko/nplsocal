@@ -42,7 +42,7 @@ export default defineConfig({
           { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
         shortcuts: [
-          { name: 'Toolbox', url: `${base}tools`, description: 'Open the NPL toolbox' },
+          { name: 'The Push', url: `${base}push`, description: 'L.A. Metro Gospel Push' },
           { name: 'Events', url: `${base}events`, description: 'Upcoming trainings and gatherings' },
           { name: 'My 100 List', url: `${base}my-100`, description: 'Your personal oikos list' },
         ],

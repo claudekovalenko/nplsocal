@@ -23,20 +23,6 @@ export interface Field {
   summary: string;
   description: string;
   scripture: { ref: string; text: string };
-  toolSlugs: string[];
-}
-
-export interface Tool {
-  slug: string;
-  name: string;
-  field: FieldId;
-  tagline: string;
-  summary: string;
-  description: string;
-  steps?: { title: string; detail: string }[];
-  scripture?: string[];
-  tags?: string[];
-  links?: { label: string; url: string }[];
 }
 
 export interface Training {

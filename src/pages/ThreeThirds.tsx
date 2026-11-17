@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Play, Pause, RotateCcw, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 
@@ -107,9 +106,6 @@ export default function ThreeThirds() {
                   className="field !w-16 !py-1.5 text-center"
                 />
               </label>
-              <Link to="/tools/3-thirds" className="underline-offset-4 hover:underline">
-                Why this format
-              </Link>
             </div>
           </div>
 

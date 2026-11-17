@@ -5,8 +5,6 @@ import ScrollToTop from '@/components/ScrollToTop';
 import Home from '@/pages/Home';
 import Vision from '@/pages/Vision';
 import FourFields from '@/pages/FourFields';
-import Tools from '@/pages/Tools';
-import ToolDetail from '@/pages/ToolDetail';
 import ThreeThirds from '@/pages/ThreeThirds';
 import Training from '@/pages/Training';
 import Events from '@/pages/Events';
@@ -42,8 +40,8 @@ export default function App() {
           <Route path="about" element={<Vision />} />
           <Route path="vision" element={<Navigate to="/about" replace />} />
           <Route path="four-fields" element={<FourFields />} />
-          <Route path="tools" element={<Tools />} />
-          <Route path="tools/:slug" element={<ToolDetail />} />
+          {/* The toolbox was taken down. Old links land on the homepage. */}
+          <Route path="tools/*" element={<Navigate to="/" replace />} />
           <Route path="three-thirds" element={<ThreeThirds />} />
           <Route path="training" element={<Training />} />
           <Route path="events" element={<Events />} />

@@ -18,7 +18,6 @@ export const fields: Field[] = [
       ref: 'Luke 10:5–6',
       text: 'Whatever house you enter, first say, "Peace be to this house!" And if a son of peace is there, your peace will rest upon him.',
     },
-    toolSlugs: ['100-list', 'prayer-walking', 'person-of-peace', 'testimony'],
   },
   {
     id: 'gospel',
@@ -32,7 +31,6 @@ export const fields: Field[] = [
       ref: 'Romans 1:16',
       text: 'For I am not ashamed of the gospel, for it is the power of God for salvation to everyone who believes.',
     },
-    toolSlugs: ['411', '3-circles', 'testimony'],
   },
   {
     id: 'discipleship',
@@ -46,7 +44,6 @@ export const fields: Field[] = [
       ref: 'Matthew 28:19–20',
       text: 'Go therefore and make disciples of all nations… teaching them to observe all that I have commanded you.',
     },
-    toolSlugs: ['commands-of-christ', '3-thirds', 'sword-method', 'discovery-bible-study'],
   },
   {
     id: 'church',
@@ -60,7 +57,6 @@ export const fields: Field[] = [
       ref: 'Acts 2:42',
       text: 'And they devoted themselves to the apostles\' teaching and the fellowship, to the breaking of bread and the prayers.',
     },
-    toolSlugs: ['church-circle', 'generational-map'],
   },
   {
     id: 'leadership',
@@ -74,7 +70,6 @@ export const fields: Field[] = [
       ref: '2 Timothy 2:2',
       text: 'What you have heard from me in the presence of many witnesses entrust to faithful men, who will be able to teach others also.',
     },
-    toolSlugs: ['mawl', 'five-levels', 'iron-on-iron'],
   },
 ];
 

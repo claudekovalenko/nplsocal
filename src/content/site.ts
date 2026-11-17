@@ -31,7 +31,6 @@ export const navigation = [
   { to: '/push', label: 'The Push' },
   { to: '/events', label: 'Events' },
   { to: '/pray', label: 'Pray' },
-  { to: '/tools', label: 'Tools' },
 ] as const;
 
 export const aboutMenu = [

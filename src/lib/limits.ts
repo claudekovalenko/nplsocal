@@ -29,6 +29,12 @@ export const LIMITS = {
   /** Any single daily count. A push that beats this can celebrate the error. */
   count: 100000,
 
+  region: 120,
+  /** People on one field log. More than this, send a second log. */
+  people: 50,
+  /** One person's "what they wanted" note. */
+  followUpNote: 2000,
+
   source: 100,
   wants: 20,
 

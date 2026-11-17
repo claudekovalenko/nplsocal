@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
-import { fields, toolBySlug } from '@/content';
+import { fields } from '@/content';
 import PageHeader from '@/components/PageHeader';
 import FourFieldsDiagram from '@/components/FourFieldsDiagram';
-import ToolCard from '@/components/ToolCard';
 
 export default function FourFields() {
   return (
@@ -45,13 +44,6 @@ export default function FourFields() {
                 "{f.scripture.text}"
                 <footer className="mt-2 text-xs uppercase tracking-[0.18em] text-faint">{f.scripture.ref}</footer>
               </blockquote>
-            </div>
-            <div className="eyebrow mt-12">Tools for this field</div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {f.toolSlugs.map((s) => {
-                const t = toolBySlug(s);
-                return t ? <ToolCard key={s} tool={t} /> : null;
-              })}
             </div>
           </div>
         </section>

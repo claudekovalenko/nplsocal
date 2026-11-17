@@ -1,11 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { Home, CalendarDays, Wrench, Info, Map as MapIcon } from 'lucide-react';
+import { Home, CalendarDays, Flame, Info, Map as MapIcon } from 'lucide-react';
 
 const items = [
   { to: '/', label: 'Home', icon: Home, end: true },
+  { to: '/push', label: 'Push', icon: Flame },
   { to: '/events', label: 'Events', icon: CalendarDays },
   { to: '/pray', label: 'Pray', icon: MapIcon },
-  { to: '/tools', label: 'Tools', icon: Wrench },
   { to: '/about', label: 'About', icon: Info },
 ];
 
