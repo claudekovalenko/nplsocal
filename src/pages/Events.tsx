@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { CalendarDays, List, Megaphone, Bell, ArrowRight } from 'lucide-react';
+import { CalendarDays, List, Bell } from 'lucide-react';
 import { upcomingEvents, events as allEvents, hubs, site, type Event } from '@/content';
 import { FeaturedEvent, EventRow } from '@/components/EventCard';
 import { SignalButton, SubscribeCalendar } from '@/components/EventActions';
@@ -140,44 +139,6 @@ export default function Events() {
         </div>
       </section>
 
-      {/* Hosting */}
-      <section className="container-x pb-20 md:pb-28">
-        <div className="relative overflow-hidden rounded-xl border border-line bg-elev p-6 md:p-10">
-          <div className="rule-gradient absolute inset-x-0 top-0 h-1 opacity-80" />
-          <div className="grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-center">
-            <div>
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-warm/15 text-warm">
-                <Megaphone className="h-5 w-5" />
-              </span>
-              <h2 className="mt-5 text-3xl md:text-4xl">Hosting something?</h2>
-              <p className="mt-3 max-w-lg text-muted">
-                A training, a prayer walk, a 3/3rds group open to visitors. Tell us and we'll put it on the calendar,
-                with your name as host, so the whole network can find it.
-              </p>
-              <Link to="/connect?interest=host" className="btn-primary mt-7">
-                Host an event <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <ol className="space-y-4 text-sm">
-              {[
-                ['Tell us', 'What it is, when, where, and who it is for.'],
-                ['We add it', 'It goes on this calendar and into every subscriber’s phone.'],
-                ['People register', 'You get the sign-ups and a Signal link for the day, if you want one.'],
-              ].map(([t, d], i) => (
-                <li key={t} className="flex gap-4">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line-strong text-xs tabular-nums text-muted">
-                    {i + 1}
-                  </span>
-                  <span>
-                    <span className="block font-medium">{t}</span>
-                    <span className="text-muted">{d}</span>
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      </section>
     </>
   );
 }

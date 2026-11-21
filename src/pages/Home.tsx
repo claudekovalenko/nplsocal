@@ -30,7 +30,7 @@ export default function Home() {
             </Link>
           </div>
         </div>
-        <div className="relative z-0 mx-auto -mb-12 mt-2 w-full max-w-3xl px-2 md:-mb-20 md:mt-4">
+        <div className="relative z-0 mx-auto -mb-12 mt-4 w-full max-w-5xl px-0 md:-mb-20 md:mt-8">
           <NetworkMap variant="hero" className="h-auto w-full" />
         </div>
       </section>
