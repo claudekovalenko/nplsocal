@@ -67,6 +67,13 @@ export interface Event {
   description: string;
   registerUrl?: string;
   online?: boolean;
+  /**
+   * Who is putting it on, e.g. "Neighbors and Nations Church". Shown on every
+   * card as "Hosted by …". Leave it out and the hub is named instead.
+   */
+  host?: string;
+  /** A Signal group invite link for this event. The button appears once it is set. */
+  signalUrl?: string;
 }
 
 export interface Faq {

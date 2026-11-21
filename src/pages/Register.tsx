@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { CheckCircle2, Lock } from 'lucide-react';
-import { events, site, hubById, venueFor } from '@/content';
+import { events, site, hubById, hostFor, venueFor } from '@/content';
 import { VenueAddress, venueName } from '@/components/EventCard';
+import { AddToCalendar, SignalButton } from '@/components/EventActions';
 import { formatRange, eventDays, dayLabel } from '@/lib/format';
 import { emptyRegistration, uid, type Registration } from '@/lib/registrations';
 import { LIMITS } from '@/lib/limits';
@@ -80,6 +81,12 @@ export default function Register() {
             Your email app should have opened with the details. If it didn't, send them to {site.contact.email}.
           </p>
         )}
+        {/* Downloads, not navigation: the calendar app opens on top and they come straight back. */}
+        <div className="mt-8 flex flex-wrap justify-center gap-2">
+          <AddToCalendar event={event} />
+          <SignalButton url={event.signalUrl} label="Join the Signal chat" />
+        </div>
+        <p className="mt-3 text-xs text-faint">Add it to your calendar and your phone will remind you the day before.</p>
         <Link to="/" className="btn-primary mt-10">
           Back to home
         </Link>
@@ -96,6 +103,7 @@ export default function Register() {
       <p className="mt-3 text-muted">
         {event.dateLabel ?? formatRange(event.start, event.end)} · {event.city ?? event.location}
       </p>
+      <p className="mt-1 text-sm text-muted">Hosted by {hostFor(event)}</p>
 
       {/*
         Where to go is part of the form, not a subtitle. Somebody filling this in

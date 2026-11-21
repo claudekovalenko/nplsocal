@@ -86,6 +86,30 @@ Set `tier` on each event in `src/content/events.ts`:
 - `hub` — open to a whole region. The normal calendar, grouped by month.
 - `group` — contained to a specific group or location. Hidden until someone ticks "Include group-only events". Set `audience` to say who it's for.
 
+### Hosts, Signal links and calendars
+
+Each event can name who is putting it on with `host` ("Hosted by …" on every
+card, row and registration form); leave it out and the hub is named. Set
+`signalUrl` to a Signal group invite and a **Signal chat** button appears on
+that event. The push reads its link from `push.signalUrl`, and a network-wide
+group goes in `site.contact.signal` (shown on the Events page).
+
+The Events page has a month grid (colour per event type, tap a day to filter)
+and a list view. "Hosting something?" links to `/connect?interest=host`.
+
+**Calendar files are written on every build** from `events.ts`
+(`npl-calendar-files` in `vite.config.ts`, using `src/lib/ics.ts`):
+
+| File | Used for |
+| --- | --- |
+| `calendar.ics` | The feed behind **Subscribe to the calendar** (network + hub events, not group-only). Subscribers' calendars pick up new events on their own. |
+| `cal/<event id>.ics` | **Add to calendar** for one event (Apple / Outlook). Google gets its own add-event link. |
+
+Every event carries reminders a day before and two hours before, so people get
+notifications from their own calendar app. Events with a `dateLabel` stay off
+calendars until real dates are set. Links inside events point at `SITE_URL` if
+set, else the custom domain in `public/CNAME`, else the GitHub Pages address.
+
 ### Event registration
 
 The form at `/register/<event id>` is deliberately focused: no menu, no tab bar, no footer links. The link gets sent to someone whose only job is to fill it in, so there is nothing to wander into mid-form. The only way out is home: the wordmark at the top and bottom links to the homepage, and the confirmation screen has a Back to home button.

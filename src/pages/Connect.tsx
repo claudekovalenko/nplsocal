@@ -22,6 +22,12 @@ export default function Connect() {
   const event = events.find((e) => e.id === params.get('event'));
   const [form, setForm] = useState({ name: '', email: '', hub: '', interest: 'training' as Interest, message: '' });
 
+  // "Host an event" on the Events page lands here with the host option picked.
+  useEffect(() => {
+    const want = params.get('interest');
+    if (want && interests.some((i) => i.id === want)) setForm((f) => ({ ...f, interest: want as Interest }));
+  }, [params]);
+
   useEffect(() => {
     if (!event) return;
     setForm((f) => ({
@@ -51,12 +57,20 @@ export default function Connect() {
     setSent(true);
   };
 
+  const hosting = !event && form.interest === 'host';
+
   return (
     <>
       <PageHeader
         eyebrow={event ? 'Register' : 'Connect'}
-        title={event ? event.title : 'Tell us where you are.'}
-        lead={event ? 'Send your name and email and we will confirm your spot.' : 'Someone from your hub will reach out.'}
+        title={event ? event.title : hosting ? 'Host an event.' : 'Tell us where you are.'}
+        lead={
+          event
+            ? 'Send your name and email and we will confirm your spot.'
+            : hosting
+              ? 'Tell us what, when, where and who it is for. We will put it on the calendar with you named as host.'
+              : 'Someone from your hub will reach out.'
+        }
       />
       <section className="container-x grid gap-14 py-14 md:grid-cols-[1.4fr_1fr] md:py-20">
         {sent ? (
@@ -111,7 +125,11 @@ export default function Connect() {
             </fieldset>
             <label className="block">
               <span className="eyebrow">Anything else?</span>
-              <textarea rows={4} className="field mt-2" value={form.message} onChange={update('message')} placeholder="Your city, your church, how you heard about NPL" />
+              <textarea rows={4} className="field mt-2" value={form.message} onChange={update('message')} placeholder={
+                  hosting
+                    ? 'What it is, the date and time, the address, who it is for, and a Signal group link if you have one'
+                    : 'Your city, your church, how you heard about NPL'
+                } />
             </label>
             <button type="submit" className="btn-primary w-full sm:w-auto sm:min-w-40">
               Send
