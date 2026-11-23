@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Check, ChevronLeft, ChevronRight, ArrowUpRight, Plus, Minus } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, ArrowUpRight, Plus, Minus, Search, X } from 'lucide-react';
 import { FOCUS, REGIONS, BIBLE, refLabel, type Lang } from '@/content/pray/plan';
 import { T } from '@/content/pray/strings';
-import { PEOPLE, PEOPLE_PRAYERS, COUNTRY, jpURL } from '@/content/pray/peoples';
+import { PEOPLE, PEOPLES, PEOPLE_PRAYERS, COUNTRY, jpURL } from '@/content/pray/peoples';
 import {
   DAYS, LIT, SHAPES, SHAPE_DAY, SECTIONS, MAP_LAND, MAP_CONTEXT, FULL_VIEW,
   tr, todayN, dateOf, bounds, type PlanId, type Day,
@@ -203,6 +203,153 @@ function PrayMap({ plan, day, done, lang, onPick }: {
   );
 }
 
+// ---------- search ----------
+type FoundKind = 'zip' | 'city' | 'place' | 'region' | 'day' | 'people';
+interface Found {
+  label: string;
+  kind: FoundKind;
+  n: number;
+  key: string;
+}
+const fold = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+/** Everything a person might type, each pointing at the day that covers it. */
+function searchIndex(plan: PlanId, lang: Lang): Found[] {
+  const list = DAYS[plan];
+  const out: Found[] = [];
+  const seen = new Set<string>();
+  const add = (label: string, kind: FoundKind, n: number) => {
+    // One row per name and day: "Glendale" the city and the neighborhood are the same answer.
+    const key = `${fold(label)}|${n}`;
+    if (!n || seen.has(key)) return;
+    seen.add(key);
+    out.push({ label, kind, n, key: fold(label) });
+  };
+  list.forEach((d) => {
+    if (d.t === 'r') add(tr(REGIONS[d.r!].name, lang), 'region', d.n);
+    else if (d.t === 'q') add(d.title, 'place', d.n);
+    else add(tr(d.title, lang), d.src.peoples ? 'people' : 'day', d.n);
+    if (d.t === 'p') (d.src.places ?? []).forEach((pl) => add(pl, 'place', d.n));
+  });
+  SHAPES.forEach((sh, i) => {
+    const n = SHAPE_DAY[plan][i];
+    add(sh.z, 'zip', n);
+    if (sh.c) add(sh.c, 'city', n);
+  });
+  PEOPLES.forEach((p) => add(p.n[lang], 'people', PEOPLE_DAY[plan][p.id] ?? 0));
+  return out;
+}
+
+/** Find a place on the plan and jump to its day. */
+function PraySearch({ plan, lang, onPick }: { plan: PlanId; lang: Lang; onPick: (n: number) => void }) {
+  const t = T[lang];
+  const [q, setQ] = useState('');
+  const [open, setOpen] = useState(false);
+  const [hi, setHi] = useState(0);
+  const index = useMemo(() => searchIndex(plan, lang), [plan, lang]);
+  const query = fold(q.trim());
+  const results = useMemo(() => {
+    if (!query) return [];
+    // Starts-with beats contains; a ZIP code only matches from its start.
+    const hits = index.filter((f) => (f.kind === 'zip' ? f.key.startsWith(query) : f.key.includes(query)));
+    // Exact, then starts with, then a word inside it starts with, then anywhere.
+    const rank = (f: Found) => (f.key === query ? 0 : f.key.startsWith(query) ? 1 : f.key.includes(' ' + query) ? 2 : 3);
+    return hits.sort((a, b) => rank(a) - rank(b) || a.label.length - b.label.length).slice(0, 8);
+  }, [index, query]);
+  useEffect(() => setHi(0), [query]);
+
+  const pick = (f: Found) => {
+    onPick(f.n);
+    setQ('');
+    setOpen(false);
+  };
+  const list = DAYS[plan];
+
+  return (
+    <div className="relative">
+      <label className="relative block">
+        <span className="sr-only">{t.search}</span>
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-faint" />
+        {/* Plain text, not type="search": browsers add their own clear button next to ours. */}
+        <input
+          type="text"
+          inputMode="search"
+          enterKeyHint="search"
+          value={q}
+          placeholder={t.search}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              setHi((h) => Math.min(h + 1, results.length - 1));
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              setHi((h) => Math.max(h - 1, 0));
+            } else if (e.key === 'Enter' && results[hi]) {
+              e.preventDefault();
+              pick(results[hi]);
+            } else if (e.key === 'Escape') {
+              setQ('');
+              setOpen(false);
+            }
+          }}
+          role="combobox"
+          aria-expanded={open && !!query}
+          aria-controls="pray-search-results"
+          autoComplete="off"
+          className="field !rounded-full !py-3 !pl-10 !pr-10"
+        />
+        {q && (
+          <button
+            type="button"
+            aria-label="Clear"
+            onClick={() => setQ('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-faint hover:text-fg"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </label>
+      {open && query && (
+        <ul
+          id="pray-search-results"
+          role="listbox"
+          className="absolute inset-x-0 z-30 mt-2 max-h-80 overflow-auto rounded-xl border border-line bg-bg/95 p-1.5 shadow-2xl backdrop-blur-xl"
+        >
+          {results.length === 0 ? (
+            <li className="px-3 py-2.5 text-sm text-muted">{t.noMatch}</li>
+          ) : (
+            results.map((f, i) => (
+              <li key={f.kind + f.key + f.n} role="option" aria-selected={i === hi}>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => pick(f)}
+                  onMouseEnter={() => setHi(i)}
+                  className={`grid w-full grid-cols-[1fr_auto] items-baseline gap-3 rounded-lg px-3 py-2 text-left ${i === hi ? 'bg-surface' : ''}`}
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-medium">{f.label}</span>
+                    <span className="block truncate text-xs text-muted">
+                      {t.tipDay} {f.n}: {tr(list[f.n - 1].title, lang)}
+                    </span>
+                  </span>
+                  <span className="text-[11px] uppercase tracking-[0.12em] text-faint">{t.found[f.kind]}</span>
+                </button>
+              </li>
+            ))
+          )}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 // ---------- peoples ----------
 /** Estimates are rough; show them rounded so they don't read as head counts. */
 const rounded = (n: number, locale: string) =>
@@ -397,6 +544,10 @@ export default function Pray() {
       </div>
 
       <div className="mt-6">
+        <PraySearch plan={plan} lang={lang} onPick={go} />
+      </div>
+
+      <div className="mt-3">
         <PrayMap plan={plan} day={day} done={done} lang={lang} onPick={go} />
       </div>
 

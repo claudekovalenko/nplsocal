@@ -227,16 +227,17 @@ await page.goto(BASE + '/push', { waitUntil: 'networkidle' });
 const pushHeading = (await page.textContent('h1')) || '';
 check('push hub loads', /Push/i.test(pushHeading), pushHeading.replace(/\s+/g, ' ').trim());
 
-const dayTabs = await page.locator('#schedule button').count();
-check('schedule offers every day', dayTabs === 4, `${dayTabs} day tabs`);
-const firstDayBlocks = await page.locator('#schedule ol li').count();
-await page.locator('#schedule button').nth(2).click();
-await page.waitForTimeout(300);
-const thirdDayBlocks = await page.locator('#schedule ol li').count();
-check('switching day changes the schedule', firstDayBlocks > 0 && thirdDayBlocks > 0);
+// All four days are shown side by side, each with its own blocks.
+const dayCards = await page.locator('#schedule [data-day]').count();
+check('schedule shows every day', dayCards === 4, `${dayCards} days`);
+const emptyDays = await page.locator('#schedule [data-day]').evaluateAll((els) => els.filter((el) => !el.querySelector('ol li')).length);
+check('every day has its schedule', emptyDays === 0, `${emptyDays} empty`);
 
 // Daily report: with no database configured it queues on the device, which is
-// exactly what a team with no signal would hit.
+// exactly what a team with no signal would hit. It sits behind the second tab
+// of "In the field".
+await page.getByRole('tab', { name: /Daily report/ }).click();
+await page.waitForTimeout(200);
 await page.locator('#report input[required]').fill('Audit Reporter');
 const counts = page.locator('#report input[type="number"]');
 await counts.nth(0).fill('12');

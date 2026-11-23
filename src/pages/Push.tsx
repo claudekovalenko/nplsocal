@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, MapPin } from 'lucide-react';
-import { push, blockKindLabel, PUSH_EVENT_ID, type ScheduleDay } from '@/content/push';
+import { MessageCircle, MapPin, CalendarDays, Ticket, Plus } from 'lucide-react';
+import { push, PUSH_EVENT_ID, type ScheduleDay } from '@/content/push';
 import { events } from '@/content';
 import { dayLabel, eventDays, formatRange } from '@/lib/format';
 import { fetchTotals, flushPending, pendingCount, sumTotals, type DayTotals } from '@/lib/pushStore';
@@ -12,14 +12,6 @@ import InterestForm from '@/components/InterestForm';
 import FollowUpForm from '@/components/FollowUpForm';
 import { fetchRegionTotals, flushFollowUps, pendingFollowUps, type RegionTotals } from '@/lib/followUpStore';
 
-const SECTIONS = [
-  ['schedule', 'Schedule'],
-  ['about', 'What is a PUSH?'],
-  ['faq', 'FAQ'],
-  ['follow-up', 'Follow-ups'],
-  ['report', 'Daily report'],
-  ['connect', 'Stay connected'],
-] as const;
 
 function Totals({ rows }: { rows: DayTotals[] }) {
   const all = sumTotals(rows);
@@ -88,47 +80,86 @@ function ByRegion({ rows }: { rows: RegionTotals[] }) {
   );
 }
 
-function Day({ day }: { day: ScheduleDay }) {
+/** One day of the schedule as a card, so all four sit side by side. */
+function DayCard({ day }: { day: ScheduleDay }) {
   return (
-    <div>
-      <h3 className="text-2xl md:text-3xl">{day.title}</h3>
-      {day.summary && <p className="mt-2 text-muted">{day.summary}</p>}
+    <li data-day={day.date} className="card flex flex-col p-5">
+      <div className="eyebrow">{dayLabel(day.date)}</div>
+      {day.summary && <p className="mt-2 text-sm text-muted">{day.summary}</p>}
       {day.place && (
-        <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-muted">
+        <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-muted">
           <MapPin className="h-3.5 w-3.5" /> {day.place}
         </p>
       )}
-      <ol className="mt-6 divide-y divide-line border-y border-line">
+      <ol className="mt-4 space-y-3">
         {day.blocks.map((b) => (
-          <li key={b.time + b.title} className="flex gap-5 py-4">
-            <span className="w-28 shrink-0 text-sm text-muted">{b.time}</span>
-            <span className="min-w-0">
-              <span className="flex flex-wrap items-baseline gap-x-3">
-                <span className={b.kind === 'celebrate' ? 'text-base text-accent' : 'text-base'}>{b.title}</span>
-                <span className="text-xs text-faint">{blockKindLabel[b.kind]}</span>
-              </span>
-              {b.detail && <span className="mt-0.5 block text-sm text-muted">{b.detail}</span>}
-              {b.place && (
-                <span className="mt-0.5 block text-xs text-faint">
-                  <MapPin className="mr-1 inline h-3 w-3" />
-                  {b.place}
-                </span>
-              )}
-            </span>
+          <li key={b.time + b.title} className="border-l-2 border-line pl-3" style={b.kind === 'celebrate' ? { borderColor: 'var(--accent)' } : undefined}>
+            <span className="block text-xs tabular-nums text-faint">{b.time}</span>
+            <span className={b.kind === 'celebrate' ? 'text-accent' : ''}>{b.title}</span>
+            {b.detail && <span className="mt-0.5 block text-sm text-muted">{b.detail}</span>}
           </li>
         ))}
       </ol>
-    </div>
+    </li>
   );
 }
+
+/** Every section shares one shape: a heading column and a content column. */
+function Block({
+  id,
+  eyebrow,
+  title,
+  lead,
+  aside,
+  children,
+  wide = false,
+  tint = false,
+}: {
+  id: string;
+  eyebrow: string;
+  title: string;
+  lead?: string;
+  aside?: React.ReactNode;
+  children: React.ReactNode;
+  /** Content runs full width under the heading instead of beside it. */
+  wide?: boolean;
+  tint?: boolean;
+}) {
+  const head = (
+    <div>
+      <div className="eyebrow">{eyebrow}</div>
+      <h2 className="mt-3 text-3xl leading-tight md:text-4xl">{title}</h2>
+      {lead && <p className="mt-3 max-w-md text-muted">{lead}</p>}
+      {aside}
+    </div>
+  );
+  return (
+    <section id={id} className={`scroll-mt-[calc(var(--header-h)_+_3.5rem)] border-t border-line ${tint ? 'bg-elev' : ''}`}>
+      <div className={`container-x py-14 md:py-20 ${wide ? '' : 'grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-14'}`}>
+        {head}
+        <div className={wide ? 'mt-10' : 'min-w-0'}>{children}</div>
+      </div>
+    </section>
+  );
+}
+
+const NAV = [
+  ['schedule', 'Schedule'],
+  ['about', 'About'],
+  ['faq', 'FAQ'],
+  ['field', 'In the field'],
+  ['connect', 'Stay connected'],
+] as const;
+
+type FieldTab = 'follow-up' | 'report';
 
 export default function Push() {
   const event = events.find((e) => e.id === PUSH_EVENT_ID);
   const days = useMemo(() => (event ? eventDays(event.start, event.end) : push.schedule.map((d) => d.date)), [event]);
-  const [active, setActive] = useState(0);
   const [totals, setTotals] = useState<DayTotals[]>([]);
   const [queued, setQueued] = useState(0);
   const [regions, setRegions] = useState<RegionTotals[]>([]);
+  const [tab, setTab] = useState<FieldTab>('follow-up');
 
   useEffect(() => {
     // Anything captured while offline goes out as soon as the page opens.
@@ -139,54 +170,91 @@ export default function Push() {
     fetchTotals(PUSH_EVENT_ID).then(setTotals).catch(() => setTotals([]));
   }, []);
 
+  // Old links to #follow-up and #report open the right tab.
+  useEffect(() => {
+    const pick = () => {
+      const h = location.hash.slice(1);
+      if (h === 'follow-up' || h === 'report') {
+        setTab(h);
+        document.getElementById('field')?.scrollIntoView();
+      }
+    };
+    pick();
+    addEventListener('hashchange', pick);
+    return () => removeEventListener('hashchange', pick);
+  }, []);
+
   return (
     <>
-      {/* Hero */}
-      {/* The hero runs up behind the floating header, like the homepage's, so the
-          glow has no hard edge under it. */}
-      <section className="relative -mt-[var(--header-h)] overflow-hidden border-b border-line">
-        <div className="pointer-events-none absolute inset-0 aurora opacity-80" />
-        <div className="container-x relative pb-16 pt-[calc(var(--header-h)_+_2.5rem)] md:pb-20 md:pt-[calc(var(--header-h)_+_4rem)]">
+      {/* Hero. Runs up behind the floating header, like the homepage's. */}
+      <section className="relative -mt-[var(--header-h)] overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 aurora opacity-70" />
+        <div className="container-x relative pb-12 pt-[calc(var(--header-h)_+_2.5rem)] md:pb-16 md:pt-[calc(var(--header-h)_+_4rem)]">
           <div className="eyebrow">#NoPlaceLeft · Los Angeles</div>
           <h1 className="mt-4 text-5xl leading-[0.95] md:text-7xl">
-            {push.name}
-            <span className="text-gradient block pb-1">{push.year}</span>
+            {push.name} <span className="text-gradient">{push.year}</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-muted">{push.tagline}</p>
-          <p className="mt-4 text-muted">{event ? formatRange(event.start, event.end) : 'Dec 30 – Jan 2'}</p>
-          {/* Teams scatter across the metro, so the one fixed place matters. */}
-          {event?.venue && (
-            <p className="mt-4 inline-flex items-center gap-1.5 text-muted">
-              <MapPin className="h-4 w-4" /> Check in at {event.venue}
-            </p>
-          )}
-          {event && <VenueAddress location={venueName(event)} className="mt-1" />}
+          <p className="mt-5 max-w-xl text-lg text-muted">{push.tagline}</p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <dl className="mt-8 grid max-w-3xl gap-4 text-sm sm:grid-cols-3">
+            <div className="flex gap-2.5">
+              <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-faint" />
+              <div>
+                <dt className="sr-only">When</dt>
+                <dd>{event ? formatRange(event.start, event.end) : 'Dec 30 – Jan 2'}</dd>
+                <dd className="text-muted">Starts 6pm with dinner</dd>
+              </div>
+            </div>
+            <div className="flex gap-2.5">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-faint" />
+              <div>
+                <dt className="sr-only">Check in</dt>
+                <dd>Check in at {event?.venue ?? 'Neighbors and Nations'}</dd>
+                {event && <VenueAddress location={venueName(event)} className="mt-0" />}
+              </div>
+            </div>
+            <div className="flex gap-2.5">
+              <Ticket className="mt-0.5 h-4 w-4 shrink-0 text-faint" />
+              <div>
+                <dt className="sr-only">Cost</dt>
+                <dd>Free</dd>
+                <dd className="text-muted">Please register so we can plan food</dd>
+              </div>
+            </div>
+          </dl>
+
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link to={`/register/${PUSH_EVENT_ID}`} className="btn-primary min-w-40">
               Register
             </Link>
-            {push.signalUrl ? (
+            {event && <AddToCalendar event={event} />}
+            {push.signalUrl && (
               <a href={push.signalUrl} target="_blank" rel="noreferrer" className="btn-secondary">
                 <MessageCircle className="h-4 w-4" /> Join the Signal chat
               </a>
-            ) : (
-              <button type="button" className="btn-secondary" disabled title="The Signal invite link has not been added yet">
-                <MessageCircle className="h-4 w-4" /> Signal chat — link coming
-              </button>
             )}
-            {event && <AddToCalendar event={event} />}
           </div>
-
-          <nav className="mt-10 flex flex-wrap gap-2" aria-label="On this page">
-            {SECTIONS.map(([id, label]) => (
-              <a key={id} href={`#${id}`} className="pill">
-                {label}
-              </a>
-            ))}
-          </nav>
+          {!push.signalUrl && (
+            <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-faint">
+              <MessageCircle className="h-3.5 w-3.5" /> Signal group chat: link coming soon.
+            </p>
+          )}
         </div>
       </section>
+
+      {/* Section bar: stays under the header so the long page is easy to move around. */}
+      <nav
+        aria-label="On this page"
+        className="sticky top-[var(--header-h)] z-20 border-y border-line bg-bg/85 backdrop-blur-xl"
+      >
+        <div className="container-x flex gap-1 overflow-x-auto py-2 [scrollbar-width:none]">
+          {NAV.map(([id, label]) => (
+            <a key={id} href={`#${id}`} className="whitespace-nowrap rounded-full px-3 py-1.5 text-sm text-muted transition hover:bg-fg/5 hover:text-fg">
+              {label}
+            </a>
+          ))}
+        </div>
+      </nav>
 
       {queued > 0 && (
         <div className="container-x pt-6">
@@ -198,138 +266,135 @@ export default function Push() {
 
       <Totals rows={totals} />
 
-      {/* Schedule */}
-      <section id="schedule" className="scroll-mt-[var(--header-h)] border-t border-line">
-        <div className="container-x py-16 md:py-24">
-          <div className="eyebrow">Schedule</div>
-          <h2 className="mt-3 text-3xl md:text-5xl">What happens each day.</h2>
-
-          <div className="mt-8 flex flex-wrap gap-2">
-            {push.schedule.map((d, i) => (
-              <button key={d.date} onClick={() => setActive(i)} className={i === active ? 'pill-active' : 'pill'}>
-                {dayLabel(d.date)}
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-10">
-            <Day day={push.schedule[active]} />
-          </div>
-        </div>
-      </section>
+      {/* Schedule: all four days at once. */}
+      <Block id="schedule" eyebrow="Schedule" title="Four days, start to finish." wide>
+        <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {push.schedule.map((d) => (
+            <DayCard key={d.date} day={d} />
+          ))}
+        </ol>
+      </Block>
 
       {/* What is a PUSH? */}
-      <section id="about" className="scroll-mt-[var(--header-h)] border-t border-line">
-        <div className="container-x py-16 md:py-24">
-          <div className="eyebrow">What is a PUSH?</div>
-          <h2 className="mt-3 max-w-3xl text-3xl md:text-5xl">{push.what.lead}</h2>
-          <p className="mt-6 text-muted">We will focus on:</p>
-          <ol className="mt-6 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2">
-            {push.what.focus.map((f) => (
-              <li key={f.letter} className="bg-bg p-6 md:p-8">
-                <div className="flex items-baseline gap-3">
-                  <span className="text-5xl font-light leading-none text-accent">{f.letter}</span>
-                  <h3 className="text-xl">{f.word}</h3>
-                </div>
-                <p className="mt-4 text-sm leading-relaxed text-muted">{f.text}</p>
-              </li>
-            ))}
-          </ol>
-
-          <div className="mt-16 grid gap-10 md:grid-cols-2">
-            <div>
-              <div className="eyebrow">Who is hosting the PUSH?</div>
-              <p className="mt-4 text-muted">{push.hosts.lead}</p>
-              <ul className="mt-4 flex flex-wrap gap-2">
-                {push.hosts.names.map((n) => (
-                  <li key={n} className="rounded-full border border-line px-3 py-1 text-sm">
-                    {n}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-3 text-sm text-muted">{push.hosts.more}</p>
-            </div>
-            <div>
-              <div className="eyebrow">Where should we stay?</div>
-              {push.stay.map((s) => (
-                <p key={s} className="mt-4 text-muted">
-                  {s}
-                </p>
+      <Block id="about" eyebrow="About" title="What is a PUSH?" lead={push.what.lead}>
+        <ol className="grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2">
+          {push.what.focus.map((f) => (
+            <li key={f.letter} className="bg-bg p-5 md:p-6">
+              <div className="flex items-baseline gap-3">
+                <span className="text-4xl font-light leading-none text-accent">{f.letter}</span>
+                <h3 className="text-lg">{f.word}</h3>
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-muted">{f.text}</p>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div className="card p-5">
+            <div className="eyebrow">Who is hosting</div>
+            <p className="mt-3 text-sm text-muted">{push.hosts.lead}</p>
+            <ul className="mt-3 flex flex-wrap gap-1.5">
+              {push.hosts.names.map((n) => (
+                <li key={n} className="rounded-full border border-line px-2.5 py-0.5 text-sm">
+                  {n}
+                </li>
               ))}
-            </div>
+            </ul>
+            <p className="mt-2 text-sm text-muted">{push.hosts.more}</p>
+          </div>
+          <div className="card p-5">
+            <div className="eyebrow">Where to stay</div>
+            {push.stay.map((x) => (
+              <p key={x} className="mt-3 text-sm text-muted">
+                {x}
+              </p>
+            ))}
           </div>
         </div>
-      </section>
+      </Block>
 
       {/* FAQ */}
-      <section id="faq" className="scroll-mt-[var(--header-h)] border-t border-line">
-        <div className="container-x py-16 md:py-24">
-          <div className="eyebrow">FAQ</div>
-          <h2 className="mt-3 text-3xl md:text-5xl">Questions people ask.</h2>
-          <div className="mt-10 divide-y divide-line border-y border-line">
-            {push.faq.map((f) => (
-              <details key={f.q} className="group py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-6">
-                  {f.q}
-                  <span className="text-faint transition group-open:rotate-45">+</span>
-                </summary>
-                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted">{f.a}</p>
-              </details>
-            ))}
-          </div>
-          <Link to={`/register/${PUSH_EVENT_ID}`} className="btn-primary mt-10 min-w-40">
+      <Block
+        id="faq"
+        eyebrow="FAQ"
+        title="Questions people ask."
+        aside={
+          <Link to={`/register/${PUSH_EVENT_ID}`} className="btn-primary mt-6 min-w-40">
             Register
           </Link>
+        }
+      >
+        <div className="divide-y divide-line border-y border-line">
+          {push.faq.map((f) => (
+            <details key={f.q} className="group py-4">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6">
+                {f.q}
+                <Plus className="h-4 w-4 shrink-0 text-faint transition group-open:rotate-45" />
+              </summary>
+              <p className="mt-3 text-sm leading-relaxed text-muted">{f.a}</p>
+            </details>
+          ))}
         </div>
-      </section>
+      </Block>
 
-      {/* Follow-ups */}
-      <section id="follow-up" className="scroll-mt-[var(--header-h)] border-t border-line">
-        <div className="container-x py-16 md:py-24">
-          <div className="eyebrow">Follow-ups</div>
-          <h2 className="mt-3 text-3xl md:text-5xl">Found someone? Log the follow-up.</h2>
-          <p className="mt-4 max-w-xl text-muted">
-            Someone wants a Bible study, or is fired up to learn to share the gospel. Get their phone number, tell us what
-            they asked for and where you met them, and a laborer near them will reach out. Counting red, yellow and green
-            lights is optional.
-          </p>
-          <div className="mt-10 max-w-3xl">
-            <FollowUpForm eventId={PUSH_EVENT_ID} days={days} />
-          </div>
-          <ByRegion rows={regions} />
+      {/* In the field: the two forms teams use, one at a time. */}
+      <Block
+        id="field"
+        eyebrow="In the field"
+        title="For teams out on the push."
+        lead="Both work with no signal: what you send waits on your phone and goes out by itself later."
+        tint
+      >
+        <div role="tablist" aria-label="Team tools" className="inline-flex rounded-full border border-line-strong p-1">
+          {(
+            [
+              ['follow-up', 'Log a follow-up'],
+              ['report', 'Daily report'],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={tab === id}
+              onClick={() => setTab(id)}
+              className={`h-9 rounded-full px-4 text-sm font-medium transition ${tab === id ? 'bg-fg text-bg' : 'text-muted hover:text-fg'}`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
-      </section>
 
-      {/* Daily report */}
-      <section id="report" className="scroll-mt-[var(--header-h)] border-t border-line bg-elev">
-        <div className="container-x py-16 md:py-24">
-          <div className="eyebrow">Daily report</div>
-          <h2 className="mt-3 text-3xl md:text-5xl">End of the day, two minutes.</h2>
-          <p className="mt-4 max-w-xl text-muted">
-            Every team turns in their numbers and one story. It works with no signal — the report waits on your phone and
-            sends itself later.
-          </p>
-          <div className="mt-10 max-w-3xl">
-            <PushReportForm eventId={PUSH_EVENT_ID} days={days} />
+        {tab === 'follow-up' ? (
+          <div id="follow-up" role="tabpanel" className="mt-6">
+            <p className="max-w-xl text-sm text-muted">
+              Met someone who wants a Bible study, or to learn to share the gospel? Get their phone number, say what they
+              asked for and where you met them, and a laborer near them will reach out. Counting red, yellow and green
+              lights is optional.
+            </p>
+            <div className="mt-6">
+              <FollowUpForm eventId={PUSH_EVENT_ID} days={days} />
+            </div>
+            <ByRegion rows={regions} />
           </div>
-        </div>
-      </section>
+        ) : (
+          <div id="report" role="tabpanel" className="mt-6">
+            <p className="max-w-xl text-sm text-muted">End of the day, two minutes: every team turns in their numbers and one story.</p>
+            <div className="mt-6">
+              <PushReportForm eventId={PUSH_EVENT_ID} days={days} />
+            </div>
+          </div>
+        )}
+      </Block>
 
       {/* Stay connected */}
-      <section id="connect" className="scroll-mt-[var(--header-h)] border-t border-line">
-        <div className="container-x py-16 md:py-24">
-          <div className="eyebrow">Stay connected</div>
-          <h2 className="mt-3 text-3xl md:text-5xl">Want to hear more?</h2>
-          <p className="mt-4 max-w-xl text-muted">
-            Not ready to register, or you met a team on the street and want to know what this is. Leave your name and
-            someone near you will reach out.
-          </p>
-          <div className="mt-10 max-w-3xl">
-            <InterestForm source="push" />
-          </div>
-        </div>
-      </section>
-
+      <Block
+        id="connect"
+        eyebrow="Stay connected"
+        title="Want to hear more?"
+        lead="Not ready to register, or met a team on the street? Leave your name and someone near you will reach out."
+      >
+        <InterestForm source="push" />
+      </Block>
     </>
   );
 }
