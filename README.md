@@ -106,7 +106,7 @@ Contact details are private by design: the database policy lets anyone insert a 
 - what a PUSH is (Prayer, Unity, Share, Houses of Peace), who is hosting, where to stay, and the FAQ
 - a link to the Signal group chat
 - registration
-- follow-ups from the field, by region
+- follow-ups from the field, sent by email with the region they came from
 - a two-minute end-of-day report from each team
 - a stay-connected form for anyone not ready to register
 
@@ -120,7 +120,7 @@ Edit `src/content/push.ts` to change any of it. The schedule, hosts, lodging not
 
 The public page shows **totals only**, through a database function that returns sums and nothing else. Names and stories stay organizer-only.
 
-**Follow-ups** are for the people a team meets who want to keep going. A team picks the region they were in (and optionally a neighborhood), can tap in how many red, yellow and green lights they found, and adds each person: phone number first (required for each person), optional first name, what they want (Bible study, learn to share the gospel, prayer, find a church, something else) and a sentence on what they asked for. Like daily reports, they queue on the phone with no signal. The push page shows lights and follow-up counts per region; the people themselves are readable only by leads and admins, under **Push follow-ups** on `/admin`, filterable by region and exportable to CSV. The region list lives in `followUp.regions` in `src/content/push.ts`. Tables: `npl_push_field_logs` and `npl_push_followups` in `supabase/schema.sql`.
+**Follow-ups** are for the people a team meets who want to keep going. A team picks the region they were in (and optionally a neighborhood), can tap in how many red, yellow and green lights they found, and adds each person: phone number first (required for each person), optional first name, what they want (Bible study, learn to share the gospel, prayer, find a church, something else) and a sentence on what they asked for. There is no database: Send opens the phone's email app with everything written out, addressed to `followUp.sendTo` in `src/content/push.ts` (la@nplsocal.net), and the person presses send. A Copy button covers phones with no email app set up. The region list lives in `followUp.regions` in the same file.
 
 ### The tracker
 

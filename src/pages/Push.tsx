@@ -9,7 +9,6 @@ import { VenueAddress, venueName } from '@/components/EventCard';
 import PushReportForm from '@/components/PushReportForm';
 import InterestForm from '@/components/InterestForm';
 import FollowUpForm from '@/components/FollowUpForm';
-import { fetchRegionTotals, flushFollowUps, pendingFollowUps, type RegionTotals } from '@/lib/followUpStore';
 
 const SECTIONS = [
   ['schedule', 'Schedule'],
@@ -43,47 +42,6 @@ function Totals({ rows }: { rows: DayTotals[] }) {
       </dl>
       <p className="mt-2 text-xs text-faint">From {all.reports} team reports. Numbers only — no names leave the organizers.</p>
     </section>
-  );
-}
-
-/** Where people were found: lights and follow-ups per region. Counts only. */
-function ByRegion({ rows }: { rows: RegionTotals[] }) {
-  if (!rows.length) return null;
-  const max = Math.max(...rows.map((r) => r.red + r.yellow + r.green), 1);
-  return (
-    <div className="mt-12">
-      <div className="eyebrow">Where people were found</div>
-      <ul className="mt-4 divide-y divide-line border-y border-line">
-        {rows.map((r) => {
-          const total = r.red + r.yellow + r.green;
-          return (
-            <li key={r.region} className="grid gap-2 py-4 sm:grid-cols-[14rem_1fr_auto] sm:items-center sm:gap-6">
-              <span className="text-sm">{r.region}</span>
-              <span
-                className="flex h-2 overflow-hidden rounded-full bg-line"
-                style={{ width: `${Math.max(8, (total / max) * 100)}%` }}
-                title={`${r.red} red · ${r.yellow} yellow · ${r.green} green`}
-              >
-                {total > 0 && (
-                  <>
-                    <span className="bg-red-500" style={{ width: `${(r.red / total) * 100}%` }} />
-                    <span className="bg-yellow-400" style={{ width: `${(r.yellow / total) * 100}%` }} />
-                    <span className="bg-green-500" style={{ width: `${(r.green / total) * 100}%` }} />
-                  </>
-                )}
-              </span>
-              <span className="flex gap-4 text-xs text-muted tabular-nums">
-                <span><span className="text-red-400">●</span> {r.red}</span>
-                <span><span className="text-yellow-400">●</span> {r.yellow}</span>
-                <span><span className="text-green-400">●</span> {r.green}</span>
-                <span className="text-fg">{r.followUps} follow-up{r.followUps === 1 ? '' : 's'}</span>
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-      <p className="mt-2 text-xs text-faint">Counts only. Names and numbers stay with the follow-up team.</p>
-    </div>
   );
 }
 
@@ -127,14 +85,10 @@ export default function Push() {
   const [active, setActive] = useState(0);
   const [totals, setTotals] = useState<DayTotals[]>([]);
   const [queued, setQueued] = useState(0);
-  const [regions, setRegions] = useState<RegionTotals[]>([]);
 
   useEffect(() => {
     // Anything captured while offline goes out as soon as the page opens.
-    Promise.allSettled([flushPending(), flushFollowUps()]).finally(() => {
-      setQueued(pendingCount() + pendingFollowUps());
-      fetchRegionTotals(PUSH_EVENT_ID).then(setRegions).catch(() => setRegions([]));
-    });
+    flushPending().finally(() => setQueued(pendingCount()));
     fetchTotals(PUSH_EVENT_ID).then(setTotals).catch(() => setTotals([]));
   }, []);
 
@@ -189,7 +143,7 @@ export default function Push() {
       {queued > 0 && (
         <div className="container-x pt-6">
           <p className="card px-4 py-3 text-sm text-muted">
-            {queued} {queued > 1 ? 'entries' : 'entry'} saved on this device, waiting for signal. They will send by themselves.
+            {queued} report{queued > 1 ? 's' : ''} saved on this device, waiting for signal. They will send by themselves.
           </p>
         </div>
       )}
@@ -288,13 +242,12 @@ export default function Push() {
           <h2 className="mt-3 text-3xl md:text-5xl">Found someone? Log the follow-up.</h2>
           <p className="mt-4 max-w-xl text-muted">
             Someone wants a Bible study, or is fired up to learn to share the gospel. Get their phone number, tell us what
-            they asked for and where you met them, and a laborer near them will reach out. Counting red, yellow and green
-            lights is optional.
+            they asked for and where you met them. Tapping Send opens your email with it all written out — just hit send
+            and it goes to the follow-up team.
           </p>
           <div className="mt-10 max-w-3xl">
-            <FollowUpForm eventId={PUSH_EVENT_ID} days={days} />
+            <FollowUpForm days={days} />
           </div>
-          <ByRegion rows={regions} />
         </div>
       </section>
 
