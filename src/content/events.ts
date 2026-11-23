@@ -1,4 +1,7 @@
 import type { Event } from './types';
+import { push } from './push';
+import { hubs } from './hubs';
+import { site } from './site';
 
 /**
  * Sample events — replace with real dates from the LA and OC hubs.
@@ -21,6 +24,9 @@ export const events: Event[] = [
     venue: 'Neighbors and Nations',
     description: 'There is no better way to start a new year than with the people of God out sharing the only hope for the world. Free; please register.',
     registerUrl: '#',
+    host: push.hosts.names.join(', '),
+    // One link, kept in push.ts, so the hub page and this card always agree.
+    signalUrl: push.signalUrl,
   },
   {
     id: 'internship-summit-2027',
@@ -159,3 +165,7 @@ export const upcomingEvents = (now = new Date()) =>
   events.filter((e) => new Date(e.end ?? e.start) >= now).sort((a, b) => +new Date(a.start) - +new Date(b.start));
 
 export const featuredEvents = (now = new Date()) => upcomingEvents(now).filter((e) => e.tier === 'network');
+
+/** Who is putting it on: the named host, or the hub it belongs to. */
+export const hostFor = (e: Event) =>
+  e.host ?? (e.hub === 'socal' ? site.name : (hubs.find((h) => h.id === e.hub)?.name ?? site.name));

@@ -6,6 +6,7 @@ import { events } from '@/content';
 import { dayLabel, eventDays, formatRange } from '@/lib/format';
 import { fetchTotals, flushPending, pendingCount, sumTotals, type DayTotals } from '@/lib/pushStore';
 import { VenueAddress, venueName } from '@/components/EventCard';
+import { AddToCalendar } from '@/components/EventActions';
 import PushReportForm from '@/components/PushReportForm';
 import InterestForm from '@/components/InterestForm';
 import FollowUpForm from '@/components/FollowUpForm';
@@ -103,7 +104,7 @@ export default function Push() {
           <div className="eyebrow">#NoPlaceLeft · Los Angeles</div>
           <h1 className="mt-4 text-5xl leading-[0.95] md:text-7xl">
             {push.name}
-            <span className="block text-muted">{push.year}</span>
+            <span className="text-gradient block pb-1">{push.year}</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted">{push.tagline}</p>
           <p className="mt-4 text-muted">{event ? formatRange(event.start, event.end) : 'Dec 30 – Jan 2'}</p>
@@ -128,6 +129,7 @@ export default function Push() {
                 <MessageCircle className="h-4 w-4" /> Signal chat — link coming
               </button>
             )}
+            {event && <AddToCalendar event={event} />}
           </div>
 
           <nav className="mt-10 flex flex-wrap gap-2" aria-label="On this page">

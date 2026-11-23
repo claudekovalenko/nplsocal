@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight, ArrowUpRight, Plus, Minus } from 'lucide-react';
 import { FOCUS, REGIONS, BIBLE, refLabel, type Lang } from '@/content/pray/plan';
 import { T } from '@/content/pray/strings';
+import { PEOPLE, PEOPLE_PRAYERS, COUNTRY, jpURL } from '@/content/pray/peoples';
 import {
   DAYS, LIT, SHAPES, SHAPE_DAY, SECTIONS, MAP_LAND, MAP_CONTEXT, FULL_VIEW,
   tr, todayN, dateOf, bounds, type PlanId, type Day,
+  DAY_PEOPLES, PEOPLE_DAY, PEOPLE_MIN, PEOPLE_LIGHT, type PeopleCount,
 } from '@/lib/pray';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 
@@ -197,6 +199,120 @@ function PrayMap({ plan, day, done, lang, onPick }: {
   );
 }
 
+// ---------- peoples ----------
+/** Estimates are rough; show them rounded so they don't read as head counts. */
+const rounded = (n: number, locale: string) =>
+  (n >= 1000 ? Math.round(n / 100) * 100 : Math.round(n / 10) * 10).toLocaleString(locale);
+
+/**
+ * "Pray for the peoples possibly represented here": the communities from the
+ * nations living in today's place, by census estimate. Each is one line; tapping
+ * it opens a prayer, a line about the peoples behind it, their religion, and
+ * the people groups on Joshua Project it possibly represents.
+ */
+function PeoplesBox({ day, list, plan, lang, onGo }: {
+  day: Day;
+  list: PeopleCount[];
+  plan: PlanId;
+  lang: Lang;
+  onGo: (n: number) => void;
+}) {
+  const t = T[lang];
+  const [all, setAll] = useState(false);
+  useEffect(() => setAll(false), [day.n, plan]);
+  if (!list.length) return null;
+  const focus = !!day.src.peoples;
+  const FIRST = 8;
+  const shown = all ? list : list.slice(0, FIRST);
+  const heading = focus ? t.peoplesF : day.t === 'a' ? t.peoplesA : t.peoplesH;
+
+  return (
+    <div className="rounded-lg border border-line">
+      <div className="px-3.5 pt-3.5">
+        <div className="text-xs font-medium uppercase tracking-[0.14em] text-faint">{heading}</div>
+        <p className="mt-1.5 text-[13px] text-muted">{focus ? t.peoplesLeadF(PEOPLE_LIGHT) : t.peoplesLead}</p>
+      </div>
+      <ul className="mt-2 divide-y divide-line border-t border-line">
+        {shown.map((c, i) => {
+          const p = PEOPLE[c.id];
+          if (!p) return null;
+          const pray = PEOPLE_PRAYERS[(day.n * 7 + i) % PEOPLE_PRAYERS.length][lang].replace('{x}', p.x[lang]);
+          const deep = PEOPLE_DAY[plan][c.id];
+          return (
+            <li key={c.id}>
+              <details className="group">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3.5 py-2.5 transition hover:bg-surface">
+                  <span className="font-medium">{p.n[lang]}</span>
+                  <span className="flex items-center gap-2 whitespace-nowrap text-[12.5px] tabular-nums text-muted">
+                    {t.about(rounded(c.est, t.locale))}
+                    <ChevronRight className="h-3.5 w-3.5 text-faint transition group-open:rotate-90" />
+                  </span>
+                </summary>
+                <div className="grid gap-2 px-3.5 pb-3.5 text-sm">
+                  <p className="flex gap-3">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent shadow-[0_0_10px_var(--glow)]" />
+                    {pray}
+                  </p>
+                  <p className="text-muted">{p.data[lang]}</p>
+                  <p className="text-[12.5px] text-muted">
+                    <span className="text-faint">{t.relL}: </span>
+                    {p.relig[lang]}
+                  </p>
+                  {p.u.length > 0 && (
+                    <p className="text-[12.5px]">
+                      <span className="text-faint">{t.possH}: </span>
+                      {p.u.map((u, k) => (
+                        <span key={u.join()}>
+                          {k > 0 && ' · '}
+                          <a href={jpURL(u)} target="_blank" rel="noreferrer" className="text-accent hover:underline">
+                            {u[2]}
+                            {p.u.filter((o) => o[2] === u[2]).length > 1 && COUNTRY[u[1]] && ` (${COUNTRY[u[1]][lang]})`}
+                          </a>
+                        </span>
+                      ))}
+                    </p>
+                  )}
+                  {deep && deep !== day.n && (
+                    <button
+                      type="button"
+                      onClick={() => onGo(deep)}
+                      className="w-fit text-left text-[12.5px] text-accent underline-offset-4 hover:underline"
+                    >
+                      {t.inDepth(deep, tr(DAYS[plan][deep - 1].title, lang))} →
+                    </button>
+                  )}
+                </div>
+              </details>
+            </li>
+          );
+        })}
+      </ul>
+      {list.length > FIRST && !all && (
+        <button
+          type="button"
+          onClick={() => setAll(true)}
+          className="w-full border-t border-line px-3.5 py-2.5 text-left text-[13px] font-medium text-accent transition hover:bg-surface"
+        >
+          {t.showMore(list.length - FIRST)}
+        </button>
+      )}
+      <details className="group border-t border-line">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3.5 py-2.5 text-[12.5px] text-faint">
+          {t.pAbout}
+          <Plus className="h-3.5 w-3.5 group-open:hidden" />
+          <Minus className="hidden h-3.5 w-3.5 group-open:block" />
+        </summary>
+        <div className="grid gap-2 px-3.5 pb-3.5 text-[12.5px] text-muted">
+          <p>{t.pNote(PEOPLE_MIN)}</p>
+          <a href="https://joshuaproject.net/pray/unreachedoftheday" target="_blank" rel="noreferrer" className="w-fit text-accent hover:underline">
+            {t.jpMore} ↗
+          </a>
+        </div>
+      </details>
+    </div>
+  );
+}
+
 // ---------- page ----------
 export default function Pray() {
   const [lang, setLang] = useLocalStorage<Lang>('pray.lang', browserLang());
@@ -344,6 +460,17 @@ export default function Pray() {
             </p>
           </div>
         )}
+
+        <PeoplesBox
+          day={day}
+          list={DAY_PEOPLES[plan][cur - 1]}
+          plan={plan}
+          lang={lang}
+          onGo={(n) => {
+            go(n);
+            cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+        />
 
         {src.ref && (
           <a

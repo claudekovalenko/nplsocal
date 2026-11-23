@@ -9,6 +9,13 @@ export const site = {
     'Reproducing disciples, churches, and leaders among the lost across every community of Los Angeles and Orange County, and from here to the ends of the earth.',
   contact: {
     email: 'hello@nplsocal.net',
+    /** Where people send events they are hosting. Shown quietly under the calendar. */
+    events: 'hello@nplsocal.net',
+    /**
+     * Network-wide Signal group invite (https://signal.group/#…). Shown on the
+     * Events page next to the calendar subscription once it is filled in.
+     */
+    signal: '',
     whatsapp: '',
     instagram: '',
     youtube: '',

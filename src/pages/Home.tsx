@@ -20,14 +20,17 @@ export default function Home() {
         <div className="pointer-events-none absolute inset-x-0 top-0 -bottom-16 aurora opacity-70 md:-bottom-24" />
         <div className="container-x relative z-10 flex flex-col items-center pt-[calc(var(--header-h)_+_1rem)] text-center md:pt-[calc(var(--header-h)_+_1.5rem)]">
           <div className="eyebrow fade-up">{site.hashtag} · Los Angeles · Orange County</div>
-          <h1 className="fade-up fade-up-2 mt-5 text-5xl leading-[0.95] sm:text-6xl md:text-7xl lg:text-8xl">No Place Left.</h1>
+          <h1 className="text-gradient fade-up fade-up-2 mt-5 pb-2 text-5xl leading-[0.95] sm:text-6xl md:text-7xl lg:text-8xl">No Place Left.</h1>
           <div className="fade-up fade-up-3 mt-8 flex flex-wrap justify-center gap-3">
             <Link to="/events" className="btn-primary min-w-40">
               Events
             </Link>
+            <Link to="/push" className="btn-secondary min-w-40">
+              The Push
+            </Link>
           </div>
         </div>
-        <div className="relative z-0 mx-auto -mb-12 mt-2 w-full max-w-3xl px-2 md:-mb-20 md:mt-4">
+        <div className="relative z-0 mx-auto -mb-12 mt-4 w-full max-w-5xl px-0 md:-mb-20 md:mt-8">
           <NetworkMap variant="hero" className="h-auto w-full" />
         </div>
       </section>
@@ -40,12 +43,13 @@ export default function Home() {
             <div>
               <div className="eyebrow">For everyone</div>
               <h2 className="mt-3 text-3xl md:text-5xl">Next up.</h2>
+              <p className="mt-3 max-w-md text-muted">Tap “Add to calendar” and your phone will remind you.</p>
             </div>
             <Link to="/events" className="btn-ghost">
               All events <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="mt-10 grid gap-4 md:grid-cols-2">
+          <div className="mt-10 grid gap-5 md:grid-cols-2">
             {featured.map((e) => (
               <FeaturedEvent key={e.id} event={e} />
             ))}
