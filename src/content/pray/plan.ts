@@ -30,6 +30,12 @@ export interface PlanDay {
   ref?: Ref;
   /** starts its own section in the list of all days */
   sec?: string;
+  /**
+   * A peoples focus day: the communities (ids from peoples.ts) it prays for in
+   * depth. The map lights every ZIP code where one of them is estimated at 250
+   * or more, and the day lists them with their counts across LA and OC.
+   */
+  peoples?: string[];
 }
 
 // Same Mercator projection as scripts/build-map.mjs, fitted from two of its projected places.
@@ -188,7 +194,8 @@ export const PLAN: PlanDay[] = [
   { t: "f", title: "Asian and Pacific Islander communities",
     
     who: ["Korean families and businesses in Koreatown, and Japanese Americans in Little Tokyo, Gardena and Torrance.", "Chinese and Taiwanese communities across the San Gabriel Valley.", "Vietnamese families in Little Saigon in Westminster and Garden Grove.", "Filipino, Thai, Cambodian and Pacific Islander communities in Historic Filipinotown, Thai Town, Long Beach and Carson."], pp: "Asian and Pacific Islander families across LA and OC",
-    ref: ["Acts 2:5–11", "ACT.2.5-11"], pins: [[34.058, -118.3], [34.07, -118.13], [33.75, -117.99], [33.86, -118.07]] },
+    ref: ["Acts 2:5–11", "ACT.2.5-11"], pins: [[34.058, -118.3], [34.07, -118.13], [33.75, -117.99], [33.86, -118.07]],
+    peoples: ["chinese", "taiwanese", "korean", "japanese", "mongolian", "vietnamese", "filipino", "cambodian", "thai", "burmese", "indonesian", "laotian", "hmong", "malaysian", "indian", "sikh", "pakistani", "bangladeshi", "srilankan", "nepali", "samoan", "tongan", "fijian", "marshallese"] },
 
   { t: "r", r: "south", title: "South LA & Gateway Cities",
     
@@ -239,7 +246,8 @@ export const PLAN: PlanDay[] = [
   { t: "f", title: "Middle Eastern, Armenian and Persian communities",
     
     who: ["Armenian families in Glendale, Burbank and across the San Fernando Valley.", "Persian (Iranian) communities in Westwood, Beverly Hills, Irvine and the Valley.", "Arab families and businesses in Anaheim's Little Arabia.", "Families from Egypt, Lebanon, Syria, Iraq and other countries in the region."], pp: "Armenian, Persian, Arab and other Middle Eastern families",
-    ref: ["Isaiah 19:23–25", "ISA.19.23-25"], pins: [[34.15, -118.26], [34.06, -118.44], [33.82, -117.96]] },
+    ref: ["Isaiah 19:23–25", "ISA.19.23-25"], pins: [[34.15, -118.26], [34.06, -118.44], [33.82, -117.96]],
+    peoples: ["armenian", "iranian", "assyrian", "arab", "egyptian", "lebanese", "syrian", "iraqi", "palestinian", "jordanian", "moroccan", "israeli", "turkish", "afghan", "uzbek"] },
 
   { t: "r", r: "woc", title: "West County",
     

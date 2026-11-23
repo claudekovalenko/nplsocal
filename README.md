@@ -58,6 +58,20 @@ Everything visible on the site comes from `src/content/`:
 | `venues.ts` | Street addresses for named venues, typed once and picked up by every event held there |
 | `faq.ts` | Questions on the Vision page |
 | `pray/plan.ts` | The Pray page: the 100-day plan (regions, neighborhood groups, focus days, who lives where), the seven optional prayer topics, and the Spanish for all of it. The 365-day plan is built from it, one day per listed place. `pray/strings.ts` holds the page's interface text in both languages; `pray/map.json` is the ZIP-code map. |
+| `pray/peoples.ts` | The peoples layer of the Pray page: 46 communities from the nations (census sources, English and Spanish names, homeland religion, a short note, and Joshua Project people groups possibly represented, every link checked). `pray/peoples.json` holds their census estimates by ZIP code; rebuild it with `npm run peoples`. |
+
+**Peoples on the Pray page.** Every day lists the communities from the nations
+possibly living in its place ("Peoples possibly living here"), largest first,
+from American Community Survey 2020–2024 estimates by ZIP code (Asian and
+Pacific Islander detailed groups, ancestry, and country of birth). A community
+shows when its estimate is at least 250 and larger than its margin of error;
+tapping one opens a prayer, a line about the peoples behind it, their homeland
+religion and Joshua Project links. A focus day with a `peoples` list in
+`plan.ts` (Asian and Pacific Islander; Middle Eastern, Armenian and Persian)
+prays for those communities across both counties and lights the ZIP codes
+where one of them reaches 3,000. `npm run peoples` streams the tables from
+www2.census.gov, no key needed (behind a proxy, run it with
+`NODE_USE_ENV_PROXY=1`).
 
 **Venues.** An event's `location` is matched against `venues.ts`. Fill in the
 `address` and it appears under the venue name on the featured card, on the

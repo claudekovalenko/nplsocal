@@ -1,5 +1,6 @@
 import { PLAN, REGIONS, PROJ, ES, type PlanDay, type Lang, type RegionId } from '@/content/pray/plan';
 import MAP from '@/content/pray/map.json';
+import PEOPLES_DATA from '@/content/pray/peoples.json';
 
 export type PlanId = '100' | '365';
 
@@ -79,7 +80,55 @@ function nearestGroup([x, y]: [number, number]) {
   return best;
 }
 
+// ---------- peoples ----------
+// Census estimates per ZIP code: [community index, estimate, margin of error].
+const PEOPLE_IDS: string[] = PEOPLES_DATA.ids;
+const ZIP_PEOPLES = PEOPLES_DATA.zips as unknown as Record<string, [number, number, number][]>;
+
+/** Shown only when the estimate is at least this and larger than its margin of error. */
+export const PEOPLE_MIN = 250;
+
+export interface PeopleCount {
+  id: string;
+  est: number;
+  moe: number;
+}
+
+/**
+ * Communities across a set of ZIP code areas, largest first. Estimates add up;
+ * margins of error combine as the square root of the sum of squares, the
+ * Census Bureau's approximation for aggregated areas. Only communities that
+ * clear PEOPLE_MIN and their margin of error are returned.
+ */
+export function peoplesIn(shapes: Shape[], only?: string[]): PeopleCount[] {
+  const est = new Map<number, number>();
+  const moe2 = new Map<number, number>();
+  for (const z of new Set(shapes.map((s) => s.z))) {
+    for (const [i, e, m] of ZIP_PEOPLES[z] ?? []) {
+      est.set(i, (est.get(i) ?? 0) + e);
+      moe2.set(i, (moe2.get(i) ?? 0) + m * m);
+    }
+  }
+  return [...est]
+    .map(([i, e]) => ({ id: PEOPLE_IDS[i], est: e, moe: Math.round(Math.sqrt(moe2.get(i) ?? 0)) }))
+    .filter((p) => p.est >= PEOPLE_MIN && p.est > p.moe && (!only || only.includes(p.id)))
+    .sort((a, b) => b.est - a.est);
+}
+
+/**
+ * A peoples focus day lights the ZIP areas where one of its communities is
+ * concentrated. At PEOPLE_MIN nearly every ZIP code in LA would light up for
+ * Asian and Pacific Islander communities, which shows nothing, so the map uses
+ * a higher bar than the lists.
+ */
+export const PEOPLE_LIGHT = 3000;
+function shapesWith(ids: string[]) {
+  const want = new Set(ids.map((id) => PEOPLE_IDS.indexOf(id)));
+  return SHAPES.filter((s) => (ZIP_PEOPLES[s.z] ?? []).some(([i, e, m]) => want.has(i) && e >= PEOPLE_LIGHT && e > m));
+}
+
 function litOf(d: Day): Shape[] {
+  if (d.src.peoples) return shapesWith(d.src.peoples);
   if (d.t === 'p') return SHAPES.filter((s) => s.day === d.n);
   if (d.t === 'q' && d.group && d.r) {
     const hub = REGIONS[d.r].hub;
@@ -134,3 +183,30 @@ function sections(list: Day[]): Section[] {
   return out;
 }
 export const SECTIONS: Record<PlanId, Section[]> = { '100': sections(DAYS['100']), '365': sections(DAYS['365']) };
+
+// ---------- peoples per day ----------
+/**
+ * The communities each day prays for, per plan: on a place or region day the
+ * ones living there; on a peoples focus day its own communities across both
+ * counties; on the first and last days, everyone. Other focus days have none.
+ */
+export const DAY_PEOPLES: Record<PlanId, PeopleCount[][]> = (() => {
+  const of = (list: Day[], lit: Shape[][]) =>
+    list.map((d, k) => {
+      if (d.src.peoples) return peoplesIn(SHAPES, d.src.peoples);
+      if (d.t === 'a') return peoplesIn(SHAPES);
+      if (d.t === 'f') return [];
+      return peoplesIn(lit[k]);
+    });
+  return { '100': of(DAYS['100'], LIT['100']), '365': of(DAYS['365'], LIT['365']) };
+})();
+
+/** The peoples focus day(s) that pray for a community in depth, per plan. */
+export const PEOPLE_DAY: Record<PlanId, Record<string, number>> = (() => {
+  const of = (list: Day[]) => {
+    const out: Record<string, number> = {};
+    list.forEach((d) => d.src.peoples?.forEach((id) => (out[id] ??= d.n)));
+    return out;
+  };
+  return { '100': of(DAYS['100']), '365': of(DAYS['365']) };
+})();
