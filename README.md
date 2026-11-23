@@ -66,10 +66,14 @@ from American Community Survey 2020–2024 estimates by ZIP code (Asian and
 Pacific Islander detailed groups, ancestry, and country of birth). A community
 shows when its estimate is at least 250 and larger than its margin of error;
 tapping one opens a prayer, a line about the peoples behind it, their homeland
-religion and Joshua Project links. A focus day with a `peoples` list in
-`plan.ts` (Asian and Pacific Islander; Middle Eastern, Armenian and Persian)
-prays for those communities across both counties and lights the ZIP codes
-where one of them reaches 3,000. `npm run peoples` streams the tables from
+religion and Joshua Project links. Twelve people-group days (a focus day with a
+`peoples` list in `plan.ts`: Korean, Filipino, African, Persian and Israeli,
+Japanese, Armenian, Chinese and Taiwanese, South Asian, Cambodian and Southeast
+Asian, Pacific Islander, Arab and Assyrian, Vietnamese) sit after the region
+where each community is centered. Each prays for its communities across both
+counties and lights the ZIP codes where they are concentrated, stepping down
+from 3,000 until a handful of areas light. Day numbers changed when these were
+added; `src/lib/prayMigrate.ts` moves people's saved progress over once. `npm run peoples` streams the tables from
 www2.census.gov, no key needed (behind a proxy, run it with
 `NODE_USE_ENV_PROXY=1`).
 

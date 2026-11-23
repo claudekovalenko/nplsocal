@@ -116,15 +116,24 @@ export function peoplesIn(shapes: Shape[], only?: string[]): PeopleCount[] {
 }
 
 /**
- * A peoples focus day lights the ZIP areas where one of its communities is
- * concentrated. At PEOPLE_MIN nearly every ZIP code in LA would light up for
- * Asian and Pacific Islander communities, which shows nothing, so the map uses
- * a higher bar than the lists.
+ * A people-group day lights the ZIP areas where its communities are
+ * concentrated. One bar does not fit all: at 250 nearly every ZIP code in LA
+ * lights for Chinese or Filipino neighbors, which shows nothing, while no ZIP
+ * code has 3,000 Samoan residents. So each day steps down from 3,000 until a
+ * handful of areas light up, and says which bar it used.
  */
-export const PEOPLE_LIGHT = 3000;
-function shapesWith(ids: string[]) {
+const LIGHT_STEPS = [3000, 1500, 1000, 500, PEOPLE_MIN];
+const LIGHT_ENOUGH = 6;
+function zipsOver(ids: string[], min: number) {
   const want = new Set(ids.map((id) => PEOPLE_IDS.indexOf(id)));
-  return SHAPES.filter((s) => (ZIP_PEOPLES[s.z] ?? []).some(([i, e, m]) => want.has(i) && e >= PEOPLE_LIGHT && e > m));
+  return SHAPES.filter((s) => (ZIP_PEOPLES[s.z] ?? []).some(([i, e, m]) => want.has(i) && e >= min && e > m));
+}
+/** The bar a people-group day lights its map at. */
+export function lightBar(ids: string[]) {
+  return LIGHT_STEPS.find((min) => zipsOver(ids, min).length >= LIGHT_ENOUGH) ?? PEOPLE_MIN;
+}
+function shapesWith(ids: string[]) {
+  return zipsOver(ids, lightBar(ids));
 }
 
 function litOf(d: Day): Shape[] {

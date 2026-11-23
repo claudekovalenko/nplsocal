@@ -6,9 +6,13 @@ import { PEOPLE, PEOPLE_PRAYERS, COUNTRY, jpURL } from '@/content/pray/peoples';
 import {
   DAYS, LIT, SHAPES, SHAPE_DAY, SECTIONS, MAP_LAND, MAP_CONTEXT, FULL_VIEW,
   tr, todayN, dateOf, bounds, type PlanId, type Day,
-  DAY_PEOPLES, PEOPLE_DAY, PEOPLE_MIN, PEOPLE_LIGHT, type PeopleCount,
+  DAY_PEOPLES, PEOPLE_DAY, PEOPLE_MIN, lightBar, type PeopleCount,
 } from '@/lib/pray';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { migratePrayProgress } from '@/lib/prayMigrate';
+
+// Before any saved day number is read.
+migratePrayProgress();
 
 const browserLang = (): Lang => (navigator.language?.toLowerCase().startsWith('es') ? 'es' : 'en');
 
@@ -131,7 +135,7 @@ function PrayMap({ plan, day, done, lang, onPick }: {
     day.t === 'p' ? `${tr(REGIONS[day.r!].name, lang)} · ${county(day.r)}`
     : day.t === 'q' ? `${tr(day.group!.title, lang)} · ${tr(REGIONS[day.r!].name, lang)}`
     : day.t === 'r' ? `${t.region} · ${county(day.r)}`
-    : day.t === 'f' ? t.focusDay : t.both;
+    : day.t === 'f' ? (day.src.peoples ? t.peoplesKind : t.focusDay) : t.both;
   // highlighted shapes are drawn last, so their outlines sit on top
   const order = useMemo(() => [...SHAPES.filter((s) => !lit.has(s)), ...SHAPES.filter((s) => lit.has(s))], [lit]);
 
@@ -230,7 +234,7 @@ function PeoplesBox({ day, list, plan, lang, onGo }: {
     <div className="rounded-lg border border-line">
       <div className="px-3.5 pt-3.5">
         <div className="text-xs font-medium uppercase tracking-[0.14em] text-faint">{heading}</div>
-        <p className="mt-1.5 text-[13px] text-muted">{focus ? t.peoplesLeadF(PEOPLE_LIGHT) : t.peoplesLead}</p>
+        <p className="mt-1.5 text-[13px] text-muted">{focus ? t.peoplesLeadF(lightBar(day.src.peoples!)) : t.peoplesLead}</p>
       </div>
       <ul className="mt-2 divide-y divide-line border-t border-line">
         {shown.map((c, i) => {
@@ -413,7 +417,7 @@ export default function Pray() {
               </button>
             )}
             <span className={`inline-flex h-6 items-center whitespace-nowrap rounded-full border px-2.5 text-[11px] font-medium ${kindTone}`}>
-              {t.kinds[day.t]}
+              {day.src.peoples ? t.peoplesKind : t.kinds[day.t]}
             </span>
           </span>
         </div>
@@ -583,7 +587,7 @@ export default function Pray() {
                       >
                         <span className="text-[12.5px] tabular-nums text-faint">{d.n}</span>
                         <span className="truncate text-sm">
-                          {d.t === 'f' && t.focusPrefix}
+                          {d.t === 'f' && (d.src.peoples ? t.peoplesPrefix : t.focusPrefix)}
                           {tr(d.title, lang)}
                           {plan === '365' && ` · ${dateOf(d.n, t.locale)}`}
                         </span>
