@@ -126,9 +126,13 @@ async function auditPage(page, path) {
       const control = controls.nth(i);
       let label = '';
       try {
-        label = ((await control.textContent()) || (await control.getAttribute('aria-label')) || '').trim();
+        // A control can vanish when an earlier click re-renders the page (the
+        // Events calendar swaps its month grid for a list). Give up on it
+        // quickly instead of waiting out Playwright's 30-second default.
+        if (!(await control.count())) continue;
+        label = ((await control.textContent({ timeout: 2000 })) || (await control.getAttribute('aria-label', { timeout: 2000 })) || '').trim();
         if (UNSAFE.test(label)) continue;
-        if ((await control.getAttribute('type')) === 'submit') continue;
+        if ((await control.getAttribute('type', { timeout: 2000 })) === 'submit') continue;
         if (!(await control.isVisible())) continue;
         await control.click({ timeout: 4000 });
         await page.waitForTimeout(150);
