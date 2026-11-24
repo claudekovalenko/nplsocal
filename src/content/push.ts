@@ -1,3 +1,5 @@
+import type { RegionId } from './pray/plan';
+
 /**
  * The L.A. Metro Gospel Push — the network's central event.
  *
@@ -176,3 +178,47 @@ export const followUp = {
 } as const;
 
 export type LightKey = (typeof followUp.lights)[number]['key'];
+
+/**
+ * Where teams go out, for the map on the Push page.
+ *
+ * `areas` ties each region above to the ZIP-code regions of the Pray map
+ * (src/content/pray/plan.ts), so the map can colour exactly those ZIP codes.
+ *
+ * `spots` are specific outreach locations: a park, a street, a shopping
+ * center. Each appears as a pin in its region. Empty until the hosts settle
+ * them; add one object per place, e.g.
+ *   { name: 'MacArthur Park', region: 'Central & Downtown LA', lat: 34.0594, lon: -118.2774,
+ *     days: ['2026-12-31'], note: 'Meet at the boathouse' }
+ */
+export interface OutreachSpot {
+  name: string;
+  /** One of followUp.regions. */
+  region: string;
+  lat: number;
+  lon: number;
+  /** YYYY-MM-DD push days this spot is used. Leave out for every day. */
+  days?: string[];
+  note?: string;
+}
+
+export const outreach: {
+  areas: Record<string, RegionId[]>;
+  base: { name: string; address: string; lat: number; lon: number };
+  spots: OutreachSpot[];
+} = {
+  areas: {
+    'Central & Downtown LA': ['central'],
+    'Westside & South Bay': ['west'],
+    'San Fernando Valley': ['sfv'],
+    'San Gabriel Valley': ['sgv'],
+    'South LA & Gateway Cities': ['south'],
+    'Long Beach': ['lb'],
+    'Antelope & Santa Clarita Valleys': ['av'],
+    'North OC (Buena Park, Fullerton, Anaheim)': ['noc'],
+    'Central & West OC': ['coc', 'woc'],
+  },
+  // Where every team checks in and is sent out from.
+  base: { name: 'Neighbors and Nations', address: '6575 Crescent Ave, Buena Park, CA 90620', lat: 33.8491, lon: -118.0197 },
+  spots: [],
+};

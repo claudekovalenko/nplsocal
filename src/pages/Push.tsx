@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MessageCircle, MapPin, CalendarDays, Ticket, Plus, ArrowRight } from 'lucide-react';
-import { push, PUSH_EVENT_ID, type ScheduleDay } from '@/content/push';
+import { push, outreach, PUSH_EVENT_ID, type ScheduleDay } from '@/content/push';
+
+const PushMap = lazy(() => import('@/components/PushMap'));
 import { events } from '@/content';
 import { dayLabel, formatRange } from '@/lib/format';
 import { flushPending, pendingCount, sumTotals } from '@/lib/pushStore';
@@ -77,6 +79,7 @@ function Block({
 
 const NAV = [
   ['schedule', 'Schedule'],
+  ['map', 'Map'],
   ['about', 'About'],
   ['faq', 'FAQ'],
   ['field', 'In the field'],
@@ -190,6 +193,19 @@ export default function Push() {
             <DayCard key={d.date} day={d} />
           ))}
         </ol>
+      </Block>
+
+      {/* Where we go: the outreach regions and the check-in, on a map. */}
+      <Block
+        id="map"
+        eyebrow="Where we go"
+        title="Across the L.A. metro."
+        lead={`Every day starts at ${outreach.base.name} in Buena Park. From there, teams go out across these regions.`}
+        wide
+      >
+        <Suspense fallback={<div className="h-[min(70vh,560px)] rounded-xl border border-line" />}>
+          <PushMap />
+        </Suspense>
       </Block>
 
       {/* What is a PUSH? */}

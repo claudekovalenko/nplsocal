@@ -154,6 +154,15 @@ An event with a real `registerUrl` (starting with `http`) keeps using that link 
 
 Contact details are private by design: the database policy lets anyone insert a sign-up but only signed-in organizers read the roster. Until the shared database is connected the form also opens the visitor's email app addressed to the organizer, so no sign-up is lost.
 
+### The outreach map
+
+The Push page's **Where we go** section maps the regions teams are sent to
+(`outreach.areas` in `push.ts`, tied to the Pray map's ZIP-code regions), with
+the check-in at Neighbors and Nations pinned. Tap a region on the map or in the
+list to zoom to it. Specific outreach spots go in `outreach.spots` (name,
+region, latitude, longitude, optional days and note); each shows as a pin in its
+region and under it in the list. It is empty until the hosts settle the spots.
+
 ### The tracker
 
 `/tracker` is a section of its own (in the menu, the phone tab bar and the app
