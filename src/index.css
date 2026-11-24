@@ -228,6 +228,39 @@ h1, h2, h3, h4 {
 }
 .pulse-2 { animation-delay: 1.4s; }
 
+/* Network map: outlines draw in once, then sparks of light run out from each
+   hub and the places twinkle. Lines use pathLength=1 so one set of numbers
+   fits every length. */
+@keyframes map-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+.map-draw {
+  stroke-dasharray: 1;
+  animation: map-draw 2.4s cubic-bezier(0.6, 0, 0.2, 1) both;
+}
+@keyframes map-spark {
+  0% { stroke-dashoffset: 0.1; opacity: 0; }
+  8% { opacity: 1; }
+  45% { opacity: 1; }
+  55%, 100% { stroke-dashoffset: -1.05; opacity: 0; }
+}
+.map-spark {
+  stroke-dasharray: 0.08 3;
+  stroke-dashoffset: 0.1;
+  animation: map-spark 4.8s cubic-bezier(0.3, 0, 0.4, 1) infinite;
+}
+.map-spark-slow {
+  stroke-dasharray: 0.05 3;
+  animation-duration: 6s;
+  animation-delay: 2.4s;
+}
+@keyframes map-twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.map-twinkle { animation: map-twinkle 5s ease-in-out infinite; }
+
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
