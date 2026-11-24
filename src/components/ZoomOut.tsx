@@ -38,7 +38,10 @@ const WORLD_CITIES: LonLat[] = [
   [116.4, 39.9], [139.69, 35.69],
 ];
 
-const C_LA: LonLat = [-118.05, 33.95];
+// Opening view: the basin and Orange County, where the network is. LA County
+// runs on north over mountains and desert; framing all of it left the top of
+// the screen empty and pushed Orange County off the bottom.
+const C_LA: LonLat = [-118.02, 33.87];
 const C_US: LonLat = [-98.5, 38.5];
 const C_GLOBE: LonLat = [-60, 16];
 
@@ -50,7 +53,7 @@ const ramp = (p: number, a: number, b: number) => ease(clamp((p - a) / (b - a)))
 
 /** Projection radius that fits each level on this canvas. */
 function radiusFor(zoom: 'la' | 'us' | 'globe', w: number, h: number) {
-  if (zoom === 'la') return Math.min((w * 0.74) / 0.0255, (h * 0.7) / 0.0235); // LA + OC, ~1.45° × 1.35°
+  if (zoom === 'la') return Math.min((w * 0.86) / 0.0227, (h * 0.8) / 0.0166); // basin + OC, ~1.3° × 0.95°
   if (zoom === 'us') return Math.min((w * 0.92) / 1.02, (h * 0.8) / 0.46); // the lower 48
   return Math.min(w, h) * 0.4; // the whole earth
 }
@@ -150,7 +153,10 @@ function draw(
 ) {
   const { radius, center } = frameAt(p, w, h);
   // The globe rises a little as it forms, to leave room for the caption under it.
-  const lift = ramp(p, 0.6, 0.9) * h * 0.08;
+  // On a tall, narrow phone the zoomed-in map is sized by the width and would
+  // sit mid-screen with empty space above it, so while zoomed in it rides high.
+  const tall = Math.max(0, h - w * 1.15) * 0.42 * (1 - ramp(p, 0.08, 0.35));
+  const lift = ramp(p, 0.6, 0.9) * h * 0.08 + tall;
   const projection = geoOrthographic()
     .scale(radius)
     .translate([w / 2, h / 2 - lift])
@@ -279,6 +285,20 @@ function draw(
   arcs(US_CITIES, 0.3, 0.55, 1 - 0.5 * far);
   arcs(WORLD_CITIES, 0.62, 0.92, 1);
 
+  // While zoomed in, the county runs off the top of the screen: fade that edge
+  // out so it reads as a frame, not a cut.
+  const edge = 1 - out;
+  if (edge > 0.01) {
+    const g = ctx.createLinearGradient(0, 0, 0, h * 0.22);
+    g.addColorStop(0, `rgba(0,0,0,${edge})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h * 0.22);
+    ctx.restore();
+  }
+
   // Los Angeles itself: a beacon that pulses at every scale.
   const home = facing(LA) ? projection(LA) : null;
   if (home) {
@@ -376,8 +396,9 @@ export default function ZoomOut() {
       const dt = Math.min(64, time - last);
       last = time;
       const target = read();
-      // Critically damped follow: covers ~63% of the gap every 110ms.
-      shown += (target - shown) * (1 - Math.exp(-dt / 110));
+      // Damped follow: covers ~63% of the gap every 190ms, so the globe eases
+      // into each new position rather than snapping to it.
+      shown += (target - shown) * (1 - Math.exp(-dt / 190));
       if (Math.abs(target - shown) < 0.0004) shown = target;
       render(time);
       if (visible && !still) raf = requestAnimationFrame(frame);
@@ -415,7 +436,8 @@ export default function ZoomOut() {
   }, [still]);
 
   return (
-    <div ref={stage} className={still ? 'relative' : 'relative h-[260vh]'}>
+    // A long stage: more scroll for the same zoom means each flick moves it less.
+    <div ref={stage} className={still ? 'relative' : 'relative h-[360vh]'}>
       <div className="sticky top-[var(--header-h)] h-[calc(100svh_-_var(--header-h)_-_4.5rem)] md:h-[calc(100svh_-_var(--header-h))]">
         <canvas
           ref={canvas}
