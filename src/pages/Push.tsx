@@ -1,42 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { MessageCircle, MapPin, CalendarDays, Ticket, Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { MessageCircle, MapPin, CalendarDays, Ticket, Plus, ArrowRight } from 'lucide-react';
 import { push, PUSH_EVENT_ID, type ScheduleDay } from '@/content/push';
 import { events } from '@/content';
-import { dayLabel, eventDays, formatRange } from '@/lib/format';
-import { fetchTotals, flushPending, pendingCount, sumTotals, type DayTotals } from '@/lib/pushStore';
+import { dayLabel, formatRange } from '@/lib/format';
+import { flushPending, pendingCount, sumTotals } from '@/lib/pushStore';
+import { useLiveTotals, useAgo } from '@/hooks/useLiveTotals';
 import { VenueAddress, venueName } from '@/components/EventCard';
 import { AddToCalendar } from '@/components/EventActions';
-import PushReportForm from '@/components/PushReportForm';
 import InterestForm from '@/components/InterestForm';
-import FollowUpForm from '@/components/FollowUpForm';
 
 
-function Totals({ rows }: { rows: DayTotals[] }) {
-  const all = sumTotals(rows);
-  if (!all.reports) return null;
-  const tiles = [
-    ['Conversations', all.conversations],
-    ['Heard the gospel', all.gospelShared],
-    ['Responded', all.responded],
-    ['Baptized', all.baptized],
-    ['Groups started', all.groupsStarted],
-  ] as const;
-  return (
-    <section className="container-x pb-4 pt-12 md:pt-16">
-      <div className="eyebrow">So far</div>
-      <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-5">
-        {tiles.map(([label, n]) => (
-          <div key={label} className="bg-bg px-4 py-6 text-center">
-            <dd className="text-3xl font-light tracking-tight md:text-4xl">{n}</dd>
-            <dt className="eyebrow mt-1">{label}</dt>
-          </div>
-        ))}
-      </dl>
-      <p className="mt-2 text-xs text-faint">From {all.reports} team reports. Numbers only — no names leave the organizers.</p>
-    </section>
-  );
-}
 
 /** One day of the schedule as a card, so all four sit side by side. */
 function DayCard({ day }: { day: ScheduleDay }) {
@@ -109,34 +83,25 @@ const NAV = [
   ['connect', 'Stay connected'],
 ] as const;
 
-type FieldTab = 'follow-up' | 'report';
-
 export default function Push() {
   const event = events.find((e) => e.id === PUSH_EVENT_ID);
-  const days = useMemo(() => (event ? eventDays(event.start, event.end) : push.schedule.map((d) => d.date)), [event]);
-  const [totals, setTotals] = useState<DayTotals[]>([]);
   const [queued, setQueued] = useState(0);
-  const [tab, setTab] = useState<FieldTab>('follow-up');
+  const { rows, status, updatedAt } = useLiveTotals(PUSH_EVENT_ID);
+  const ago = useAgo(updatedAt);
+  const all = sumTotals(rows);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Anything captured while offline goes out as soon as the page opens.
     flushPending().finally(() => setQueued(pendingCount()));
-    fetchTotals(PUSH_EVENT_ID).then(setTotals).catch(() => setTotals([]));
   }, []);
 
-  // Old links to #follow-up and #report open the right tab.
+  // The forms moved to the tracker; old links to #report and #follow-up follow them.
   useEffect(() => {
-    const pick = () => {
-      const h = location.hash.slice(1);
-      if (h === 'follow-up' || h === 'report') {
-        setTab(h);
-        document.getElementById('field')?.scrollIntoView();
-      }
-    };
-    pick();
-    addEventListener('hashchange', pick);
-    return () => removeEventListener('hashchange', pick);
-  }, []);
+    const h = location.hash.slice(1);
+    if (h === 'report') navigate('/push/tracker', { replace: true });
+    if (h === 'follow-up') navigate('/push/tracker?tool=follow-up', { replace: true });
+  }, [navigate]);
 
   return (
     <>
@@ -218,8 +183,6 @@ export default function Push() {
         </div>
       )}
 
-      <Totals rows={totals} />
-
       {/* Schedule: all four days at once. */}
       <Block id="schedule" eyebrow="Schedule" title="Four days, start to finish." wide>
         <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -290,56 +253,52 @@ export default function Push() {
         </div>
       </Block>
 
-      {/* In the field: the two forms teams use, one at a time. */}
+      {/* In the field: the live numbers, and the way into the tracker. */}
       <Block
         id="field"
         eyebrow="In the field"
-        title="For teams out on the push."
-        lead="Log the people who want to keep going, and turn in your team's numbers at the end of the day."
+        title="The push tracker."
+        lead="Live numbers from every team, the end-of-day report, and follow-ups, on one page built for phones."
         tint
+        aside={
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Link to="/push/tracker" className="btn-primary">
+              Open the tracker <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        }
       >
-        <div role="tablist" aria-label="Team tools" className="inline-flex rounded-full border border-line-strong p-1">
+        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-5">
           {(
             [
-              ['follow-up', 'Log a follow-up'],
-              ['report', 'Daily report'],
+              ['Conversations', all.conversations],
+              ['Heard the gospel', all.gospelShared],
+              ['Responded', all.responded],
+              ['Baptized', all.baptized],
+              ['Groups started', all.groupsStarted],
             ] as const
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={tab === id}
-              onClick={() => setTab(id)}
-              className={`h-9 rounded-full px-4 text-sm font-medium transition ${tab === id ? 'bg-fg text-bg' : 'text-muted hover:text-fg'}`}
-            >
-              {label}
-            </button>
+          ).map(([label, n], i) => (
+            <div key={label} className={`bg-bg px-2 py-5 text-center ${i === 4 ? 'col-span-2 sm:col-span-1' : ''}`}>
+              <dd className="text-3xl font-light tabular-nums tracking-tight">{n.toLocaleString('en-US')}</dd>
+              <dt className="eyebrow mt-1 !tracking-[0.12em]">{label}</dt>
+            </div>
           ))}
+        </dl>
+        <p className="mt-2 text-xs text-faint">
+          {status === 'live' ? `Live · updated ${ago}` : status === 'offline' ? `No signal · last updated ${ago || 'never'}` : ''}
+          {status === 'live' || status === 'offline' ? ' · ' : ''}
+          {all.reports ? `${all.reports} team report${all.reports === 1 ? '' : 's'} so far.` : 'Numbers appear as teams turn in their reports.'}
+        </p>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <Link to="/push/tracker" className="card card-hover p-5">
+            <span className="block font-medium">Turn in the daily report</span>
+            <span className="mt-1 block text-sm text-muted">Two minutes, five numbers and one story. Works with no signal.</span>
+          </Link>
+          <Link to="/push/tracker?tool=follow-up" className="card card-hover p-5">
+            <span className="block font-medium">Log a follow-up</span>
+            <span className="mt-1 block text-sm text-muted">Someone who wants to keep going: phone number first.</span>
+          </Link>
         </div>
-
-        {tab === 'follow-up' ? (
-          <div id="follow-up" role="tabpanel" className="mt-6">
-            <p className="max-w-xl text-sm text-muted">
-              Met someone who wants a Bible study, or to learn to share the gospel? Get their phone number, say what they
-              asked for and where you met them. Tapping Send opens your email with it all written out — just hit send and
-              it goes to the follow-up team.
-            </p>
-            <div className="mt-6">
-              <FollowUpForm days={days} />
-            </div>
-          </div>
-        ) : (
-          <div id="report" role="tabpanel" className="mt-6">
-            <p className="max-w-xl text-sm text-muted">
-              End of the day, two minutes: every team turns in their numbers and one story. It works with no signal — the
-              report waits on your phone and sends itself later.
-            </p>
-            <div className="mt-6">
-              <PushReportForm eventId={PUSH_EVENT_ID} days={days} />
-            </div>
-          </div>
-        )}
       </Block>
 
       {/* Stay connected */}

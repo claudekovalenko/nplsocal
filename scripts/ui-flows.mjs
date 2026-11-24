@@ -233,11 +233,16 @@ check('schedule shows every day', dayCards === 4, `${dayCards} days`);
 const emptyDays = await page.locator('#schedule [data-day]').evaluateAll((els) => els.filter((el) => !el.querySelector('ol li')).length);
 check('every day has its schedule', emptyDays === 0, `${emptyDays} empty`);
 
+// The push page leads to the tracker, where the field forms live.
+check('push page links to the tracker', (await page.locator('a[href$="/push/tracker"]').count()) > 0);
+const stayUrl = page.url();
+await page.goto(BASE + '/push/tracker', { waitUntil: 'networkidle' });
+check('tracker loads', /Tracker/.test((await page.textContent('h1')) || ''));
+const dayRows = await page.locator('table tbody tr').count(); // desktop view
+check('tracker lists every day', dayRows === 4, `${dayRows} days`);
+
 // Daily report: with no database configured it queues on the device, which is
-// exactly what a team with no signal would hit. It sits behind the second tab
-// of "In the field".
-await page.getByRole('tab', { name: /Daily report/ }).click();
-await page.waitForTimeout(200);
+// exactly what a team with no signal would hit.
 await page.locator('#report input[required]').fill('Audit Reporter');
 const counts = page.locator('#report input[type="number"]');
 await counts.nth(0).fill('12');
@@ -247,6 +252,7 @@ await page.getByRole('button', { name: /Send report/ }).click();
 await page.waitForTimeout(1200);
 const reportDone = ((await page.textContent('#report')) || '').match(/Report received|Saved on your phone/);
 check('daily report submits', !!reportDone, reportDone?.[0]);
+await page.goto(stayUrl, { waitUntil: 'networkidle' });
 
 // Stay-connected form.
 await page.locator('#connect input[autocomplete="name"]').fill('Audit Contact');

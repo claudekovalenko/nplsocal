@@ -129,6 +129,28 @@ const interestRow = (i: Interest) => ({
 });
 
 /**
+ * Insert rows one at a time. A phone on a weak signal can send a row, have the
+ * database save it, and lose the reply; it then resends the same row. Postgres
+ * answers that with a duplicate-key error (23505), which here means "already
+ * saved", not failure. Sent in one batch, that single duplicate failed the
+ * whole batch on every retry and stuck everything queued behind it. (Ignoring
+ * duplicates in the database would need read access the public does not have.)
+ * Returns the rows that still need sending.
+ */
+async function insertEach<T>(table: string, rows: T[], toRow: (r: T) => object): Promise<T[]> {
+  const left: T[] = [];
+  for (const r of rows) {
+    try {
+      const { error } = await supabase().from(table).insert(toRow(r));
+      if (error && error.code !== '23505') left.push(r);
+    } catch {
+      left.push(r);
+    }
+  }
+  return left;
+}
+
+/**
  * Send a daily report. Teams fill these in at the end of a day in the field,
  * often on a weak signal, so a failure queues the report on the device and
  * retries the next time anything is sent.
@@ -139,15 +161,13 @@ export async function submitReport(report: PushReport) {
     queue(PENDING_REPORTS, row);
     return { queued: true };
   }
-  try {
-    await flushPending();
-    const { error } = await supabase().from('npl_push_reports').insert(reportRow(row));
-    if (error) throw error;
-    return { queued: false };
-  } catch {
+  await flushPending();
+  const left = await insertEach('npl_push_reports', [row], reportRow);
+  if (left.length) {
     queue(PENDING_REPORTS, row);
     return { queued: true };
   }
+  return { queued: false };
 }
 
 export async function submitInterest(interest: Interest) {
@@ -156,46 +176,32 @@ export async function submitInterest(interest: Interest) {
     queue(PENDING_INTEREST, row);
     return { queued: true };
   }
-  try {
-    await flushPending();
-    const { error } = await supabase().from('npl_interest').insert(interestRow(row));
-    if (error) throw error;
-    return { queued: false };
-  } catch {
+  await flushPending();
+  const left = await insertEach('npl_interest', [row], interestRow);
+  if (left.length) {
     queue(PENDING_INTEREST, row);
     return { queued: true };
   }
+  return { queued: false };
 }
 
 /**
  * Retry anything queued while offline. Safe to call often; does nothing when empty.
  *
- * The two kinds are flushed independently: if reports send but interest fails
- * (or the other way around), only the batch that actually failed goes back on
- * the queue. Requeuing both on any failure would resend — and duplicate — the
- * batch that already made it to the database.
+ * Each row is sent on its own (see insertEach), so one bad row never holds
+ * back the rest, and only rows that truly failed go back on the queue.
  */
-export async function flushPending() {
-  if (!isShared) return;
-  const reports = drain<PushReport>(PENDING_REPORTS);
-  const interest = drain<Interest>(PENDING_INTEREST);
-  if (reports.length) {
-    try {
-      const { error } = await supabase().from('npl_push_reports').insert(reports.map(reportRow));
-      if (error) throw error;
-    } catch {
-      // Put them back rather than losing them.
-      reports.forEach((r) => queue(PENDING_REPORTS, r));
-    }
-  }
-  if (interest.length) {
-    try {
-      const { error } = await supabase().from('npl_interest').insert(interest.map(interestRow));
-      if (error) throw error;
-    } catch {
-      interest.forEach((i) => queue(PENDING_INTEREST, i));
-    }
-  }
+let flushing: Promise<void> | null = null;
+export function flushPending(): Promise<void> {
+  if (!isShared) return Promise.resolve();
+  // Two calls at once (page load and a submit) must not drain the queue twice.
+  flushing ??= (async () => {
+    const reports = drain<PushReport>(PENDING_REPORTS);
+    const interest = drain<Interest>(PENDING_INTEREST);
+    (await insertEach('npl_push_reports', reports, reportRow)).forEach((r) => queue(PENDING_REPORTS, r));
+    (await insertEach('npl_interest', interest, interestRow)).forEach((i) => queue(PENDING_INTEREST, i));
+  })().finally(() => (flushing = null));
+  return flushing;
 }
 
 /**

@@ -83,7 +83,7 @@ export default function Home() {
       {/* Next up. No top border: the map fades into this section, and a hairline
           there read as a hard cut across the bottom of the map. */}
       <section id="next">
-        <div className="container-x py-20 md:py-28">
+        <div className="container-x pb-20 pt-10 md:pb-28 md:pt-14">
           <div className="flex items-end justify-between gap-6">
             <div>
               <div className="eyebrow">For everyone</div>

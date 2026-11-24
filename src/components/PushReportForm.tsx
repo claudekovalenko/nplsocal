@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { CheckCircle2, CloudOff } from 'lucide-react';
-import { dayLabel } from '@/lib/format';
+import { dayLabel, isoDay } from '@/lib/format';
 import { emptyReport, submitReport, type PushReport } from '@/lib/pushStore';
 import { LIMITS } from '@/lib/limits';
 
@@ -16,8 +16,18 @@ const COUNTS: { key: keyof PushReport; label: string; hint: string }[] = [
  * End-of-day report from a team in the field. Short on purpose: five numbers
  * and two optional boxes, so it can be filled in standing on a sidewalk.
  */
-export default function PushReportForm({ eventId, days }: { eventId: string; days: string[] }) {
-  const today = new Date().toISOString().slice(0, 10);
+export default function PushReportForm({
+  eventId,
+  days,
+  onSent,
+}: {
+  eventId: string;
+  days: string[];
+  /** Called after a report goes out, so live totals can refresh at once. */
+  onSent?: () => void;
+}) {
+  // Pacific, not UTC: reports come in after 4pm, when UTC is already tomorrow.
+  const today = isoDay(new Date().toISOString());
   const [form, setForm] = useState<PushReport>(() =>
     emptyReport(eventId, days.includes(today) ? today : days[0]),
   );
@@ -32,6 +42,7 @@ export default function PushReportForm({ eventId, days }: { eventId: string; day
     setState('sending');
     const { queued } = await submitReport(form);
     setState(queued ? 'queued' : 'sent');
+    if (!queued) onSent?.();
   };
 
   if (state === 'sent' || state === 'queued') {
@@ -45,7 +56,7 @@ export default function PushReportForm({ eventId, days }: { eventId: string; day
         <h3 className="mt-4 text-2xl">{state === 'sent' ? 'Report received.' : 'Saved on your phone.'}</h3>
         <p className="mt-2 text-sm text-muted">
           {state === 'sent'
-            ? 'It is counted in the totals above.'
+            ? 'It is counted in the live totals.'
             : 'No signal right now. It will send by itself the next time you report.'}
         </p>
         <button

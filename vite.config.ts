@@ -102,6 +102,7 @@ export default defineConfig({
         ],
         shortcuts: [
           { name: 'The Push', url: `${base}push`, description: 'L.A. Metro Gospel Push' },
+          { name: 'Push tracker', url: `${base}push/tracker`, description: 'Live numbers and the daily report' },
           { name: 'Events', url: `${base}events`, description: 'Upcoming trainings and gatherings' },
           { name: 'My 100 List', url: `${base}my-100`, description: 'Your personal oikos list' },
         ],

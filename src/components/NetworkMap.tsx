@@ -27,13 +27,14 @@ export default function NetworkMap({ variant = 'full', className = '' }: { varia
 
   const labelFor = (p: Place) => (variant === 'full' ? p.label : p.size >= 2 ? p.label : '');
 
-  // Hero: crop to the LA basin + OC. The top fade is the longest: LA County's
+  // Hero: crop to the LA basin + OC, deep enough to hold the whole of Orange
+  // County down to San Clemente, so the bottom fade never chops its tip. The top fade is the longest: LA County's
   // borders run on north to the Antelope Valley, and a short fade left them as
   // two lines dangling off the top of the map.
   // The county outlines run past every edge of
   // that crop, so fade the whole frame outward with an elliptical mask — a
   // vertical-only fade left hard vertical cuts at the sides.
-  const viewBox = variant === 'hero' ? '120 250 880 690' : `0 0 ${MAP_W} ${MAP_H}`;
+  const viewBox = variant === 'hero' ? '120 250 880 750' : `0 0 ${MAP_W} ${MAP_H}`;
   // Two linear fades intersected, rather than one radial: a radial gradient is
   // still ~80% opaque at the middle of each edge, which left the clipped county
   // fill showing as a straight line (obvious on a light background). Intersecting
@@ -44,9 +45,9 @@ export default function NetworkMap({ variant = 'full', className = '' }: { varia
     variant === 'hero'
       ? ({
           WebkitMaskImage:
-            'linear-gradient(to bottom, transparent 0%, #000 32%, #000 87%, transparent 100%), linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%)',
+            'linear-gradient(to bottom, transparent 0%, #000 32%, #000 93%, transparent 100%), linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%)',
           maskImage:
-            'linear-gradient(to bottom, transparent 0%, #000 32%, #000 87%, transparent 100%), linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%)',
+            'linear-gradient(to bottom, transparent 0%, #000 32%, #000 93%, transparent 100%), linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%)',
           WebkitMaskComposite: 'source-in',
           maskComposite: 'intersect',
         } as const)

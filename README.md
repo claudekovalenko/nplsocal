@@ -141,6 +141,25 @@ An event with a real `registerUrl` (starting with `http`) keeps using that link 
 
 Contact details are private by design: the database policy lets anyone insert a sign-up but only signed-in organizers read the roster. Until the shared database is connected the form also opens the visitor's email app addressed to the organizer, so no sign-up is lost.
 
+### The push tracker
+
+`/push/tracker` is its own page for the days of the push, built to stay open on
+a phone all day (it is also an app shortcut). It shows live totals for the
+whole push and per day, the daily report, and the follow-up form. The Push
+page's "In the field" section shows the same live numbers and links here; old
+links to `/push#report` and `/push#follow-up` land on the tracker.
+
+Live numbers come from the `npl_push_totals` database function (sums only).
+Each open tracker asks every 30 seconds plus a few seconds of jitter, stops
+while the app is in the background, and asks again the moment it comes back or
+regains signal (`src/hooks/useLiveTotals.ts`). The last numbers are kept on the
+phone, so a team with no signal still sees them, marked as not live.
+
+Reports queued without signal are sent one at a time; a duplicate-key answer
+means "already saved" (the reply was lost, not the report), so a lost reply can
+never block the rest of the queue. Report dates default to today in Pacific
+time.
+
 ### The Push hub
 
 `/push` is the central page for the L.A. Metro Gospel Push and carries the whole event:

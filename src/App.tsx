@@ -15,6 +15,7 @@ import Track from '@/pages/Track';
 import Register from '@/pages/Register';
 import Roster from '@/pages/Roster';
 import Push from '@/pages/Push';
+import PushTracker from '@/pages/PushTracker';
 import TrackEdit from '@/pages/TrackEdit';
 import Admin from '@/pages/Admin';
 import NotFound from '@/pages/NotFound';
@@ -65,6 +66,7 @@ export default function App() {
           <Route path="track/new" element={<TrackEdit />} />
           <Route path="track/:id" element={<TrackEdit />} />
           <Route path="push" element={<Push />} />
+          <Route path="push/tracker" element={<PushTracker />} />
           <Route path="register/:eventId" element={<Register />} />
           <Route path="roster" element={<Roster />} />
           <Route path="roster/:eventId" element={<Roster />} />

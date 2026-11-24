@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Copy, Mail, Minus, Plus, Phone, Trash2, UserPlus } from 'lucide-react';
-import { dayLabel } from '@/lib/format';
+import { dayLabel, isoDay } from '@/lib/format';
 import { followUp, type LightKey } from '@/content/push';
 import { emptyLog, emptyPerson, followUpMessage, isBlank, type FieldLog, type FollowUp } from '@/lib/followUpStore';
 import { LIMITS } from '@/lib/limits';
@@ -132,7 +132,8 @@ function PersonCard({
  * before anything else.
  */
 export default function FollowUpForm({ days }: { days: string[] }) {
-  const today = new Date().toISOString().slice(0, 10);
+  // Pacific, not UTC: reports come in after 4pm, when UTC is already tomorrow.
+  const today = isoDay(new Date().toISOString());
   const firstDay = days.includes(today) ? today : days[0];
   const [form, setForm] = useState<FieldLog>(() => emptyLog(firstDay));
   const [opened, setOpened] = useState(false);
