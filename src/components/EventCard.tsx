@@ -64,7 +64,7 @@ export const typeTone: Record<Event['type'], string> = {
 };
 export const toneStyle = (e: Event) => ({ '--tone': typeTone[e.type] }) as React.CSSProperties;
 
-const hubName = (e: Event) => hubById(e.hub)?.shortName ?? 'All SoCal';
+export const hubName = (e: Event) => hubById(e.hub)?.shortName ?? 'All SoCal';
 
 /**
  * Where people physically turn up. Usually the event's location; for something
@@ -102,7 +102,7 @@ export function HostLine({ event, className = '' }: { event: Event; className?: 
 }
 
 /** Month over day, on the event's colour. */
-function DateTile({ event, size = 'lg' }: { event: Event; size?: 'lg' | 'sm' }) {
+export function DateTile({ event, size = 'lg' }: { event: Event; size?: 'lg' | 'sm' }) {
   const { month, day } = monthDay(event.start);
   const big = size === 'lg';
   return (

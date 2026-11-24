@@ -27,7 +27,10 @@ export default function NetworkMap({ variant = 'full', className = '' }: { varia
 
   const labelFor = (p: Place) => (variant === 'full' ? p.label : p.size >= 2 ? p.label : '');
 
-  // Hero: crop to the LA basin + OC. The county outlines run past every edge of
+  // Hero: crop to the LA basin + OC. The top fade is the longest: LA County's
+  // borders run on north to the Antelope Valley, and a short fade left them as
+  // two lines dangling off the top of the map.
+  // The county outlines run past every edge of
   // that crop, so fade the whole frame outward with an elliptical mask — a
   // vertical-only fade left hard vertical cuts at the sides.
   const viewBox = variant === 'hero' ? '120 250 880 690' : `0 0 ${MAP_W} ${MAP_H}`;
@@ -41,14 +44,14 @@ export default function NetworkMap({ variant = 'full', className = '' }: { varia
     variant === 'hero'
       ? ({
           WebkitMaskImage:
-            'linear-gradient(to bottom, transparent 0%, #000 13%, #000 87%, transparent 100%), linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%)',
+            'linear-gradient(to bottom, transparent 0%, #000 32%, #000 87%, transparent 100%), linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%)',
           maskImage:
-            'linear-gradient(to bottom, transparent 0%, #000 13%, #000 87%, transparent 100%), linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%)',
+            'linear-gradient(to bottom, transparent 0%, #000 32%, #000 87%, transparent 100%), linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%)',
           WebkitMaskComposite: 'source-in',
           maskComposite: 'intersect',
         } as const)
       : undefined;
-  const laCaption = variant === 'hero' ? [560, 300] : [counties.la.centroid[0] - 40, counties.la.centroid[1] - 210];
+  const laCaption = [counties.la.centroid[0] - 40, counties.la.centroid[1] - 210];
 
   return (
     <svg
@@ -72,12 +75,16 @@ export default function NetworkMap({ variant = 'full', className = '' }: { varia
         </filter>
       </defs>
 
-      {/* Neighboring counties, very faint, for geographic context */}
-      <g fill="none" stroke="var(--fg)" strokeOpacity="0.10" strokeWidth="1">
-        {context.map((d, i) => (
-          <path key={i} d={d} />
-        ))}
-      </g>
+      {/* Neighboring counties, very faint, for geographic context. Not in the
+          hero: cropped to the basin, they only showed as stray fragments of
+          outline at the edges. */}
+      {variant === 'full' && (
+        <g fill="none" stroke="var(--fg)" strokeOpacity="0.10" strokeWidth="1">
+          {context.map((d, i) => (
+            <path key={i} d={d} />
+          ))}
+        </g>
+      )}
 
       {/* Hub glows */}
       <circle cx={la.x} cy={la.y} r="210" fill="url(#hub-glow)" opacity={0.7 * dim('la')} />
@@ -192,11 +199,12 @@ export default function NetworkMap({ variant = 'full', className = '' }: { varia
         );
       })}
 
-      {/* County captions */}
-      <g fontSize="12" fill="var(--fg)" fillOpacity="0.45" letterSpacing="0.28em" fontWeight="500" pointerEvents="none">
+      {/* County captions. The hero crop cuts LA County off at the top, which
+          left its caption hanging on the edge; the hub names say enough there. */}
+      {variant === 'full' && <g fontSize="12" fill="var(--fg)" fillOpacity="0.45" letterSpacing="0.28em" fontWeight="500" pointerEvents="none">
         <text x={laCaption[0]} y={laCaption[1]}>LOS ANGELES COUNTY</text>
         <text x={counties.oc.centroid[0] + 40} y={counties.oc.centroid[1] + 110}>ORANGE COUNTY</text>
-      </g>
+      </g>}
     </svg>
   );
 }
