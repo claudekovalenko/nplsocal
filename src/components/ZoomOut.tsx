@@ -24,6 +24,8 @@ interface Place {
   size: number;
 }
 const places = DATA.places as Place[];
+/** Labels that go left of their dot, where the right side is taken. */
+const LABEL_LEFT = new Set(['santa-monica', 'fullerton', 'westminster', 'huntington', 'south-la', 'torrance']);
 const LA: LonLat = [-118.2437, 34.0522];
 const OC: LonLat = [-117.8678, 33.7455];
 
@@ -31,6 +33,7 @@ const OC: LonLat = [-117.8678, 33.7455];
 const US_CITIES: LonLat[] = [
   [-122.42, 37.77], [-122.33, 47.61], [-104.99, 39.74], [-112.07, 33.45], [-96.8, 32.78], [-95.37, 29.76],
   [-87.63, 41.88], [-93.27, 44.98], [-83.05, 42.33], [-84.39, 33.75], [-80.19, 25.76], [-77.04, 38.91], [-74.01, 40.71],
+  [-157.86, 21.31], // Honolulu: Hawaii is part of the country too
 ];
 const WORLD_CITIES: LonLat[] = [
   [-99.13, 19.43], [-46.63, -23.55], [-0.13, 51.51], [3.38, 6.52], [38.75, 9.03], [31.24, 30.04], [28.98, 41.01],
@@ -43,7 +46,8 @@ const WORLD_CITIES: LonLat[] = [
 // the screen empty and pushed Orange County off the bottom.
 const C_LA: LonLat = [-118.02, 33.87];
 const C_US: LonLat = [-98.5, 38.5];
-const C_GLOBE: LonLat = [-60, 16];
+const C_GLOBE: LonLat = [-100, 20]; // the Americas, with Hawaii in view
+const C_TURNED: LonLat = [35, 18]; // after turning east: Europe, Africa, Asia
 
 const clamp = (x: number, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
@@ -53,7 +57,9 @@ const ramp = (p: number, a: number, b: number) => ease(clamp((p - a) / (b - a)))
 
 /** Projection radius that fits each level on this canvas. */
 function radiusFor(zoom: 'la' | 'us' | 'globe', w: number, h: number) {
-  if (zoom === 'la') return Math.min((w * 0.86) / 0.0227, (h * 0.8) / 0.0166); // basin + OC, ~1.3° × 0.95°
+  // Basin + OC, ~1.3° × 0.95°, with room around for the coast on a wide
+  // screen; a phone is narrow, so it fills the width.
+  if (zoom === 'la') return w < h ? (w * 0.98) / 0.0227 : Math.min((w * 0.62) / 0.0227, (h * 0.6) / 0.0166);
   if (zoom === 'us') return Math.min((w * 0.92) / 1.02, (h * 0.8) / 0.46); // the lower 48
   return Math.min(w, h) * 0.4; // the whole earth
 }
@@ -83,7 +89,11 @@ function frameAt(p: number, w: number, h: number) {
   const toUS = smooth(clamp((z - zUS * 0.3) / (zUS * 0.75)));
   const toGlobe = smooth(clamp((z - zUS) / (1 - zUS)));
   const mid = geoInterpolate(C_LA, C_US)(toUS) as LonLat;
-  const center = geoInterpolate(mid, C_GLOBE)(toGlobe) as LonLat;
+  const atGlobe = geoInterpolate(mid, C_GLOBE)(toGlobe) as LonLat;
+  // Once the whole earth is in view it turns east with the last of the scroll,
+  // carrying the light from Hawaii and the Americas across to the nations.
+  const turn = smooth(clamp((p - 0.8) / 0.2));
+  const center = geoInterpolate(atGlobe, C_TURNED)(turn) as LonLat;
   return { radius, center };
 }
 
@@ -155,7 +165,7 @@ function draw(
   // The globe rises a little as it forms, to leave room for the caption under it.
   // On a tall, narrow phone the zoomed-in map is sized by the width and would
   // sit mid-screen with empty space above it, so while zoomed in it rides high.
-  const tall = Math.max(0, h - w * 1.15) * 0.42 * (1 - ramp(p, 0.08, 0.35));
+  const tall = Math.max(0, h - w * 1.15) * 0.22 * (1 - ramp(p, 0.08, 0.35));
   const lift = ramp(p, 0.6, 0.9) * h * 0.08 + tall;
   const projection = geoOrthographic()
     .scale(radius)
@@ -203,6 +213,40 @@ function draw(
   ctx.strokeStyle = rgba(fg, 0.12 * usOn * (1 - far));
   ctx.stroke();
 
+  // Around LA and OC while zoomed in: the neighbouring counties, Catalina and
+  // the ocean, so the opening reads as a place on a coast, not shapes in a void.
+  const around = (1 - out) * ease(clamp(intro / 0.6));
+  if (around > 0.01) {
+    for (const c of DATA.neighbours) {
+      shape(c as GeoPermissibleObjects);
+      ctx.fillStyle = rgba(fg, 0.04 * around);
+      ctx.fill();
+      ctx.strokeStyle = rgba(fg, 0.14 * around);
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    }
+    for (const c of DATA.islands) {
+      shape(c as GeoPermissibleObjects);
+      ctx.fillStyle = rgba(accent, 0.1 * around);
+      ctx.fill();
+      ctx.strokeStyle = rgba(fg, 0.3 * around);
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    }
+    const sea = projection([-118.72, 33.6]);
+    if (sea) {
+      ctx.save();
+      ctx.font = 'italic 500 13px ui-serif, Georgia, serif';
+      if ('letterSpacing' in ctx) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = '3px';
+      ctx.fillStyle = rgba(accent, 0.55 * around);
+      ctx.textAlign = 'center';
+      // Nudged in from the edge on a narrow screen, so it is never clipped.
+      const half = ctx.measureText('Pacific Ocean').width / 2 + 8;
+      ctx.fillText('Pacific Ocean', Math.min(Math.max(sea[0], half), w - half), sea[1]);
+      ctx.restore();
+    }
+  }
+
   // Los Angeles and Orange County: always there, smaller and smaller. On first
   // load the borders trace themselves in (OC just behind LA), then fill.
   const trace = [ease(clamp(intro / 0.75)), ease(clamp((intro - 0.15) / 0.75))];
@@ -237,8 +281,11 @@ function draw(
       ctx.lineTo(b[0], b[1]);
       ctx.stroke();
     }
-    ctx.font = '500 12px ui-sans-serif, system-ui, sans-serif';
-    for (const pl of places) {
+    // Dots first, then labels biggest place first; a smaller label that would
+    // overlap one already placed is left out rather than drawn on top of it.
+    const taken: [number, number, number, number][] = [];
+    const order = [...places].sort((a, b) => b.size - a.size);
+    for (const pl of order) {
       const xy = projection([pl.lon, pl.lat]);
       if (!xy) continue;
       const r = pl.size === 3 ? 6 : pl.size === 2 ? 3.5 : 2.5;
@@ -246,12 +293,42 @@ function draw(
       ctx.beginPath();
       ctx.arc(xy[0], xy[1], r, 0, Math.PI * 2);
       ctx.fill();
-      if (pl.size >= 2) {
-        ctx.fillStyle = rgba(fg, (pl.size === 3 ? 1 : 0.7) * near);
-        ctx.font = pl.size === 3 ? '600 14px ui-sans-serif, system-ui, sans-serif' : '500 12px ui-sans-serif, system-ui, sans-serif';
-        ctx.fillText(pl.label, xy[0] + r + 6, xy[1] + 4);
+      // Dots count as taken too, so a label never covers another place.
+      taken.push([xy[0] - r - 1, xy[1] - r - 1, xy[0] + r + 1, xy[1] + r + 1]);
+    }
+    for (const pl of order) {
+      const xy = projection([pl.lon, pl.lat]);
+      if (!xy) continue;
+      const r = pl.size === 3 ? 6 : pl.size === 2 ? 3.5 : 2.5;
+      ctx.font =
+        pl.size === 3
+          ? '600 14px ui-sans-serif, system-ui, sans-serif'
+          : pl.size === 2
+            ? '500 12px ui-sans-serif, system-ui, sans-serif'
+            : '500 10.5px ui-sans-serif, system-ui, sans-serif';
+      const tw = ctx.measureText(pl.label).width;
+      const th = pl.size === 3 ? 14 : pl.size === 2 ? 12 : 11;
+      // Try the right side, then the left.
+      const tries: [number, CanvasTextAlign][] = LABEL_LEFT.has(pl.id)
+        ? [[xy[0] - (r + 6), 'right'], [xy[0] + r + 6, 'left']]
+        : [[xy[0] + r + 6, 'left'], [xy[0] - (r + 6), 'right']];
+      for (const [x, align] of tries) {
+        const x0 = align === 'left' ? x : x - tw;
+        const box: [number, number, number, number] = [x0 - 2, xy[1] - th + 2, x0 + tw + 2, xy[1] + 5];
+        const self = (t: [number, number, number, number]) =>
+          Math.abs((t[0] + t[2]) / 2 - xy[0]) < 0.5 && Math.abs((t[1] + t[3]) / 2 - xy[1]) < 0.5;
+        const clash = taken.some((t) => !self(t) && box[0] < t[2] && box[2] > t[0] && box[1] < t[3] && box[3] > t[1]);
+        // Never cut off by the edge of the screen: try the other side instead.
+        const offscreen = box[0] < 4 || box[2] > w - 4;
+        if ((clash || offscreen) && pl.size < 3) continue;
+        ctx.fillStyle = rgba(fg, (pl.size === 3 ? 1 : pl.size === 2 ? 0.75 : 0.5) * near);
+        ctx.textAlign = align;
+        ctx.fillText(pl.label, x, xy[1] + 4);
+        taken.push(box);
+        break;
       }
     }
+    ctx.textAlign = 'left';
   }
 
   // Light going out: across the country, then to the nations.

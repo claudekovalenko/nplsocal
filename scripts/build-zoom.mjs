@@ -59,7 +59,19 @@ const places = [
   ['san-clemente', 'San Clemente', -117.612, 33.427, 'oc', 1],
 ].map(([id, label, lon, lat, hub, size]) => ({ id, label, lon, lat, hub, size }));
 
-const out = { land, nation, states, la: county('06037'), oc: county('06059'), places };
+// Context for the opening view, so LA and OC sit on a coast among their
+// neighbours instead of floating in black: the surrounding counties, and the
+// islands off LA (Catalina, San Clemente).
+const neighbours = ['06111', '06029', '06071', '06065', '06073', '06083'].map(county);
+const islands = (() => {
+  const f = all.find((x) => x.id === '06037');
+  if (f.geometry.type !== 'MultiPolygon') return [];
+  const polys = f.geometry.coordinates.map((p) => ({ p, a: geoArea({ type: 'Polygon', coordinates: p }) }));
+  polys.sort((x, y) => y.a - x.a);
+  return polys.slice(1, 3).map((x) => round({ type: 'Polygon', coordinates: x.p }, 4));
+})();
+
+const out = { land, nation, states, la: county('06037'), oc: county('06059'), neighbours, islands, places };
 const json = JSON.stringify(out);
 writeFileSync(resolve(root, 'src/components/zoom-data.json'), json);
 console.log('wrote zoom-data.json', (json.length / 1024).toFixed(0), 'KB');
