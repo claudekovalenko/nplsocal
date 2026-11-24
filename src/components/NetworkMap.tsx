@@ -88,6 +88,8 @@ export default function NetworkMap({ variant = 'full', className = '' }: { varia
         <Link key={h} to={`/regions/${h}`} aria-label={h === 'la' ? 'Los Angeles hub' : 'Orange County hub'}>
           <path
             d={counties[h].path}
+            pathLength={1}
+            className="map-draw"
             fill="url(#land)"
             stroke="var(--fg)"
             strokeOpacity={hover === h ? 0.9 : 0.45}
@@ -114,10 +116,41 @@ export default function NetworkMap({ variant = 'full', className = '' }: { varia
         strokeLinecap="round"
       />
 
+      {/* A light running between the two hubs */}
+      <line
+        x1={la.x}
+        y1={la.y}
+        x2={oc.x}
+        y2={oc.y}
+        pathLength={1}
+        className="map-spark map-spark-slow"
+        stroke="var(--accent)"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+
       {/* Links */}
       <g stroke="var(--fg)" strokeWidth="0.8" strokeLinecap="round">
         {links.map((l) => (
           <line key={l.id} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} strokeOpacity={0.22 * dim(l.hub)} style={{ transition: 'stroke-opacity .3s' }} />
+        ))}
+      </g>
+
+      {/* Sparks: light going out from each hub to every place it reaches. The
+          delays are staggered so they never all fire at once. */}
+      <g stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" pointerEvents="none">
+        {links.map((l, i) => (
+          <line
+            key={l.id}
+            x1={l.x1}
+            y1={l.y1}
+            x2={l.x2}
+            y2={l.y2}
+            pathLength={1}
+            className="map-spark"
+            opacity={dim(l.hub)}
+            style={{ animationDelay: `${1.2 + ((i * 0.73) % 4.4)}s` }}
+          />
         ))}
       </g>
 
@@ -134,7 +167,14 @@ export default function NetworkMap({ variant = 'full', className = '' }: { varia
                 <circle cx={p.x} cy={p.y} r="12" fill="var(--accent)" opacity="0.35" filter="url(#soft)" />
               </>
             )}
-            <circle cx={p.x} cy={p.y} r={r} fill={p.size === 3 ? 'var(--accent)' : 'var(--fg)'} />
+            <circle
+              cx={p.x}
+              cy={p.y}
+              r={r}
+              fill={p.size === 3 ? 'var(--accent)' : 'var(--fg)'}
+              className={p.size === 3 ? undefined : 'map-twinkle'}
+              style={p.size === 3 ? undefined : { animationDelay: `${(p.x * 7 + p.y * 3) % 5}s` }}
+            />
             {label && (
               <text
                 x={p.x + r + 6}
