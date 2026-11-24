@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { site, featuredEvents } from '@/content';
-import NetworkMap from '@/components/NetworkMap';
+import { lazy, Suspense } from 'react';
+
+const ZoomOut = lazy(() => import('@/components/ZoomOut'));
 import { DateTile, RegisterLink, hubName, toneStyle, typeLabel } from '@/components/EventCard';
 import { AddToCalendar } from '@/components/EventActions';
 import { formatDate, sameDay } from '@/lib/format';
@@ -55,11 +57,9 @@ export default function Home() {
       {/* No overflow-hidden: it sliced a hard horizontal line across the
           bottom of the map, where the fade had not finished. */}
       <section className="relative flex flex-col">
-        {/* The map hangs below this section on a negative margin, so a glow
-            bounded by the section ended in a hard line partway down the map.
-            Extend it past the section and centre it on the map, so it fades out
-            on its own before it reaches any edge. */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 -bottom-16 aurora opacity-70 md:-bottom-24" />
+        {/* The glow runs on past the section, under the top of the zoom-out, so
+            it fades out on its own instead of ending in a hard line. */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 -bottom-40 aurora opacity-70" />
         <div className="container-x relative z-10 flex flex-col items-center pt-[calc(var(--header-h)_+_1rem)] text-center md:pt-[calc(var(--header-h)_+_1.5rem)]">
           <div className="eyebrow fade-up">
             {site.hashtag} · <span className="hidden sm:inline">Los Angeles · Orange County</span>
@@ -75,10 +75,13 @@ export default function Home() {
             </Link>
           </div>
         </div>
-        <div className="relative z-0 mx-auto -mb-6 mt-6 w-full max-w-md px-4 sm:max-w-xl md:-mb-10 md:mt-8 md:max-w-2xl">
-          <NetworkMap variant="hero" className="h-auto w-full" />
-        </div>
       </section>
+
+      {/* From here to the ends of the earth: the zoom-out runs as you scroll.
+          Loaded after the page so its map data never delays the first paint. */}
+      <Suspense fallback={<div className="h-[calc(100svh_-_var(--header-h))]" />}>
+        <ZoomOut />
+      </Suspense>
 
       {/* Next up. No top border: the map fades into this section, and a hairline
           there read as a hard cut across the bottom of the map. */}

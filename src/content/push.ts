@@ -162,7 +162,7 @@ export const followUp = {
     'Central & West OC',
     'Other',
   ],
-  wants: ['Bible study', 'Learn to share the gospel', 'Prayer', 'Find a church', 'Something else'],
+  wants: ['Bible study', 'Learn to share the gospel', 'Prayer', 'Join a group', 'Something else'],
   lights: [
     { key: 'red', label: 'Red lights', hint: 'Not interested right now' },
     { key: 'yellow', label: 'Yellow lights', hint: 'Open, curious, not ready yet' },
