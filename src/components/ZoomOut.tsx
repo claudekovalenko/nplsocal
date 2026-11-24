@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { geoOrthographic, geoPath, geoGraticule10, geoInterpolate, type GeoPermissibleObjects } from 'd3-geo';
+import { geoOrthographic, geoPath, geoGraticule10, geoInterpolate, geoDistance, type GeoPermissibleObjects } from 'd3-geo';
 import DATA from './zoom-data.json';
 
 /**
@@ -158,6 +158,8 @@ function draw(
     .clipAngle(90)
     .precision(1);
   const path = geoPath(projection, ctx);
+  /** On the side of the globe facing us (a little inside the rim, so nothing sits on the edge). */
+  const facing = (pt: LonLat) => geoDistance(pt, center) < Math.PI / 2 - 0.02;
   const shape = (g: GeoPermissibleObjects) => {
     ctx.beginPath();
     path(g);
@@ -260,7 +262,10 @@ function draw(
       ctx.strokeStyle = rgba(accent, 0.55 * alpha);
       ctx.lineWidth = 1.4;
       ctx.stroke();
-      if (k >= 1) {
+      // A point's projected position exists even when it is behind the globe,
+      // so check which side it is on: otherwise Beijing and Tokyo showed up as
+      // dots in the middle of the Atlantic.
+      if (k >= 1 && facing(t)) {
         const xy = projection(t);
         if (xy) {
           ctx.fillStyle = rgba(accent, 0.9 * alpha);
@@ -275,7 +280,7 @@ function draw(
   arcs(WORLD_CITIES, 0.62, 0.92, 1);
 
   // Los Angeles itself: a beacon that pulses at every scale.
-  const home = projection(LA);
+  const home = facing(LA) ? projection(LA) : null;
   if (home) {
     const glow = ctx.createRadialGradient(home[0], home[1], 0, home[0], home[1], 70);
     glow.addColorStop(0, rgba(accent, 0.45));
