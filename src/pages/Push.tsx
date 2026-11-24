@@ -99,8 +99,8 @@ export default function Push() {
   // The forms moved to the tracker; old links to #report and #follow-up follow them.
   useEffect(() => {
     const h = location.hash.slice(1);
-    if (h === 'report') navigate('/push/tracker', { replace: true });
-    if (h === 'follow-up') navigate('/push/tracker?tool=follow-up', { replace: true });
+    if (h === 'report') navigate('/tracker', { replace: true });
+    if (h === 'follow-up') navigate('/tracker?tool=follow-up', { replace: true });
   }, [navigate]);
 
   return (
@@ -262,7 +262,7 @@ export default function Push() {
         tint
         aside={
           <div className="mt-6 flex flex-wrap gap-2">
-            <Link to="/push/tracker" className="btn-primary">
+            <Link to="/tracker" className="btn-primary">
               Open the tracker <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -290,11 +290,11 @@ export default function Push() {
           {all.reports ? `${all.reports} team report${all.reports === 1 ? '' : 's'} so far.` : 'Numbers appear as teams turn in their reports.'}
         </p>
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Link to="/push/tracker" className="card card-hover p-5">
+          <Link to="/tracker" className="card card-hover p-5">
             <span className="block font-medium">Turn in the daily report</span>
             <span className="mt-1 block text-sm text-muted">Two minutes, five numbers and one story. Works with no signal.</span>
           </Link>
-          <Link to="/push/tracker?tool=follow-up" className="card card-hover p-5">
+          <Link to="/tracker?tool=follow-up" className="card card-hover p-5">
             <span className="block font-medium">Log a follow-up</span>
             <span className="mt-1 block text-sm text-muted">Someone who wants to keep going: phone number first.</span>
           </Link>

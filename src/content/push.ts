@@ -26,6 +26,13 @@ export interface ScheduleDay {
 
 export const PUSH_EVENT_ID = 'la-metro-gospel-push-2027';
 
+/**
+ * Reports filed on any day outside the push. The tracker is open all year:
+ * a report dated during the push counts toward the push, any other day toward
+ * the network's ongoing work.
+ */
+export const FIELD_EVENT_ID = 'npl-field';
+
 export const push = {
   eventId: PUSH_EVENT_ID,
   name: 'L.A. Metro Gospel Push',

@@ -18,10 +18,13 @@ const COUNTS: { key: keyof PushReport; label: string; hint: string }[] = [
  */
 export default function PushReportForm({
   eventId,
+  eventFor,
   days,
   onSent,
 }: {
   eventId: string;
+  /** Picks the event from the chosen day (the tracker files push days under the push). */
+  eventFor?: (day: string) => string;
   days: string[];
   /** Called after a report goes out, so live totals can refresh at once. */
   onSent?: () => void;
@@ -40,7 +43,7 @@ export default function PushReportForm({
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setState('sending');
-    const { queued } = await submitReport(form);
+    const { queued } = await submitReport({ ...form, eventId: eventFor ? eventFor(form.day) : form.eventId });
     setState(queued ? 'queued' : 'sent');
     if (!queued) onSent?.();
   };

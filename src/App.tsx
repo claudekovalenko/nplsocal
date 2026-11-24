@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ScrollToTop from '@/components/ScrollToTop';
 import Home from '@/pages/Home';
@@ -15,7 +15,7 @@ import Track from '@/pages/Track';
 import Register from '@/pages/Register';
 import Roster from '@/pages/Roster';
 import Push from '@/pages/Push';
-import PushTracker from '@/pages/PushTracker';
+import Tracker from '@/pages/Tracker';
 import TrackEdit from '@/pages/TrackEdit';
 import Admin from '@/pages/Admin';
 import NotFound from '@/pages/NotFound';
@@ -25,6 +25,12 @@ import NotFound from '@/pages/NotFound';
 // first page is up, so opening Pray never shows a blank screen while it loads.
 const loadPray = () => import('@/pages/Pray');
 const Pray = lazy(loadPray);
+
+/** /push/tracker → /tracker, keeping ?tool= so old follow-up links still open that form. */
+function TrackerRedirect() {
+  const { search } = useLocation();
+  return <Navigate to={`/tracker${search}`} replace />;
+}
 
 export default function App() {
   useEffect(() => {
@@ -66,7 +72,9 @@ export default function App() {
           <Route path="track/new" element={<TrackEdit />} />
           <Route path="track/:id" element={<TrackEdit />} />
           <Route path="push" element={<Push />} />
-          <Route path="push/tracker" element={<PushTracker />} />
+          <Route path="tracker" element={<Tracker />} />
+          {/* The tracker started life under the push; keep those links working. */}
+          <Route path="push/tracker" element={<TrackerRedirect />} />
           <Route path="register/:eventId" element={<Register />} />
           <Route path="roster" element={<Roster />} />
           <Route path="roster/:eventId" element={<Roster />} />

@@ -234,12 +234,21 @@ const emptyDays = await page.locator('#schedule [data-day]').evaluateAll((els) =
 check('every day has its schedule', emptyDays === 0, `${emptyDays} empty`);
 
 // The push page leads to the tracker, where the field forms live.
-check('push page links to the tracker', (await page.locator('a[href$="/push/tracker"]').count()) > 0);
+check('push page links to the tracker', (await page.locator('a[href$="/tracker"]').count()) > 0);
 const stayUrl = page.url();
+// The tracker is its own section, open all year; old push links still reach it.
 await page.goto(BASE + '/push/tracker', { waitUntil: 'networkidle' });
+check('old tracker link redirects', new URL(page.url()).pathname.endsWith('/tracker'), page.url());
 check('tracker loads', /Tracker/.test((await page.textContent('h1')) || ''));
-const dayRows = await page.locator('table tbody tr').count(); // desktop view
-check('tracker lists every day', dayRows === 4, `${dayRows} days`);
+await page.goto(BASE + '/tracker?view=week', { waitUntil: 'networkidle' });
+const weekRows = await page.locator('table tbody tr').count(); // desktop view
+check('tracker shows the whole week', weekRows === 7, `${weekRows} days`);
+await page.goto(BASE + '/tracker?view=push', { waitUntil: 'networkidle' });
+const pushRows = await page.locator('table tbody tr').count();
+check('tracker shows every push day', pushRows === 4, `${pushRows} days`);
+await page.goto(BASE + '/tracker', { waitUntil: 'networkidle' });
+const reportDays = await page.locator('#report select').first().locator('option').count();
+check('reports can be filed for any day this week', reportDays >= 4, `${reportDays} days offered`);
 
 // Daily report: with no database configured it queues on the device, which is
 // exactly what a team with no signal would hit.

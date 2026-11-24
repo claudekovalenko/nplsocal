@@ -141,13 +141,20 @@ An event with a real `registerUrl` (starting with `http`) keeps using that link 
 
 Contact details are private by design: the database policy lets anyone insert a sign-up but only signed-in organizers read the roster. Until the shared database is connected the form also opens the visitor's email app addressed to the organizer, so no sign-up is lost.
 
-### The push tracker
+### The tracker
 
-`/push/tracker` is its own page for the days of the push, built to stay open on
-a phone all day (it is also an app shortcut). It shows live totals for the
-whole push and per day, the daily report, and the follow-up form. The Push
-page's "In the field" section shows the same live numbers and links here; old
-links to `/push#report` and `/push#follow-up` land on the tracker.
+`/tracker` is a section of its own (in the menu, the phone tab bar and the app
+shortcuts), open every day of the year, built to stay open on a phone. Teams
+report their day and log follow-ups; everyone sees the numbers move live, as
+**This week**, **The push** or **All time** (by week). It opens on The push
+while the push runs and on This week otherwise.
+
+A report can be for today or any day of the past week (the four push days
+while the push runs). Reports dated during the push are filed under the push
+event; any other day under `npl-field` (`FIELD_EVENT_ID` in `push.ts`), so the
+push keeps its own totals. The Push page's "In the field" section shows the
+push's live numbers and links here; `/push/tracker`, `/push#report` and
+`/push#follow-up` all land on the tracker.
 
 Live numbers come from the `npl_push_totals` database function (sums only).
 Each open tracker asks every 30 seconds plus a few seconds of jitter, stops

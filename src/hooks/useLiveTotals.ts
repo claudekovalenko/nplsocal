@@ -18,19 +18,26 @@ export type LiveStatus = 'connecting' | 'live' | 'offline' | 'local';
  */
 const EVERY_MS = 30_000;
 const JITTER_MS = 8_000;
-const cacheKey = (eventId: string) => `npl:totals:${eventId}`;
+const cacheKey = (ids: string[]) => `npl:totals:${ids.join('+')}`;
 
-function readCache(eventId: string): { rows: DayTotals[]; at: number } | null {
+function readCache(ids: string[]): { rows: DayTotals[]; at: number } | null {
   try {
-    return JSON.parse(localStorage.getItem(cacheKey(eventId)) ?? 'null');
+    return JSON.parse(localStorage.getItem(cacheKey(ids)) ?? 'null');
   } catch {
     return null;
   }
 }
 
-export function useLiveTotals(eventId: string) {
-  const cached = useRef(readCache(eventId));
-  const [rows, setRows] = useState<DayTotals[]>(cached.current?.rows ?? []);
+/**
+ * Totals per day for one event, or several added together (the tracker counts
+ * the push and the rest of the year's field reports side by side). Rows carry
+ * the event they came from.
+ */
+export function useLiveTotals(eventIds: string | string[]) {
+  const ids = typeof eventIds === 'string' ? [eventIds] : eventIds;
+  const key = ids.join('+');
+  const cached = useRef(readCache(ids));
+  const [rows, setRows] = useState<(DayTotals & { eventId?: string })[]>(cached.current?.rows ?? []);
   const [updatedAt, setUpdatedAt] = useState<number | null>(cached.current?.at ?? null);
   const [status, setStatus] = useState<LiveStatus>(isShared ? 'connecting' : 'local');
   const timer = useRef<number>();
@@ -42,18 +49,20 @@ export function useLiveTotals(eventId: string) {
       return;
     }
     try {
-      const next = await fetchTotals(eventId);
+      const next = (
+        await Promise.all(key.split('+').map(async (id) => (await fetchTotals(id)).map((r) => ({ ...r, eventId: id }))))
+      ).flat();
       const at = Date.now();
       setRows(next);
       setUpdatedAt(at);
       setStatus('live');
       try {
-        localStorage.setItem(cacheKey(eventId), JSON.stringify({ rows: next, at }));
+        localStorage.setItem(cacheKey(key.split('+')), JSON.stringify({ rows: next, at }));
       } catch {}
     } catch {
       setStatus('offline');
     }
-  }, [eventId]);
+  }, [key]);
 
   useEffect(() => {
     if (!isShared) return;

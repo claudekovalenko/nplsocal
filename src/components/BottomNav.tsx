@@ -1,12 +1,14 @@
 import { NavLink } from 'react-router-dom';
-import { Home, CalendarDays, Flame, Info, Map as MapIcon } from 'lucide-react';
+import { Home, CalendarDays, Flame, Activity, Map as MapIcon } from 'lucide-react';
 
 const items = [
   { to: '/', label: 'Home', icon: Home, end: true },
   { to: '/push', label: 'Push', icon: Flame },
   { to: '/events', label: 'Events', icon: CalendarDays },
   { to: '/pray', label: 'Pray', icon: MapIcon },
-  { to: '/about', label: 'About', icon: Info },
+  // The tracker takes About's slot: it is what people need in the field, all
+  // week. About is still in the menu.
+  { to: '/tracker', label: 'Tracker', icon: Activity },
 ];
 
 export default function BottomNav() {

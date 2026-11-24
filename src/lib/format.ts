@@ -85,3 +85,20 @@ export function dayLabel(day: string) {
     new Date(Date.UTC(y, m - 1, d, 20)),
   );
 }
+
+/** A YYYY-MM-DD day moved by n days (calendar days, no time zone involved). */
+export function addDays(day: string, n: number): string {
+  const [y, m, d] = day.split('-').map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d + n, 12));
+  return t.toISOString().slice(0, 10);
+}
+
+/** The Monday that starts the week a YYYY-MM-DD day falls in. */
+export function weekStart(day: string): string {
+  const [y, m, d] = day.split('-').map(Number);
+  const dow = new Date(Date.UTC(y, m - 1, d, 12)).getUTCDay(); // 0 = Sunday
+  return addDays(day, -((dow + 6) % 7));
+}
+
+/** Today, YYYY-MM-DD, in Pacific time. */
+export const todayPacific = () => isoDay(new Date().toISOString());
