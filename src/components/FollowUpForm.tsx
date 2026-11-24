@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react';
-import { CheckCircle2, CloudOff, Minus, Plus, Phone, Trash2, UserPlus } from 'lucide-react';
+import { Copy, Mail, Minus, Plus, Phone, Trash2, UserPlus } from 'lucide-react';
 import { dayLabel } from '@/lib/format';
 import { followUp, type LightKey } from '@/content/push';
-import { emptyLog, emptyPerson, isBlank, submitFieldLog, type FieldLog, type FollowUp } from '@/lib/followUpStore';
+import { emptyLog, emptyPerson, followUpMessage, isBlank, type FieldLog, type FollowUp } from '@/lib/followUpStore';
 import { LIMITS } from '@/lib/limits';
 
 const DOT: Record<LightKey, string> = {
@@ -131,13 +131,13 @@ function PersonCard({
  * region, tap in the lights if you counted them, and get phone numbers down
  * before anything else.
  */
-export default function FollowUpForm({ eventId, days }: { eventId: string; days: string[] }) {
+export default function FollowUpForm({ days }: { days: string[] }) {
   const today = new Date().toISOString().slice(0, 10);
   const firstDay = days.includes(today) ? today : days[0];
-  const [form, setForm] = useState<FieldLog>(() => emptyLog(eventId, firstDay));
-  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'queued'>('idle');
+  const [form, setForm] = useState<FieldLog>(() => emptyLog(firstDay));
+  const [opened, setOpened] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
-  const [sent, setSent] = useState(0);
 
   const set = <K extends keyof FieldLog>(k: K, v: FieldLog[K]) => setForm((f) => ({ ...f, [k]: v }));
   const setPerson = (i: number, p: FollowUp) =>
@@ -148,46 +148,62 @@ export default function FollowUpForm({ eventId, days }: { eventId: string; days:
 
   const people = form.people.filter((p) => !isBlank(p));
   const lights = form.red + form.yellow + form.green;
+  const message = followUpMessage(form);
 
-  const submit = async (e: FormEvent) => {
+  const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!people.length && !lights) {
       setError('Add a phone number or count at least one light before sending.');
       return;
     }
     setError('');
-    setState('sending');
-    const { queued } = await submitFieldLog(form);
-    setSent(people.length);
-    setState(queued ? 'queued' : 'sent');
+    // Hand off to the phone's email app with everything written out.
+    window.location.href = message.mailto;
+    setOpened(true);
   };
 
-  if (state === 'sent' || state === 'queued') {
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(`${message.subject}\n\n${message.body}`);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  if (opened) {
     return (
       <div className="card p-8 text-center">
-        {state === 'sent' ? (
-          <CheckCircle2 className="mx-auto h-8 w-8 text-accent" strokeWidth={1.5} />
-        ) : (
-          <CloudOff className="mx-auto h-8 w-8 text-muted" strokeWidth={1.5} />
-        )}
-        <h3 className="mt-4 text-2xl">{state === 'sent' ? 'Follow-ups received.' : 'Saved on your phone.'}</h3>
-        <p className="mt-2 text-sm text-muted">
-          {state === 'sent'
-            ? sent
-              ? `${sent} ${sent === 1 ? 'person' : 'people'} handed to the team for ${form.region}.`
-              : `Your lights are counted for ${form.region}.`
-            : 'No signal right now. It will send by itself the next time you open this page.'}
+        <Mail className="mx-auto h-8 w-8 text-accent" strokeWidth={1.5} />
+        <h3 className="mt-4 text-2xl">Now hit send in your email.</h3>
+        <p className="mx-auto mt-2 max-w-md text-sm text-muted">
+          Your email app opened with the follow-up written out to {followUp.sendTo}. It is not sent until you press send
+          there.
         </p>
-        <button
-          className="btn-secondary mt-6"
-          onClick={() => {
-            // Keep where you are and who you are; clear the rest.
-            setForm({ ...emptyLog(eventId, form.day), region: form.region, area: form.area, foundBy: form.foundBy });
-            setState('idle');
-          }}
-        >
-          Log more
-        </button>
+        <pre className="mx-auto mt-6 max-w-md whitespace-pre-wrap rounded-xl border border-line bg-bg p-4 text-left text-xs leading-relaxed text-muted">
+          {message.body}
+        </pre>
+        <p className="mt-4 text-xs text-faint">Email app didn't open? Copy this and send it to {followUp.sendTo}.</p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <a href={message.mailto} className="btn-secondary">
+            <Mail className="h-4 w-4" /> Open email again
+          </a>
+          <button type="button" onClick={copy} className="btn-secondary">
+            <Copy className="h-4 w-4" /> {copied ? 'Copied' : 'Copy message'}
+          </button>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => {
+              // Keep where you are and who you are; clear the rest.
+              setForm({ ...emptyLog(form.day), region: form.region, area: form.area, foundBy: form.foundBy });
+              setOpened(false);
+              setCopied(false);
+            }}
+          >
+            Log more
+          </button>
+        </div>
       </div>
     );
   }
@@ -284,13 +300,13 @@ export default function FollowUpForm({ eventId, days }: { eventId: string; days:
 
       {error && <p className="text-sm text-red-400">{error}</p>}
 
-      <button type="submit" className="btn-primary min-w-40" disabled={state === 'sending'}>
-        {state === 'sending'
-          ? 'Sending…'
-          : people.length
-            ? `Send ${people.length} follow-up${people.length > 1 ? 's' : ''}`
-            : 'Send'}
-      </button>
+      <div>
+        <button type="submit" className="btn-primary min-w-40">
+          <Mail className="h-4 w-4" />
+          {people.length ? `Send ${people.length} follow-up${people.length > 1 ? 's' : ''}` : 'Send'}
+        </button>
+        <p className="mt-2 text-xs text-faint">Opens your email, written out to {followUp.sendTo}.</p>
+      </div>
     </form>
   );
 }

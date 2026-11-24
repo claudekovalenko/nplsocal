@@ -10,7 +10,6 @@ import { AddToCalendar } from '@/components/EventActions';
 import PushReportForm from '@/components/PushReportForm';
 import InterestForm from '@/components/InterestForm';
 import FollowUpForm from '@/components/FollowUpForm';
-import { fetchRegionTotals, flushFollowUps, pendingFollowUps, type RegionTotals } from '@/lib/followUpStore';
 
 
 function Totals({ rows }: { rows: DayTotals[] }) {
@@ -36,47 +35,6 @@ function Totals({ rows }: { rows: DayTotals[] }) {
       </dl>
       <p className="mt-2 text-xs text-faint">From {all.reports} team reports. Numbers only — no names leave the organizers.</p>
     </section>
-  );
-}
-
-/** Where people were found: lights and follow-ups per region. Counts only. */
-function ByRegion({ rows }: { rows: RegionTotals[] }) {
-  if (!rows.length) return null;
-  const max = Math.max(...rows.map((r) => r.red + r.yellow + r.green), 1);
-  return (
-    <div className="mt-12">
-      <div className="eyebrow">Where people were found</div>
-      <ul className="mt-4 divide-y divide-line border-y border-line">
-        {rows.map((r) => {
-          const total = r.red + r.yellow + r.green;
-          return (
-            <li key={r.region} className="grid gap-2 py-4 sm:grid-cols-[14rem_1fr_auto] sm:items-center sm:gap-6">
-              <span className="text-sm">{r.region}</span>
-              <span
-                className="flex h-2 overflow-hidden rounded-full bg-line"
-                style={{ width: `${Math.max(8, (total / max) * 100)}%` }}
-                title={`${r.red} red · ${r.yellow} yellow · ${r.green} green`}
-              >
-                {total > 0 && (
-                  <>
-                    <span className="bg-red-500" style={{ width: `${(r.red / total) * 100}%` }} />
-                    <span className="bg-yellow-400" style={{ width: `${(r.yellow / total) * 100}%` }} />
-                    <span className="bg-green-500" style={{ width: `${(r.green / total) * 100}%` }} />
-                  </>
-                )}
-              </span>
-              <span className="flex gap-4 text-xs text-muted tabular-nums">
-                <span><span className="text-red-400">●</span> {r.red}</span>
-                <span><span className="text-yellow-400">●</span> {r.yellow}</span>
-                <span><span className="text-green-400">●</span> {r.green}</span>
-                <span className="text-fg">{r.followUps} follow-up{r.followUps === 1 ? '' : 's'}</span>
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-      <p className="mt-2 text-xs text-faint">Counts only. Names and numbers stay with the follow-up team.</p>
-    </div>
   );
 }
 
@@ -158,15 +116,11 @@ export default function Push() {
   const days = useMemo(() => (event ? eventDays(event.start, event.end) : push.schedule.map((d) => d.date)), [event]);
   const [totals, setTotals] = useState<DayTotals[]>([]);
   const [queued, setQueued] = useState(0);
-  const [regions, setRegions] = useState<RegionTotals[]>([]);
   const [tab, setTab] = useState<FieldTab>('follow-up');
 
   useEffect(() => {
     // Anything captured while offline goes out as soon as the page opens.
-    Promise.allSettled([flushPending(), flushFollowUps()]).finally(() => {
-      setQueued(pendingCount() + pendingFollowUps());
-      fetchRegionTotals(PUSH_EVENT_ID).then(setRegions).catch(() => setRegions([]));
-    });
+    flushPending().finally(() => setQueued(pendingCount()));
     fetchTotals(PUSH_EVENT_ID).then(setTotals).catch(() => setTotals([]));
   }, []);
 
@@ -259,7 +213,7 @@ export default function Push() {
       {queued > 0 && (
         <div className="container-x pt-6">
           <p className="card px-4 py-3 text-sm text-muted">
-            {queued} {queued > 1 ? 'entries' : 'entry'} saved on this device, waiting for signal. They will send by themselves.
+            {queued} report{queued > 1 ? 's' : ''} saved on this device, waiting for signal. They will send by themselves.
           </p>
         </div>
       )}
@@ -341,7 +295,7 @@ export default function Push() {
         id="field"
         eyebrow="In the field"
         title="For teams out on the push."
-        lead="Both work with no signal: what you send waits on your phone and goes out by itself later."
+        lead="Log the people who want to keep going, and turn in your team's numbers at the end of the day."
         tint
       >
         <div role="tablist" aria-label="Team tools" className="inline-flex rounded-full border border-line-strong p-1">
@@ -368,17 +322,19 @@ export default function Push() {
           <div id="follow-up" role="tabpanel" className="mt-6">
             <p className="max-w-xl text-sm text-muted">
               Met someone who wants a Bible study, or to learn to share the gospel? Get their phone number, say what they
-              asked for and where you met them, and a laborer near them will reach out. Counting red, yellow and green
-              lights is optional.
+              asked for and where you met them. Tapping Send opens your email with it all written out — just hit send and
+              it goes to the follow-up team.
             </p>
             <div className="mt-6">
-              <FollowUpForm eventId={PUSH_EVENT_ID} days={days} />
+              <FollowUpForm days={days} />
             </div>
-            <ByRegion rows={regions} />
           </div>
         ) : (
           <div id="report" role="tabpanel" className="mt-6">
-            <p className="max-w-xl text-sm text-muted">End of the day, two minutes: every team turns in their numbers and one story.</p>
+            <p className="max-w-xl text-sm text-muted">
+              End of the day, two minutes: every team turns in their numbers and one story. It works with no signal — the
+              report waits on your phone and sends itself later.
+            </p>
             <div className="mt-6">
               <PushReportForm eventId={PUSH_EVENT_ID} days={days} />
             </div>

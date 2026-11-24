@@ -134,13 +134,15 @@ export const blockKindLabel: Record<ScheduleBlock['kind'], string> = {
 /**
  * Follow-ups from the field. A team logs the people who want to keep going —
  * a phone number first — plus, if they kept count, how many red, yellow and
- * green lights they found. Every entry carries the region it came from, so
- * organizers can hand each follow-up to laborers who live nearby.
+ * green lights they found, and the region they were in. There is no database:
+ * Send opens an email to `sendTo` with everything written out.
  *
  * This first version is for the L.A. push. Edit the regions to match how the
  * teams are actually sent out; "Other" stays last as a catch-all.
  */
 export const followUp = {
+  /** Where follow-ups go. Send opens the phone's email app addressed here. */
+  sendTo: 'la@nplsocal.net',
   regions: [
     'Central & Downtown LA',
     'Westside & South Bay',
