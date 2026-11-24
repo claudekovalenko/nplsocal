@@ -39,14 +39,20 @@ export interface PlanDay {
 }
 
 // Same Mercator projection as scripts/build-map.mjs, fitted from two of its projected places.
-export const PROJ = (() => {
-  const m = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
-  const a = { lon: -118.2437, lat: 34.0522, x: 466.5, y: 534.2 }; // Downtown LA
-  const b = { lon: -117.8678, lat: 33.7455, x: 657.3, y: 721.8 }; // Santa Ana
-  const kx = (b.x - a.x) / (b.lon - a.lon);
-  const ky = (b.y - a.y) / (m(b.lat) - m(a.lat));
-  return ([lat, lon]: [number, number]): [number, number] => [a.x + kx * (lon - a.lon), a.y + ky * (m(lat) - m(a.lat))];
-})();
+const P_A = { lon: -118.2437, lat: 34.0522, x: 466.5, y: 534.2 }; // Downtown LA
+const P_B = { lon: -117.8678, lat: 33.7455, x: 657.3, y: 721.8 }; // Santa Ana
+const merc = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
+const P_KX = (P_B.x - P_A.x) / (P_B.lon - P_A.lon);
+const P_KY = (P_B.y - P_A.y) / (merc(P_B.lat) - merc(P_A.lat));
+export const PROJ = ([lat, lon]: [number, number]): [number, number] => [
+  P_A.x + P_KX * (lon - P_A.lon),
+  P_A.y + P_KY * (merc(lat) - merc(P_A.lat)),
+];
+/** The other way: a point on the map back to [lat, lon] (for tapping the map to place a pin). */
+export const UNPROJ = ([x, y]: [number, number]): [number, number] => {
+  const m = merc(P_A.lat) + (y - P_A.y) / P_KY;
+  return [((Math.atan(Math.exp(m)) - Math.PI / 4) * 360) / Math.PI, P_A.lon + (x - P_A.x) / P_KX];
+};
 
 export const BIBLE = (code: string, lang: Lang) => lang === "es"
   ? `https://www.bible.com/bible/128/${code}.NVI`

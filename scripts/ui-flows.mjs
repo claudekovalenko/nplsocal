@@ -261,6 +261,22 @@ await page.getByRole('button', { name: /Send report/ }).click();
 await page.waitForTimeout(1200);
 const reportDone = ((await page.textContent('#report')) || '').match(/Report received|Saved on your phone/);
 check('daily report submits', !!reportDone, reportDone?.[0]);
+
+// Add a place: tap the map, the region fills in, and it saves (on the device
+// here, since the audit build has no database).
+await page.goto(BASE + '/tracker?tool=spot', { waitUntil: 'networkidle' });
+const pickMap = page.locator('#spot svg[role="img"]');
+await pickMap.waitFor();
+await pickMap.scrollIntoViewIfNeeded();
+const pb = await pickMap.boundingBox();
+await page.mouse.click(pb.x + pb.width * 0.52, pb.y + pb.height * 0.6);
+await page.waitForTimeout(400);
+const pinned = ((await page.textContent('#spot')) || '').match(/Pinned in ([^.]+)\./);
+check('tapping the map pins a place in a region', !!pinned, pinned?.[1]);
+await page.getByRole('button', { name: /Add to the map/ }).click();
+await page.waitForTimeout(800);
+const spotDone = ((await page.textContent('#spot')) || '').match(/On the map|Saved on your phone/);
+check('a place can be added', !!spotDone, spotDone?.[0]);
 await page.goto(stayUrl, { waitUntil: 'networkidle' });
 
 // Stay-connected form.

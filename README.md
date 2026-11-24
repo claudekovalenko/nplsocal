@@ -154,14 +154,25 @@ An event with a real `registerUrl` (starting with `http`) keeps using that link 
 
 Contact details are private by design: the database policy lets anyone insert a sign-up but only signed-in organizers read the roster. Until the shared database is connected the form also opens the visitor's email app addressed to the organizer, so no sign-up is lost.
 
-### The outreach map
+### The live map (Push page)
 
-The Push page's **Where we go** section maps the regions teams are sent to
-(`outreach.areas` in `push.ts`, tied to the Pray map's ZIP-code regions), with
-the check-in at Neighbors and Nations pinned. Tap a region on the map or in the
-list to zoom to it. Specific outreach spots go in `outreach.spots` (name,
-region, latitude, longitude, optional days and note); each shows as a pin in its
-region and under it in the list. It is empty until the hosts settle the spots.
+The Push page's **Live** section puts the push's live numbers and a map of
+where the teams are in one place: each outreach region coloured on the ZIP-code
+map (`outreach.areas` in `push.ts`, tied to the Pray map's regions), the
+check-in at Neighbors and Nations, and a pin for every place teams have been.
+
+Teams add places from the tracker (**Add a place**): "Use my location" on the
+spot, or tap the map; the region fills itself in. The map on every phone picks
+new places up within about half a minute (same polling as the totals), and
+places added in the last two hours pulse. A place is public by design: a
+point rounded to about a block, a region, an optional place name and the day,
+never a name or phone number. Added with no signal, it waits on the phone and
+sends itself later, like a daily report.
+
+Places live in `npl_push_spots`: run `supabase/2026-11-24_push_spots.sql` once
+in the Supabase SQL editor (it is also in `schema.sql`). Until the table exists
+the map shows the regions only and added places wait on the phone. Fixed spots
+the hosts choose in advance can still go in `outreach.spots` in `push.ts`.
 
 ### The tracker
 

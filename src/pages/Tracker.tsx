@@ -9,6 +9,8 @@ import { useLiveTotals, useAgo, type LiveStatus } from '@/hooks/useLiveTotals';
 import { useOnline } from '@/hooks/useOnline';
 import PushReportForm from '@/components/PushReportForm';
 import FollowUpForm from '@/components/FollowUpForm';
+import SpotForm from '@/components/SpotForm';
+import { flushSpots, pendingSpots } from '@/lib/spotsStore';
 
 const STATS = [
   ['conversations', 'Conversations', 'Talks'],
@@ -20,7 +22,7 @@ const STATS = [
 
 type Stat = (typeof STATS)[number][0];
 type View = 'week' | 'push' | 'all';
-type Tool = 'report' | 'follow-up';
+type Tool = 'report' | 'follow-up' | 'spot';
 interface Row extends DayTotals {
   label: string;
   highlight?: boolean;
@@ -130,9 +132,9 @@ export default function Tracker() {
   const ago = useAgo(updatedAt);
   const online = useOnline();
   const [params, setParams] = useSearchParams();
-  const tool: Tool = params.get('tool') === 'follow-up' ? 'follow-up' : 'report';
+  const tool: Tool = params.get('tool') === 'follow-up' ? 'follow-up' : params.get('tool') === 'spot' ? 'spot' : 'report';
   const view: View = (['week', 'push', 'all'] as const).find((v) => v === params.get('view')) ?? (duringPush ? 'push' : 'week');
-  const [queued, setQueued] = useState(pendingCount());
+  const [queued, setQueued] = useState(pendingCount() + pendingSpots());
 
   const setParam = (k: string, v: string | null) => {
     const next = new URLSearchParams(params);
@@ -143,7 +145,8 @@ export default function Tracker() {
 
   // Anything saved without signal goes out as soon as there is some.
   useEffect(() => {
-    const send = () => flushPending().finally(() => setQueued(pendingCount()));
+    const send = () =>
+      Promise.allSettled([flushPending(), flushSpots()]).finally(() => setQueued(pendingCount() + pendingSpots()));
     send();
     window.addEventListener('online', send);
     return () => window.removeEventListener('online', send);
@@ -278,16 +281,17 @@ export default function Tracker() {
       {queued > 0 && (
         <p className="mt-6 flex items-center gap-2 rounded-xl border border-line bg-elev px-4 py-3 text-sm text-muted">
           <CloudOff className="h-4 w-4 shrink-0" />
-          {queued} {queued > 1 ? 'reports' : 'report'} saved on this phone, waiting for signal. They send by themselves.
+          {queued} {queued > 1 ? 'entries' : 'entry'} saved on this phone, waiting to send. They go by themselves.
         </p>
       )}
 
       {/* The two forms, one at a time */}
       <div className="mt-12">
-        <div role="tablist" aria-label="Team tools" className="inline-flex rounded-full border border-line-strong p-1">
+        <div role="tablist" aria-label="Team tools" className="inline-flex max-w-full overflow-x-auto rounded-full border border-line-strong p-1 [scrollbar-width:none]">
           {(
             [
               ['report', 'Report your day'],
+              ['spot', 'Add a place'],
               ['follow-up', 'Log a follow-up'],
             ] as const
           ).map(([id, label]) => (
@@ -297,7 +301,7 @@ export default function Tracker() {
               role="tab"
               aria-selected={tool === id}
               onClick={() => setParam('tool', id === 'report' ? null : id)}
-              className={`h-9 rounded-full px-4 text-sm font-medium transition ${tool === id ? 'bg-fg text-bg' : 'text-muted hover:text-fg'}`}
+              className={`h-9 shrink-0 whitespace-nowrap rounded-full px-3.5 text-sm font-medium transition sm:px-4 ${tool === id ? 'bg-fg text-bg' : 'text-muted hover:text-fg'}`}
             >
               {label}
             </button>
@@ -320,6 +324,15 @@ export default function Tracker() {
                   setQueued(pendingCount());
                 }}
               />
+            </div>
+          </div>
+        ) : tool === 'spot' ? (
+          <div id="spot" role="tabpanel" className="mt-6">
+            <p className="max-w-xl text-sm text-muted">
+              Where did your team go? Pin it and it appears on the push map for everyone, live. No names, just the place.
+            </p>
+            <div className="mt-6">
+              <SpotForm days={reportDays} eventFor={eventFor} />
             </div>
           </div>
         ) : (

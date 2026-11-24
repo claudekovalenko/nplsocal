@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MessageCircle, MapPin, CalendarDays, Ticket, Plus, ArrowRight } from 'lucide-react';
+import { MessageCircle, MapPin, CalendarDays, Ticket, Plus } from 'lucide-react';
 import { push, outreach, PUSH_EVENT_ID, type ScheduleDay } from '@/content/push';
 
 const PushMap = lazy(() => import('@/components/PushMap'));
@@ -8,6 +8,7 @@ import { events } from '@/content';
 import { dayLabel, formatRange } from '@/lib/format';
 import { flushPending, pendingCount, sumTotals } from '@/lib/pushStore';
 import { useLiveTotals, useAgo } from '@/hooks/useLiveTotals';
+import { useLiveSpots } from '@/hooks/useLiveSpots';
 import { VenueAddress, venueName } from '@/components/EventCard';
 import { AddToCalendar } from '@/components/EventActions';
 import InterestForm from '@/components/InterestForm';
@@ -79,10 +80,9 @@ function Block({
 
 const NAV = [
   ['schedule', 'Schedule'],
-  ['map', 'Map'],
+  ['map', 'Live map'],
   ['about', 'About'],
   ['faq', 'FAQ'],
-  ['field', 'In the field'],
   ['connect', 'Stay connected'],
 ] as const;
 
@@ -90,6 +90,7 @@ export default function Push() {
   const event = events.find((e) => e.id === PUSH_EVENT_ID);
   const [queued, setQueued] = useState(0);
   const { rows, status, updatedAt } = useLiveTotals(PUSH_EVENT_ID);
+  const { spots } = useLiveSpots([PUSH_EVENT_ID]);
   const ago = useAgo(updatedAt);
   const all = sumTotals(rows);
   const navigate = useNavigate();
@@ -195,17 +196,52 @@ export default function Push() {
         </ol>
       </Block>
 
-      {/* Where we go: the outreach regions and the check-in, on a map. */}
+      {/* Live: where the teams are and what is happening, in one place. Teams
+          add places from the tracker and they appear here for everyone. */}
       <Block
         id="map"
-        eyebrow="Where we go"
-        title="Across the L.A. metro."
-        lead={`Every day starts at ${outreach.base.name} in Buena Park. From there, teams go out across these regions.`}
+        eyebrow="Live"
+        title="Where the teams are."
+        lead={`Every day starts at ${outreach.base.name} in Buena Park. Teams go out across these regions and pin the places they go; the numbers come from their daily reports.`}
         wide
       >
+        {/* Old links to the "In the field" section land here. */}
+        <span id="field" className="block scroll-mt-[calc(var(--header-h)_+_3.5rem)]" />
+        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-5">
+          {(
+            [
+              ['Conversations', all.conversations],
+              ['Heard the gospel', all.gospelShared],
+              ['Responded', all.responded],
+              ['Baptized', all.baptized],
+              ['Groups started', all.groupsStarted],
+            ] as const
+          ).map(([label, n], i) => (
+            <div key={label} className={`bg-bg px-2 py-4 text-center ${i === 4 ? 'col-span-2 sm:col-span-1' : ''}`}>
+              <dd className="text-2xl font-light tabular-nums tracking-tight md:text-3xl">{n.toLocaleString('en-US')}</dd>
+              <dt className="eyebrow mt-1 !tracking-[0.12em]">{label}</dt>
+            </div>
+          ))}
+        </dl>
+        <p className="mb-6 mt-2 text-xs text-faint">
+          {status === 'live' ? `Live · updated ${ago}` : status === 'offline' ? `No signal · last updated ${ago || 'never'}` : ''}
+          {status === 'live' || status === 'offline' ? ' · ' : ''}
+          {all.reports ? `${all.reports} team report${all.reports === 1 ? '' : 's'} so far.` : 'Numbers appear as teams turn in their reports.'}
+        </p>
         <Suspense fallback={<div className="h-[min(70vh,560px)] rounded-xl border border-line" />}>
-          <PushMap />
+          <PushMap live={spots} />
         </Suspense>
+        <div className="mt-6 flex flex-wrap gap-2">
+          <Link to="/tracker?tool=spot" className="btn-primary">
+            Add your place to the map
+          </Link>
+          <Link to="/tracker" className="btn-secondary">
+            Report your day
+          </Link>
+          <Link to="/tracker?tool=follow-up" className="btn-secondary">
+            Log a follow-up
+          </Link>
+        </div>
       </Block>
 
       {/* What is a PUSH? */}
@@ -266,54 +302,6 @@ export default function Push() {
               <p className="mt-3 text-sm leading-relaxed text-muted">{f.a}</p>
             </details>
           ))}
-        </div>
-      </Block>
-
-      {/* In the field: the live numbers, and the way into the tracker. */}
-      <Block
-        id="field"
-        eyebrow="In the field"
-        title="The push tracker."
-        lead="Live numbers from every team, the end-of-day report, and follow-ups, on one page built for phones."
-        tint
-        aside={
-          <div className="mt-6 flex flex-wrap gap-2">
-            <Link to="/tracker" className="btn-primary">
-              Open the tracker <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        }
-      >
-        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-5">
-          {(
-            [
-              ['Conversations', all.conversations],
-              ['Heard the gospel', all.gospelShared],
-              ['Responded', all.responded],
-              ['Baptized', all.baptized],
-              ['Groups started', all.groupsStarted],
-            ] as const
-          ).map(([label, n], i) => (
-            <div key={label} className={`bg-bg px-2 py-5 text-center ${i === 4 ? 'col-span-2 sm:col-span-1' : ''}`}>
-              <dd className="text-3xl font-light tabular-nums tracking-tight">{n.toLocaleString('en-US')}</dd>
-              <dt className="eyebrow mt-1 !tracking-[0.12em]">{label}</dt>
-            </div>
-          ))}
-        </dl>
-        <p className="mt-2 text-xs text-faint">
-          {status === 'live' ? `Live · updated ${ago}` : status === 'offline' ? `No signal · last updated ${ago || 'never'}` : ''}
-          {status === 'live' || status === 'offline' ? ' · ' : ''}
-          {all.reports ? `${all.reports} team report${all.reports === 1 ? '' : 's'} so far.` : 'Numbers appear as teams turn in their reports.'}
-        </p>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Link to="/tracker" className="card card-hover p-5">
-            <span className="block font-medium">Turn in the daily report</span>
-            <span className="mt-1 block text-sm text-muted">Two minutes, five numbers and one story. Works with no signal.</span>
-          </Link>
-          <Link to="/tracker?tool=follow-up" className="card card-hover p-5">
-            <span className="block font-medium">Log a follow-up</span>
-            <span className="mt-1 block text-sm text-muted">Someone who wants to keep going: phone number first.</span>
-          </Link>
         </div>
       </Block>
 
