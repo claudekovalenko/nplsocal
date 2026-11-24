@@ -114,6 +114,7 @@ export const push = {
   stay: [
     'There are hotels and Airbnbs within a 3-mile radius of Neighbors and Nations (6575 Crescent Ave, Buena Park, CA 90620).',
     'Or stay with a friend!',
+    "We won't be providing rides, so plan your own transportation or carpool.",
   ],
 
   faq: [
@@ -124,6 +125,10 @@ export const push = {
       a: 'Yes, but the training is progressive, so you will miss key parts of what you need if you are unsure how to engage with the gospel and follow up.',
     },
     { q: 'Can I bring whoever?', a: 'Yes, but please register so we can plan for food.' },
+    {
+      q: 'Will rides be provided?',
+      a: "No, we won't be providing rides. Please plan your own way to Neighbors and Nations and around the city each day, or carpool with your team.",
+    },
   ],
 } as const;
 
