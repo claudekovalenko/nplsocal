@@ -116,7 +116,6 @@ export const push = {
   stay: [
     'There are hotels and Airbnbs within a 3-mile radius of Neighbors and Nations (6575 Crescent Ave, Buena Park, CA 90620).',
     'Or stay with a friend!',
-    "We won't be providing rides, so plan your own transportation or carpool.",
   ],
 
   faq: [

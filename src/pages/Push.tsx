@@ -94,6 +94,12 @@ export default function Push() {
   const ago = useAgo(updatedAt);
   const all = sumTotals(rows);
   const navigate = useNavigate();
+  // Hosting and where to stay are questions people ask too: one list, not three boxes.
+  const faqs = [
+    { q: 'Who is hosting the push?', a: `${push.hosts.lead} ${push.hosts.names.join(', ')}. ${push.hosts.more}` },
+    { q: 'Where should we stay?', a: push.stay.join(' ') },
+    ...push.faq,
+  ];
 
   useEffect(() => {
     // Anything captured while offline goes out as soon as the page opens.
@@ -157,11 +163,6 @@ export default function Push() {
               </a>
             )}
           </div>
-          {!push.signalUrl && (
-            <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-faint">
-              <MessageCircle className="h-3.5 w-3.5" /> Signal group chat: link coming soon.
-            </p>
-          )}
         </div>
       </section>
 
@@ -248,37 +249,15 @@ export default function Push() {
       <Block id="about" eyebrow="About" title="What is a PUSH?" lead={push.what.lead}>
         <ol className="grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2">
           {push.what.focus.map((f) => (
-            <li key={f.letter} className="bg-bg p-5 md:p-6">
+            <li key={f.letter} className="bg-bg p-5">
               <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-light leading-none text-accent">{f.letter}</span>
+                <span className="text-3xl font-light leading-none text-accent">{f.letter}</span>
                 <h3 className="text-lg">{f.word}</h3>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-muted">{f.text}</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{f.text}</p>
             </li>
           ))}
         </ol>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div className="card p-5">
-            <div className="eyebrow">Who is hosting</div>
-            <p className="mt-3 text-sm text-muted">{push.hosts.lead}</p>
-            <ul className="mt-3 flex flex-wrap gap-1.5">
-              {push.hosts.names.map((n) => (
-                <li key={n} className="rounded-full border border-line px-2.5 py-0.5 text-sm">
-                  {n}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-2 text-sm text-muted">{push.hosts.more}</p>
-          </div>
-          <div className="card p-5">
-            <div className="eyebrow">Where to stay</div>
-            {push.stay.map((x) => (
-              <p key={x} className="mt-3 text-sm text-muted">
-                {x}
-              </p>
-            ))}
-          </div>
-        </div>
       </Block>
 
       {/* FAQ */}
@@ -293,7 +272,7 @@ export default function Push() {
         }
       >
         <div className="divide-y divide-line border-y border-line">
-          {push.faq.map((f) => (
+          {faqs.map((f) => (
             <details key={f.q} className="group py-4">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-6">
                 {f.q}

@@ -271,55 +271,61 @@ export default function PushMap({
 
   if (pick) return map;
 
+  const here = picked ? pins.filter((p) => p.region === picked) : [];
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+    <div>
       {map}
-      <div>
-        <ol className="divide-y divide-line overflow-hidden rounded-xl border border-line">
-          {pushRegions.map((r, i) => {
-            const here = pins.filter((p) => p.region === r);
-            return (
-              <li key={r}>
-                <button
-                  type="button"
-                  aria-pressed={picked === r}
-                  onClick={() => setPicked(picked === r ? null : r)}
-                  className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition hover:bg-surface ${picked === r ? 'bg-surface' : ''}`}
-                >
-                  <span
-                    className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-semibold text-bg"
-                    style={{ background: HUES[i % HUES.length] }}
-                  >
-                    {i + 1}
-                  </span>
-                  <span className="flex-1">{r}</span>
-                  {here.length > 0 && <span className="text-xs tabular-nums text-muted">{here.length} place{here.length === 1 ? '' : 's'}</span>}
-                </button>
-                {picked === r && here.length > 0 && (
-                  <ul className="space-y-2 px-4 pb-3 pl-13 text-sm">
-                    {here.slice(0, 12).map((p) => (
-                      <li key={p.key} className="flex gap-2">
-                        <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-faint" />
-                        <span>
-                          {p.name}
-                          {p.days.length ? <span className="text-muted"> · {p.days.map(dayLabel).join(', ')}</span> : null}
-                          {p.note && <span className="block text-xs text-muted">{p.note}</span>}
-                        </span>
-                      </li>
-                    ))}
-                    {here.length > 12 && <li className="text-xs text-muted">and {here.length - 12} more</li>}
-                  </ul>
-                )}
-              </li>
-            );
-          })}
-        </ol>
-        <p className="mt-3 text-xs text-faint">
-          {pins.length
-            ? 'Teams add the places they go from the tracker. Tap a region to see them.'
-            : 'As teams add the places they go, they appear here for everyone.'}
-        </p>
+      {/* Regions as a row of chips under the map: tap one to zoom to it. */}
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {pushRegions.map((r, i) => {
+          const n = pins.filter((p) => p.region === r).length;
+          return (
+            <button
+              key={r}
+              type="button"
+              aria-pressed={picked === r}
+              onClick={() => setPicked(picked === r ? null : r)}
+              className={`inline-flex h-8 items-center gap-1.5 rounded-full border pl-1 pr-3 text-xs transition ${
+                picked === r ? 'border-fg bg-fg text-bg' : 'border-line text-muted hover:border-line-strong hover:text-fg'
+              }`}
+            >
+              <span
+                className="grid h-6 w-6 place-items-center rounded-full text-[10px] font-semibold text-bg"
+                style={{ background: HUES[i % HUES.length] }}
+              >
+                {i + 1}
+              </span>
+              {r.replace(/ \(.*\)$/, '')}
+              {n > 0 && <span className="tabular-nums opacity-70">· {n}</span>}
+            </button>
+          );
+        })}
       </div>
+      {picked && (
+        <div className="mt-3 rounded-xl border border-line p-4 text-sm">
+          {here.length ? (
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {here.slice(0, 12).map((p) => (
+                <li key={p.key} className="flex gap-2">
+                  <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-faint" />
+                  <span>
+                    {p.name}
+                    {p.days.length ? <span className="text-muted"> · {p.days.map(dayLabel).join(', ')}</span> : null}
+                    {p.note && <span className="block text-xs text-muted">{p.note}</span>}
+                  </span>
+                </li>
+              ))}
+              {here.length > 12 && <li className="text-xs text-muted">and {here.length - 12} more</li>}
+            </ul>
+          ) : (
+            <p className="text-muted">No places pinned in {picked} yet.</p>
+          )}
+        </div>
+      )}
+      <p className="mt-3 text-xs text-faint">
+        {pins.length ? 'Teams add the places they go from the tracker. Tap a region to see them.' : 'As teams add the places they go, they appear here for everyone.'}
+      </p>
     </div>
   );
 }
