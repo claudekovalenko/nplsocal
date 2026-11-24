@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { geoOrthographic, geoPath, geoGraticule10, geoInterpolate, type GeoPermissibleObjects } from 'd3-geo';
 import DATA from './zoom-data.json';
 
@@ -38,44 +38,69 @@ const WORLD_CITIES: LonLat[] = [
   [116.4, 39.9], [139.69, 35.69],
 ];
 
-/** Keyframes over scroll progress: where the globe is centred and how far out. */
-type Frame = { at: number; center: LonLat; zoom: 'la' | 'us' | 'globe' };
-const FRAMES: Frame[] = [
-  { at: 0.0, center: [-118.05, 33.95], zoom: 'la' },
-  { at: 0.12, center: [-118.05, 33.95], zoom: 'la' },
-  { at: 0.45, center: [-98.5, 38.5], zoom: 'us' },
-  { at: 0.58, center: [-98.5, 38.5], zoom: 'us' },
-  { at: 0.88, center: [-60, 16], zoom: 'globe' },
-  { at: 1.0, center: [-60, 16], zoom: 'globe' },
-];
+const C_LA: LonLat = [-118.05, 33.95];
+const C_US: LonLat = [-98.5, 38.5];
+const C_GLOBE: LonLat = [-60, 16];
 
 const clamp = (x: number, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+const smooth = (t: number) => t * t * (3 - 2 * t);
 /** 0 before a, 1 after b, eased in between. */
 const ramp = (p: number, a: number, b: number) => ease(clamp((p - a) / (b - a)));
 
 /** Projection radius that fits each level on this canvas. */
-function radiusFor(zoom: Frame['zoom'], w: number, h: number) {
+function radiusFor(zoom: 'la' | 'us' | 'globe', w: number, h: number) {
   if (zoom === 'la') return Math.min((w * 0.74) / 0.0255, (h * 0.7) / 0.0235); // LA + OC, ~1.45° × 1.35°
   if (zoom === 'us') return Math.min((w * 0.92) / 1.02, (h * 0.8) / 0.46); // the lower 48
   return Math.min(w, h) * 0.4; // the whole earth
 }
 
+/**
+ * The camera, as one continuous move. Zoom runs in log space (every doubling
+ * takes the same scroll), slows as it passes the United States without ever
+ * stopping, and the centre drifts with the zoom rather than on its own clock,
+ * so LA never leaves the screen and nothing swings at the last moment.
+ */
 function frameAt(p: number, w: number, h: number) {
-  let i = 0;
-  while (i < FRAMES.length - 2 && p > FRAMES[i + 1].at) i++;
-  const a = FRAMES[i];
-  const b = FRAMES[i + 1];
-  const t = ease(clamp((p - a.at) / (b.at - a.at || 1)));
-  const ra = radiusFor(a.zoom, w, h);
-  const rb = radiusFor(b.zoom, w, h);
-  // Zoom in log space, so every doubling takes the same scroll distance.
-  const radius = Math.exp(Math.log(ra) + (Math.log(rb) - Math.log(ra)) * t);
-  // Move the centre late in each step, once the view is wide enough that LA
-  // stays on screen; moving it early swung the view to empty desert.
-  const center = geoInterpolate(a.center, b.center)(t ** 2.6) as LonLat;
+  const rLA = Math.log(radiusFor('la', w, h));
+  const rUS = Math.log(radiusFor('us', w, h));
+  const rGlobe = Math.log(radiusFor('globe', w, h));
+  const zUS = (rLA - rUS) / (rLA - rGlobe); // how far along the zoom the US sits
+
+  // Scroll → zoom: a short rest on LA, then a smooth curve (cubic Hermite,
+  // monotone) through the US at about the middle of the scroll. Its speed is
+  // continuous everywhere: it eases out of LA, slows as it passes the US
+  // without stopping or lurching, and eases into the globe.
+  const q = clamp((p - 0.06) / 0.86);
+  const z = zoomCurve(q, zUS);
+  const radius = Math.exp(rLA + (rGlobe - rLA) * z);
+
+  // Centre follows the zoom: LA → middle of the country → the Atlantic side of
+  // the globe, each move spread over the stretch where it reads naturally.
+  const toUS = smooth(clamp((z - zUS * 0.3) / (zUS * 0.75)));
+  const toGlobe = smooth(clamp((z - zUS) / (1 - zUS)));
+  const mid = geoInterpolate(C_LA, C_US)(toUS) as LonLat;
+  const center = geoInterpolate(mid, C_GLOBE)(toGlobe) as LonLat;
   return { radius, center };
 }
+
+/** Monotone cubic Hermite through (0,0), (Q_US, zUS), (1,1). */
+const Q_US = 0.48;
+function zoomCurve(q: number, zUS: number) {
+  const d1 = zUS / Q_US; // average speed of each leg
+  const d2 = (1 - zUS) / (1 - Q_US);
+  const m0 = 0.35 * d1; // gentle start out of LA
+  const m1 = 0.6 * Math.min(d1, d2); // shared speed at the US: slower, never zero
+  const m2 = 0.45 * d2; // gentle arrival at the globe
+  const seg = (t: number, y0: number, y1: number, ma: number, mb: number, span: number) => {
+    const t2 = t * t;
+    const t3 = t2 * t;
+    return (2 * t3 - 3 * t2 + 1) * y0 + (t3 - 2 * t2 + t) * span * ma + (-2 * t3 + 3 * t2) * y1 + (t3 - t2) * span * mb;
+  };
+  return q < Q_US ? seg(q / Q_US, 0, zUS, m0, m1, Q_US) : seg((q - Q_US) / (1 - Q_US), zUS, 1, m1, m2, 1 - Q_US);
+}
+
+const GRATICULE = geoGraticule10();
 
 const css = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
@@ -97,9 +122,32 @@ function rgba(color: string, alpha: number) {
   return `rgba(${rgb}, ${alpha})`;
 }
 
-function draw(ctx: CanvasRenderingContext2D, w: number, h: number, p: number, time: number) {
-  const fg = css('--fg') || '#eef3fb';
-  const accent = css('--accent') || '#6ea8ff';
+interface Theme {
+  fg: string;
+  accent: string;
+}
+const readTheme = (): Theme => ({ fg: css('--fg') || '#eef3fb', accent: css('--accent') || '#6ea8ff' });
+
+/**
+ * A ring of coordinates cut to the first fraction of its length, so the county
+ * borders can trace themselves in when the page opens.
+ */
+function partial(geom: { coordinates: number[][][] }, k: number): GeoPermissibleObjects {
+  const ring = geom.coordinates[0] as LonLat[];
+  const n = Math.max(2, Math.ceil(ring.length * k));
+  return { type: 'LineString', coordinates: ring.slice(0, n) };
+}
+
+function draw(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  p: number,
+  time: number,
+  { fg, accent }: Theme,
+  /** 0 → 1 over the first moments on the page: borders trace, then everything fills in. */
+  intro = 1,
+) {
   const { radius, center } = frameAt(p, w, h);
   // The globe rises a little as it forms, to leave room for the caption under it.
   const lift = ramp(p, 0.6, 0.9) * h * 0.08;
@@ -108,7 +156,7 @@ function draw(ctx: CanvasRenderingContext2D, w: number, h: number, p: number, ti
     .translate([w / 2, h / 2 - lift])
     .rotate([-center[0], -center[1]])
     .clipAngle(90)
-    .precision(0.5);
+    .precision(1);
   const path = geoPath(projection, ctx);
   const shape = (g: GeoPermissibleObjects) => {
     ctx.beginPath();
@@ -126,7 +174,7 @@ function draw(ctx: CanvasRenderingContext2D, w: number, h: number, p: number, ti
   ctx.strokeStyle = rgba(fg, 0.18 * far);
   ctx.lineWidth = 1;
   ctx.stroke();
-  shape(geoGraticule10());
+  shape(GRATICULE);
   ctx.strokeStyle = rgba(fg, 0.05 * far);
   ctx.stroke();
 
@@ -147,18 +195,26 @@ function draw(ctx: CanvasRenderingContext2D, w: number, h: number, p: number, ti
   ctx.strokeStyle = rgba(fg, 0.12 * usOn * (1 - far));
   ctx.stroke();
 
-  // Los Angeles and Orange County: always there, smaller and smaller.
-  for (const c of [DATA.la, DATA.oc]) {
-    shape(c as GeoPermissibleObjects);
-    ctx.fillStyle = rgba(accent, 0.1 + 0.15 * out);
-    ctx.fill();
+  // Los Angeles and Orange County: always there, smaller and smaller. On first
+  // load the borders trace themselves in (OC just behind LA), then fill.
+  const trace = [ease(clamp(intro / 0.75)), ease(clamp((intro - 0.15) / 0.75))];
+  const filled = ease(clamp((intro - 0.55) / 0.45));
+  [DATA.la, DATA.oc].forEach((c, i) => {
+    if (filled > 0) {
+      shape(c as GeoPermissibleObjects);
+      ctx.fillStyle = rgba(accent, (0.1 + 0.15 * out) * filled);
+      ctx.fill();
+    }
+    if (trace[i] <= 0) return;
+    shape(trace[i] >= 1 ? (c as GeoPermissibleObjects) : partial(c as { coordinates: number[][][] }, trace[i]));
     ctx.strokeStyle = rgba(fg, 0.5 * (1 - out) + 0.15);
     ctx.lineWidth = 1.2;
+    ctx.lineJoin = 'round';
     ctx.stroke();
-  }
+  });
 
-  // The network, while LA fills the screen.
-  const near = 1 - ramp(p, 0.06, 0.22);
+  // The network, while LA fills the screen; it appears once the borders are in.
+  const near = (1 - ramp(p, 0.06, 0.22)) * filled;
   if (near > 0.01) {
     const hubs = { la: LA, oc: OC };
     ctx.lineWidth = 0.8;
@@ -257,8 +313,8 @@ const CAPTIONS = [
 export default function ZoomOut() {
   const stage = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const progress = useRef(0);
-  const [p, setP] = useState(0);
+  const captions = useRef<(HTMLDivElement | null)[]>([]);
+  const hint = useRef<HTMLDivElement>(null);
   const still = typeof window !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
@@ -270,7 +326,19 @@ export default function ZoomOut() {
     let raf = 0;
     let visible = true;
     let size = { w: 0, h: 0 };
+    let theme = readTheme();
+    // `shown` glides toward the scroll position instead of jumping to it, so a
+    // mouse wheel's steps and a phone's flicks become one smooth move.
+    let shown = still ? 1 : read();
+    let last = performance.now();
+    const born = performance.now();
 
+    function read() {
+      if (still) return 1;
+      const r = box!.getBoundingClientRect();
+      const run = r.height - el!.getBoundingClientRect().height;
+      return run > 0 ? clamp(-r.top / run) : 0;
+    }
     const resize = () => {
       const r = el.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -279,38 +347,59 @@ export default function ZoomOut() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       size = { w: r.width, h: r.height };
     };
-    const read = () => {
-      if (still) return 1;
-      const r = box.getBoundingClientRect();
-      const run = r.height - el.getBoundingClientRect().height;
-      return run > 0 ? clamp(-r.top / run) : 0;
+    // Captions cross-fade with the scroll itself, written straight to the DOM:
+    // no React render in the animation loop.
+    const paintCaptions = (p: number) => {
+      CAPTIONS.forEach((c, i) => {
+        const node = captions.current[i];
+        if (!node) return;
+        const fadeIn = c.from < 0 ? 1 : clamp((p - c.from) / 0.07);
+        const fadeOut = c.to > 1 ? 1 : clamp((c.to - p) / 0.07);
+        const o = Math.min(fadeIn, fadeOut);
+        node.style.opacity = String(o);
+        node.style.transform = `translateY(${(1 - o) * 10}px)`;
+        node.setAttribute('aria-hidden', o < 0.5 ? 'true' : 'false');
+      });
+      if (hint.current) hint.current.style.opacity = String(clamp(1 - p / 0.04));
+    };
+    const render = (time: number) => {
+      const intro = still ? 1 : clamp((time - born) / 1800);
+      draw(ctx, size.w, size.h, shown, still ? 0 : time, theme, intro);
+      paintCaptions(shown);
     };
     const frame = (time: number) => {
-      const next = read();
-      if (Math.abs(next - progress.current) > 0.001) {
-        progress.current = next;
-        setP(next);
-      }
-      draw(ctx, size.w, size.h, progress.current, still ? 0 : time);
-      // Keep animating (the pulse) only while on screen; a still view draws once.
+      const dt = Math.min(64, time - last);
+      last = time;
+      const target = read();
+      // Critically damped follow: covers ~63% of the gap every 110ms.
+      shown += (target - shown) * (1 - Math.exp(-dt / 110));
+      if (Math.abs(target - shown) < 0.0004) shown = target;
+      render(time);
       if (visible && !still) raf = requestAnimationFrame(frame);
     };
 
     resize();
-    raf = requestAnimationFrame(frame);
+    if (still) render(0);
+    else raf = requestAnimationFrame(frame);
     const ro = new ResizeObserver(() => {
       resize();
-      draw(ctx, size.w, size.h, progress.current, performance.now());
+      render(performance.now());
     });
     ro.observe(el);
     const io = new IntersectionObserver(([e]) => {
       const was = visible;
       visible = e.isIntersecting;
-      if (visible && !was && !still) raf = requestAnimationFrame(frame);
+      if (visible && !was && !still) {
+        last = performance.now();
+        raf = requestAnimationFrame(frame);
+      }
     });
     io.observe(box);
     // Light/dark switches change the colours.
-    const mo = new MutationObserver(() => draw(ctx, size.w, size.h, progress.current, performance.now()));
+    const mo = new MutationObserver(() => {
+      theme = readTheme();
+      render(performance.now());
+    });
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     return () => {
       cancelAnimationFrame(raf);
@@ -331,26 +420,25 @@ export default function ZoomOut() {
         />
         <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center px-6 md:bottom-10">
           <div className="relative h-28 w-full max-w-xl text-center">
-            {CAPTIONS.map((c) => {
-              const on = p > c.from && p < c.to;
-              return (
-                <div
-                  key={c.title}
-                  aria-hidden={!on}
-                  className="absolute inset-x-0 bottom-0 transition-all duration-500"
-                  style={{ opacity: on ? 1 : 0, transform: on ? 'none' : 'translateY(8px)' }}
-                >
-                  <div className="text-2xl font-medium tracking-tight md:text-3xl">{c.title}</div>
-                  <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">{c.sub}</p>
-                </div>
-              );
-            })}
+            {CAPTIONS.map((c, i) => (
+              <div
+                key={c.title}
+                ref={(n) => {
+                  captions.current[i] = n;
+                }}
+                className="absolute inset-x-0 bottom-0 will-change-transform"
+                style={{ opacity: still ? (c.to > 1 ? 1 : 0) : i === 0 ? 1 : 0 }}
+              >
+                <div className="text-2xl font-medium tracking-tight md:text-3xl">{c.title}</div>
+                <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">{c.sub}</p>
+              </div>
+            ))}
           </div>
         </div>
         {!still && (
           <div
-            className="pointer-events-none absolute inset-x-0 top-3 text-center text-[11px] uppercase tracking-[0.22em] text-faint transition-opacity duration-500"
-            style={{ opacity: p < 0.03 ? 1 : 0 }}
+            ref={hint}
+            className="pointer-events-none absolute inset-x-0 top-3 text-center text-[11px] uppercase tracking-[0.22em] text-faint"
           >
             Scroll
           </div>
